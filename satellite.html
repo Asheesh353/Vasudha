@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Satellite Physics Explainer - Falling Perpetually</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #030611;
+      --bg-card: rgba(8, 14, 28, 0.7);
+      --border-color: rgba(0, 240, 255, 0.15);
+      --border-glow: rgba(0, 240, 255, 0.35);
+      --accent-cyan: #00f0ff;
+      --accent-blue: #0088cc;
+      --accent-gold: #ffd700;
+      --accent-green: #39ff14;
+      --accent-orange: #ff7b00;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #475569;
+      --card-blur: blur(12px);
+      --transition-fast: 0.2s ease;
+      --transition-slow: 0.4s ease;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #starfield {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1; pointer-events: none;
+    }
+
+    .app-container {
+      max-width: 1400px; margin: 0 auto;
+      padding: 24px; display: flex;
+      flex-direction: column; gap: 24px;
+    }
+
+    /* Header */
+    .app-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 24px; background: var(--bg-card);
+      backdrop-filter: var(--card-blur); border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+    }
+
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo .icon { font-size: 28px; filter: drop-shadow(0 0 8px var(--accent-cyan)); }
+    .logo h1 { font-size: 24px; font-weight: 800; letter-spacing: 2px; }
+    .accent { color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+
+    .status-indicator {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(0,0,0,0.4); padding: 6px 14px;
+      border-radius: 30px; border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .pulse-dot {
+      width: 8px; height: 8px;
+      background-color: var(--accent-cyan);
+      border-radius: 50%; box-shadow: 0 0 10px var(--accent-cyan);
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0.5; }
+      100% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .status-text {
+      font-family: 'Fira Code', monospace;
+      font-size: 11px; letter-spacing: 1px; color: var(--text-secondary);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card); backdrop-filter: var(--card-blur);
+      border: 1px solid var(--border-color); border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.05);
+      overflow: hidden;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 8px 32px rgba(0,240,255,0.1), inset 0 1px 1px rgba(255,255,255,0.08);
+    }
+
+    /* Grid */
+    .dashboard-grid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 24px; }
+    @media (max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; } }
+
+    /* Video Section */
+    .video-section { display: flex; flex-direction: column; }
+
+    .video-container {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      background-color: #01030a; border-radius: 20px;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+
+    .video-container:fullscreen {
+      width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0;
+    }
+
+    .scene-viewer {
+      position: relative; flex-grow: 1; width: 100%;
+      height: calc(100% - 100px); background-color: #010207; overflow: hidden;
+    }
+
+    .video-container:fullscreen .scene-viewer { height: calc(100% - 120px); }
+
+    #canvasScreen {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; z-index: 1;
+    }
+
+    #svgOverlay {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; z-index: 2; pointer-events: none;
+    }
+
+    .player-overlay {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.85) 100%);
+      z-index: 3; pointer-events: none;
+    }
+
+    /* HUD */
+    .hud-overlay {
+      position: absolute; top: 20px; left: 20px; right: 20px;
+      display: flex; justify-content: space-between;
+      z-index: 4; pointer-events: none;
+      font-family: 'Fira Code', monospace;
+    }
+
+    .hud-group {
+      background: rgba(3,6,17,0.8); backdrop-filter: blur(4px);
+      border: 1px solid rgba(0,240,255,0.25);
+      padding: 8px 16px; border-radius: 8px;
+      display: flex; flex-direction: column;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .hud-label { font-size: 9px; color: var(--text-secondary); letter-spacing: 1.5px; }
+    .hud-value { font-size: 15px; font-weight: 600; color: var(--accent-cyan); text-shadow: 0 0 5px rgba(0,240,255,0.4); }
+
+    /* Title Card */
+    .title-card {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(3,5,12,0.9); backdrop-filter: blur(8px);
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      z-index: 10; gap: 16px;
+      transition: opacity 0.8s ease, visibility 0.8s;
+      text-align: center; padding: 20px;
+    }
+
+    .title-card.hidden { opacity: 0; visibility: hidden; }
+
+    .title-card h2 {
+      font-size: 34px; font-weight: 800; letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(0,240,255,0.5);
+      background: linear-gradient(135deg, #fff 30%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .title-card p { color: var(--text-secondary); font-size: 15px; letter-spacing: 1px; }
+
+    /* Subtitles */
+    .subtitles-container {
+      position: absolute; bottom: 110px; left: 5%; right: 5%;
+      z-index: 5; pointer-events: none;
+      text-align: center; display: flex; justify-content: center;
+    }
+
+    #subtitlesText {
+      background: rgba(3,6,17,0.9); backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 10px 24px; border-radius: 12px;
+      font-size: 15px; line-height: 1.4;
+      color: var(--text-primary); max-width: 80%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      text-shadow: 0 1px 2px rgba(0,0,0,1);
+      min-height: 44px;
+    }
+
+    /* Player Controls */
+    .player-controls {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 100px;
+      background: linear-gradient(to top, rgba(3,6,17,0.95) 80%, rgba(3,6,17,0.7));
+      border-top: 1px solid rgba(255,255,255,0.05);
+      z-index: 6; padding: 12px 20px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+
+    .video-container:fullscreen .player-controls { height: 120px; padding: 16px 30px; }
+
+    /* Timeline */
+    .timeline-container { position: relative; width: 100%; margin-bottom: 8px; }
+
+    #timelineSlider {
+      -webkit-appearance: none; width: 100%;
+      background: rgba(255,255,255,0.1); height: 6px;
+      border-radius: 3px; outline: none; cursor: pointer;
+      position: relative; z-index: 8;
+      transition: height var(--transition-fast);
+    }
+
+    #timelineSlider:hover { height: 8px; }
+
+    #timelineSlider::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 16px; width: 16px;
+      border-radius: 50%; background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan); margin-top: -5px;
+      cursor: pointer; transition: transform var(--transition-fast);
+    }
+
+    #timelineSlider:hover::-webkit-slider-thumb { transform: scale(1.25); }
+
+    .timeline-ticks {
+      position: absolute; top: 50%; left: 0;
+      width: 100%; height: 0;
+      pointer-events: none; z-index: 7;
+    }
+
+    .tick {
+      position: absolute; width: 10px; height: 10px;
+      background: #1e293b; border: 2px solid #020617;
+      border-radius: 50%; transform: translate(-50%, -50%);
+      cursor: pointer; pointer-events: all;
+      transition: background var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .tick.active { background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+
+    .timeline-labels { display: flex; justify-content: center; margin-top: 4px; }
+
+    .timeline-label-text {
+      font-size: 11px; color: var(--accent-cyan); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+      background: rgba(0,240,255,0.06); padding: 2px 8px;
+      border-radius: 4px; border: 1px solid rgba(0,240,255,0.15);
+    }
+
+    /* Controls Row */
+    .controls-row { display: flex; justify-content: space-between; align-items: center; }
+    .controls-left, .controls-right { display: flex; align-items: center; gap: 16px; }
+
+    .ctrl-btn {
+      background: transparent; border: none;
+      color: var(--text-secondary); font-size: 18px;
+      cursor: pointer; transition: color var(--transition-fast), transform var(--transition-fast);
+      padding: 4px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+    }
+
+    .ctrl-btn:hover { color: var(--text-primary); transform: scale(1.1); }
+    .ctrl-btn.active { color: var(--accent-cyan); filter: drop-shadow(0 0 5px var(--accent-cyan)); }
+    .main-play-btn { font-size: 24px; color: var(--accent-cyan); filter: drop-shadow(0 0 8px rgba(0,240,255,0.3)); }
+    .main-play-btn:hover { color: #fff; transform: scale(1.15); }
+
+    .time-display { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--text-muted); }
+
+    .control-badge {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      padding: 4px 12px; border-radius: 6px;
+      font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.5px;
+    }
+
+    /* Speed Selector */
+    .speed-selector { position: relative; }
+
+    .speed-badge {
+      font-size: 12px; font-family: 'Fira Code', monospace; font-weight: 600;
+      background: rgba(255,255,255,0.04); padding: 4px 8px;
+      border-radius: 6px; border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .speed-menu {
+      position: absolute; bottom: 120%; right: 0;
+      background: #0b0f19; border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 4px;
+      display: flex; flex-direction: column; gap: 4px;
+      opacity: 0; visibility: hidden; transform: translateY(10px);
+      transition: all var(--transition-fast); z-index: 15;
+    }
+
+    .speed-selector:hover .speed-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .speed-option {
+      padding: 6px 12px; font-size: 12px;
+      font-family: 'Fira Code', monospace; color: var(--text-secondary);
+      cursor: pointer; border-radius: 4px;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .speed-option:hover, .speed-option.active { background: rgba(0,240,255,0.15); color: var(--accent-cyan); }
+
+    /* Right column */
+    .dashboard-controls-section { display: flex; flex-direction: column; min-height: 500px; }
+    .tabs-container { display: flex; flex-direction: column; height: 100%; }
+
+    .tabs-header {
+      display: flex; border-bottom: 1px solid var(--border-color);
+      background: rgba(3,6,17,0.4);
+    }
+
+    .tab-btn {
+      flex: 1; background: transparent; border: none;
+      padding: 16px; color: var(--text-secondary);
+      font-family: 'Outfit', sans-serif; font-size: 13px;
+      font-weight: 600; letter-spacing: 1.5px; cursor: pointer;
+      transition: color var(--transition-fast), background var(--transition-fast);
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.02); }
+    .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); background: rgba(0,240,255,0.03); }
+
+    .tabs-content { flex-grow: 1; padding: 24px; overflow-y: auto; }
+
+    .tab-pane { display: none; flex-direction: column; gap: 20px; }
+    .tab-pane.active { display: flex; }
+
+    .tab-pane h3 { font-size: 20px; font-weight: 600; display: flex; justify-content: space-between; align-items: baseline; }
+
+    .sub-h {
+      font-size: 11px; color: var(--text-muted); font-weight: 400;
+      font-family: 'Fira Code', monospace; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* Telemetry */
+    .telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .tele-item {
+      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .tele-label { font-size: 9px; color: var(--text-secondary); letter-spacing: 1px; }
+    .tele-value { font-family: 'Fira Code', monospace; font-size: 18px; font-weight: 600; color: var(--text-primary); }
+
+    .tele-gauge {
+      width: 100%; height: 4px; background: rgba(255,255,255,0.05);
+      border-radius: 2px; overflow: hidden; margin-top: 6px;
+    }
+
+    .tele-bar { height: 100%; background: var(--accent-blue); width: 0%; transition: width 0.3s ease; }
+    .tele-bar.highlight { background: var(--accent-cyan); }
+    .tele-bar.danger { background: var(--accent-orange); }
+    .tele-bar.success { background: var(--accent-green); }
+
+    /* Schematic Panel */
+    .schematic-panel {
+      border: 1px solid var(--border-color); background: rgba(0,0,0,0.4);
+      border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .schematic-header {
+      display: flex; justify-content: space-between;
+      font-size: 11px; font-family: 'Fira Code', monospace; letter-spacing: 0.5px;
+    }
+
+    .health-val { font-weight: 600; }
+    .health-val.green { color: var(--accent-green); }
+    .health-val.orange { color: var(--accent-orange); }
+
+    .diag-split {
+      display: grid; grid-template-columns: 1fr 1.2fr;
+      gap: 16px; height: 150px;
+    }
+
+    .temp-gauges {
+      display: flex; flex-direction: column; justify-content: center; gap: 10px;
+      background: rgba(255,255,255,0.02); border-radius: 8px; padding: 12px;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .temp-item { display: flex; justify-content: space-between; font-size: 12px; }
+    .temp-lbl { color: var(--text-secondary); }
+    .temp-val { font-family: 'Fira Code', monospace; color: var(--accent-cyan); font-weight: 600; }
+
+    .system-logs { display: flex; flex-direction: column; gap: 6px; font-family: 'Fira Code', monospace; font-size: 11px; }
+    .system-logs h4 { color: var(--text-muted); font-size: 10px; letter-spacing: 0.5px; }
+
+    .log-lines {
+      background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px; padding: 8px; flex-grow: 1; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .log-line { line-height: 1.3; color: var(--text-secondary); }
+    .text-cyan { color: var(--accent-cyan); }
+    .text-orange { color: var(--accent-orange); }
+    .text-green { color: var(--accent-green); }
+    .text-gold { color: var(--accent-gold); }
+
+    /* Sandbox */
+    .equation-display {
+      background: rgba(0,0,0,0.5); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 16px; text-align: center;
+      font-family: 'Fira Code', monospace; font-size: 18px; font-weight: 600;
+      color: var(--accent-cyan); box-shadow: inset 0 0 15px rgba(0,240,255,0.05);
+    }
+
+    .sandbox-controls { display: flex; flex-direction: column; gap: 16px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .slider-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
+    .hint-label { font-size: 10px; color: var(--text-muted); font-weight: 400; }
+    .slider-value { color: var(--accent-cyan); font-family: 'Fira Code', monospace; }
+
+    .input-group input[type="range"] {
+      -webkit-appearance: none; width: 100%; height: 6px;
+      background: rgba(255,255,255,0.08); border-radius: 3px; outline: none;
+    }
+
+    .input-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--text-primary);
+      border: 2px solid var(--accent-cyan); cursor: pointer;
+      transition: transform var(--transition-fast);
+    }
+
+    .input-group input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    .slider-hints { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-muted); }
+
+    .sandbox-metrics { display: flex; gap: 12px; }
+
+    .metric-box {
+      flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 10px; padding: 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+
+    .metric-label { font-size: 9px; color: var(--text-muted); text-align: center; font-weight: 600; }
+    .metric-value { font-family: 'Fira Code', monospace; font-size: 16px; font-weight: 600; }
+
+    .sandbox-status {
+      background: rgba(57,255,20,0.08); border: 1px solid rgba(57,255,20,0.2);
+      color: var(--accent-green); padding: 10px; border-radius: 8px;
+      font-size: 11px; text-align: center; line-height: 1.3; transition: all 0.3s ease;
+    }
+
+    .sandbox-status.warning {
+      background: rgba(255,123,0,0.1); border: 1px solid rgba(255,123,0,0.2);
+      color: var(--accent-orange);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 12px 24px; font-family: 'Outfit', sans-serif;
+      font-weight: 600; font-size: 14px; letter-spacing: 1px;
+      border-radius: 12px; cursor: pointer; transition: all var(--transition-fast);
+      border: none; gap: 8px;
+    }
+
+    .btn-primary { background: var(--accent-cyan); color: #020617; box-shadow: 0 4px 15px rgba(0,240,255,0.4); }
+    .btn-primary:hover { background: #fff; box-shadow: 0 4px 20px rgba(255,255,255,0.5); transform: translateY(-2px); }
+    .btn-secondary { background: rgba(255,255,255,0.05); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.1); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(0,240,255,0.2); }
+    .btn-full { width: 100%; }
+    .btn-text { background: transparent; border: none; color: var(--accent-cyan); font-size: 12px; font-weight: 600; cursor: pointer; }
+
+    /* Context Panel */
+    .context-panel { display: flex; flex-direction: column; }
+
+    .context-header {
+      padding: 16px 24px; border-bottom: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(3,6,17,0.4);
+    }
+
+    .context-header h3 { font-size: 16px; font-weight: 600; letter-spacing: 1px; color: var(--accent-blue); }
+
+    .context-body {
+      padding: 24px; max-height: 350px; overflow-y: auto;
+      transition: max-height 0.4s ease-out;
+    }
+
+    .context-body.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
+
+    .context-text { line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 16px; }
+
+    .context-text h4 {
+      color: var(--text-primary); font-size: 18px; font-weight: 600;
+      margin-top: 8px; border-left: 3px solid var(--accent-cyan); padding-left: 10px;
+    }
+
+    .context-text p strong { color: var(--text-primary); }
+    .context-text ul { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+
+    .math-block {
+      background: rgba(0,0,0,0.4); border-radius: 8px; padding: 12px;
+      font-family: 'Fira Code', monospace; color: var(--accent-cyan);
+      text-align: center; border: 1px dashed rgba(0,240,255,0.2);
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,240,255,0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+  </style>
+</head>
+<body>
+
+  <canvas id="starfield"></canvas>
+
+  <div class="app-container">
+
+    <header class="app-header">
+      <div class="logo">
+        <span class="icon">🛰️</span>
+        <h1>ORBITAL <span class="accent">EXPLAINER</span></h1>
+      </div>
+      <div class="status-indicator">
+        <span class="pulse-dot"></span>
+        <span class="status-text">TELEMETRY STEADY</span>
+      </div>
+    </header>
+
+    <main class="dashboard-grid">
+
+      <!-- LEFT: Visual Player -->
+      <section class="video-section card">
+        <div class="video-container" id="videoContainer">
+
+          <div class="scene-viewer" id="visualScreen">
+            <canvas id="canvasScreen"></canvas>
+            <svg id="svgOverlay" viewBox="0 0 800 450"></svg>
+          </div>
+
+          <div class="player-overlay"></div>
+
+          <div class="hud-overlay">
+            <div class="hud-group">
+              <span class="hud-label">ALTITUDE</span>
+              <span class="hud-value" id="hudAltitude">400.0 km</span>
+            </div>
+            <div class="hud-group">
+              <span class="hud-label">ORBITAL SPEED</span>
+              <span class="hud-value" id="hudSpeed">7.66 km/s</span>
+            </div>
+            <div class="hud-group">
+              <span class="hud-label">PERIOD</span>
+              <span class="hud-value" id="hudPeriod">92.4 min</span>
+            </div>
+          </div>
+
+          <div class="title-card" id="titleCard">
+            <h2>SATELLITES: FALLING PERPETUALLY</h2>
+            <p>Interactive Physics &amp; Anatomy Simulator</p>
+            <button class="btn btn-primary" id="btnOverlayPlay">▶ START EXPERIENCE</button>
+          </div>
+
+          <div class="subtitles-container">
+            <p id="subtitlesText">Click start to begin the orbital sequence...</p>
+          </div>
+
+          <div class="player-controls">
+            <div class="timeline-container">
+              <input type="range" id="timelineSlider" min="0" max="100" value="0" step="0.1">
+              <div class="timeline-ticks">
+                <span class="tick active" style="left:0%"   data-time="0"   title="Falling Perpetually"></span>
+                <span class="tick"        style="left:20%"  data-time="20"  title="Newton's Cannon"></span>
+                <span class="tick"        style="left:40%"  data-time="40"  title="Orbital Speed"></span>
+                <span class="tick"        style="left:60%"  data-time="60"  title="LEO vs GEO"></span>
+                <span class="tick"        style="left:80%"  data-time="80"  title="Satellite Anatomy"></span>
+                <span class="tick"        style="left:100%" data-time="100" title="Thermal & Comms"></span>
+              </div>
+              <div class="timeline-labels">
+                <span class="timeline-label-text" id="currentTimelineLabel">1. Falling Perpetually</span>
+              </div>
+            </div>
+
+            <div class="controls-row">
+              <div class="controls-left">
+                <button class="ctrl-btn" id="btnPrev" title="Previous Scene">⏮</button>
+                <button class="ctrl-btn main-play-btn" id="btnPlayPause" title="Play/Pause">▶</button>
+                <button class="ctrl-btn" id="btnNext" title="Next Scene">⏭</button>
+                <span class="time-display" id="timeDisplay">00:00 / 01:30</span>
+              </div>
+              <div class="controls-center">
+                <div class="control-badge">SCENE <span id="sceneNumber">1</span>/6</div>
+              </div>
+              <div class="controls-right">
+                <div class="speed-selector">
+                  <button class="ctrl-btn speed-badge" id="btnSpeed" title="Playback Speed">1.0x</button>
+                  <div class="speed-menu">
+                    <div class="speed-option" data-speed="0.5">0.5x</div>
+                    <div class="speed-option active" data-speed="1">1.0x</div>
+                    <div class="speed-option" data-speed="1.5">1.5x</div>
+                    <div class="speed-option" data-speed="2">2.0x</div>
+                  </div>
+                </div>
+                <button class="ctrl-btn" id="btnVoiceToggle" title="Toggle Voice Narration">🔊</button>
+                <button class="ctrl-btn" id="btnSoundFXToggle" title="Toggle Telemetry Beacon Pings">🔥</button>
+                <button class="ctrl-btn" id="btnFullscreen" title="Fullscreen">⛶</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- RIGHT: Dashboard -->
+      <section class="dashboard-controls-section">
+        <div class="tabs-container card">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="telemetry">MISSION CONTROL</button>
+            <button class="tab-btn" data-tab="sandbox">ORBITAL MECHANICS LAB</button>
+          </div>
+          <div class="tabs-content">
+
+            <!-- TAB 1 -->
+            <div class="tab-pane active" id="tab-telemetry">
+              <h3>Satellite Diagnostics <span class="sub-h">Live Bus Telemetry</span></h3>
+              <div class="telemetry-grid">
+                <div class="tele-item">
+                  <div class="tele-label">ORBITAL ALTITUDE</div>
+                  <div class="tele-value" id="teleAltitude">400 km</div>
+                  <div class="tele-gauge"><div class="tele-bar" id="barAltitude" style="width:2%"></div></div>
+                </div>
+                <div class="tele-item">
+                  <div class="tele-label">ORBITAL SPEED</div>
+                  <div class="tele-value" id="teleSpeed">7.66 km/s</div>
+                  <div class="tele-gauge"><div class="tele-bar" id="barSpeed" style="width:76%"></div></div>
+                </div>
+                <div class="tele-item">
+                  <div class="tele-label">BATTERY CHARGE</div>
+                  <div class="tele-value" id="teleBattery">98.5%</div>
+                  <div class="tele-gauge"><div class="tele-bar success" id="barBattery" style="width:98.5%"></div></div>
+                </div>
+                <div class="tele-item">
+                  <div class="tele-label">REACTION WHEELS</div>
+                  <div class="tele-value" id="teleReaction">3200 RPM</div>
+                  <div class="tele-gauge"><div class="tele-bar highlight" id="barReaction" style="width:40%"></div></div>
+                </div>
+              </div>
+
+              <div class="schematic-panel">
+                <div class="schematic-header">
+                  <span>SUBSYSTEM TEMPERATURES</span>
+                  <span class="health-val green" id="sysHealth">CORE NORMAL</span>
+                </div>
+                <div class="diag-split">
+                  <div class="temp-gauges">
+                    <div class="temp-item"><span class="temp-lbl">Solar Arrays:</span><span class="temp-val" id="tempSolar">85 °C</span></div>
+                    <div class="temp-item"><span class="temp-lbl">Internal Bus:</span><span class="temp-val" id="tempInternal">22 °C</span></div>
+                    <div class="temp-item"><span class="temp-lbl">Shadow Side:</span><span class="temp-val" id="tempShadow">-115 °C</span></div>
+                  </div>
+                  <div class="system-logs">
+                    <h4>SYSTEM CONSOLE LOGS:</h4>
+                    <div class="log-lines" id="telemetryLogs">
+                      <div class="log-line text-green">> System initialized. Core bus online.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2 -->
+            <div class="tab-pane" id="tab-sandbox">
+              <h3>Orbital Mechanics Lab <span class="sub-h">Gravity Sandbox</span></h3>
+              <div class="equation-display">v = sqrt( GM / r )</div>
+              <div class="sandbox-controls">
+                <div class="input-group">
+                  <div class="slider-header">
+                    <label for="altSlider">Orbital Altitude (h)</label>
+                    <span class="slider-value"><span id="altVal">400</span> km</span>
+                  </div>
+                  <input type="range" id="altSlider" min="160" max="36000" step="10" value="400">
+                  <div class="slider-hints">
+                    <span>160 km (Low LEO)</span><span>2000 km (LEO limit)</span><span>35786 km (GEO)</span>
+                  </div>
+                </div>
+                <div class="input-group">
+                  <div class="slider-header">
+                    <label for="massSlider">Planetary Mass (M) <span class="hint-label">(Earth Masses)</span></label>
+                    <span class="slider-value"><span id="massVal">1.0</span> Earths</span>
+                  </div>
+                  <input type="range" id="massSlider" min="0.1" max="10.0" step="0.1" value="1.0">
+                  <div class="slider-hints">
+                    <span>0.1 (Mars)</span><span>1.0 (Earth)</span><span>10.0 (Super-Earth)</span>
+                  </div>
+                </div>
+                <div class="sandbox-metrics">
+                  <div class="metric-box">
+                    <span class="metric-label">CALCULATED VELOCITY (v)</span>
+                    <span class="metric-value text-cyan" id="calcVelocity">7.67 km/s</span>
+                  </div>
+                  <div class="metric-box">
+                    <span class="metric-label">ORBITAL PERIOD (T)</span>
+                    <span class="metric-value text-green" id="calcPeriod">92.4 min</span>
+                  </div>
+                </div>
+                <div class="sandbox-status feasible" id="sandboxStatus">Checking orbit feasibility...</div>
+                <button class="btn btn-secondary btn-full" id="btnSyncSandbox">⚙️ INJECT ORBIT INTO MAIN SIMULATOR</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Context Panel -->
+    <section class="context-panel card">
+      <div class="context-header">
+        <h3>PHYSICS DEEP DIVE</h3>
+        <button class="btn-text" id="btnToggleContext">Hide Full Script [-]</button>
+      </div>
+      <div class="context-body" id="contextBody">
+        <div class="context-text">
+          <h4>2. How Satellites Work: Falling Perpetually</h4>
+          <p>Once a rocket drops a satellite off in space, the satellite doesn't just hover there. It stays in space by entering orbit.</p>
+
+          <h4>The Physics of Orbit: The "Cannonball" Concept</h4>
+          <p>The easiest way to understand an orbit is a thought experiment from Isaac Newton. Imagine a cannon on top of a tall mountain firing a cannonball horizontally:</p>
+          <ul>
+            <li>If you fire it slowly, gravity pulls it down, and it hits the Earth.</li>
+            <li>If you fire it faster, it travels further before hitting the ground.</li>
+            <li>If you fire it exactly fast enough, the curve of the cannonball's falling path matches the curve of the Earth's surface.</li>
+          </ul>
+          <p>A satellite is essentially a projectile in a constant state of free-fall around the Earth, but it is moving so fast sideways that it keeps missing the planet.</p>
+
+          <h4>Orbital Mechanics Equation</h4>
+          <p>The velocity (v) required to maintain a stable circular orbit depends entirely on the mass of the planet (M) and the distance from the center of the planet (r):</p>
+          <div class="math-block">v = sqrt( GM / r )</div>
+          <p>Where G is the gravitational constant (6.674 × 10⁻¹¹ N m² / kg²).</p>
+          <p><strong>Orbital Speed Fact:</strong> To stay in LEO at ~400 km (where the ISS sits), a satellite must travel at roughly 7.66 km/s (~27,600 km/h). At this speed, it circles the entire Earth in just 90 minutes.</p>
+
+          <h4>Key Types of Orbits</h4>
+          <ul>
+            <li><strong>Low Earth Orbit (LEO):</strong> 160–2,000 km. Ideal for imaging, spy satellites, and science (e.g., Hubble, ISS).</li>
+            <li><strong>Geostationary Orbit (GEO):</strong> Exactly 35,786 km above the equator. The orbital period matches Earth's 24-hour rotation — the satellite appears stationary in the sky. Perfect for weather and TV satellites.</li>
+          </ul>
+
+          <h4>3. The Essential Anatomy of a Satellite</h4>
+          <ul>
+            <li><strong>Power System:</strong> Solar panels + batteries for power during Earth's shadow.</li>
+            <li><strong>Attitude Control:</strong> Reaction wheels (spinning flywheels) or gas thrusters to rotate and orient antennas.</li>
+            <li><strong>Communications:</strong> Transponders, antennas, and receivers.</li>
+            <li><strong>Thermal Control:</strong> Multi-layer gold foil insulation blankets (MLI) and heat pipes to manage extreme temperature swings.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // ─── SCENE DATA ───────────────────────────────────────────────────────────
+    const SCENES = [
+      {
+        id: 1, title: "1. How Satellites Work: Falling Perpetually", duration: 15,
+        narration: "Once a rocket drops a satellite off in space, the satellite doesn't just hover there. It stays in space by entering orbit.",
+        subtitles: [
+          { text: "Once a rocket drops a satellite off in space, the satellite doesn't just hover there.", start: 0, end: 7.0 },
+          { text: "It stays in space by entering orbit, balancing gravity with velocity.", start: 7.0, end: 15.0 }
+        ],
+        telemetry: { alt: 400, speed: 7.66, period: 92.4, battery: 95, reaction: 1200, tempSolar: 72, tempInternal: 21, tempShadow: -90, logs: ["Fairing separation confirmed.", "Satellite payload deployed.", "Awaiting orbital speed confirmation...", "Orbit insertion lock achieved."] }
+      },
+      {
+        id: 2, title: "2. The Physics of Orbit: The Cannonball", duration: 15,
+        narration: "Imagine a cannon on top of a tall mountain firing a cannonball horizontally: If you fire it slowly, gravity pulls it down. If you fire it faster, it travels further. If you fire it exactly fast enough, the curve of the cannonball's falling path matches the curve of the Earth's surface.",
+        subtitles: [
+          { text: "Newton's Cannonball: Imagine a cannon on a mountain firing horizontally.", start: 0, end: 4.5 },
+          { text: "Fired slowly, gravity pulls it down. Fired faster, it travels further.", start: 4.5, end: 9.5 },
+          { text: "Fired exactly fast enough, the falling path matches the Earth's curvature.", start: 9.5, end: 15.0 }
+        ],
+        telemetry: { alt: 1200, speed: 7.24, period: 109.4, battery: 85, reaction: 1800, tempSolar: 88, tempInternal: 22, tempShadow: -95, logs: ["Running Newton's Cannonball thought experiment.", "Low velocity: projectile impacts surface.", "Sub-orbital velocity: trajectory exceeds horizon.", "Orbital velocity: projectile path matches Earth curvature."] }
+      },
+      {
+        id: 3, title: "3. Orbital Mechanics Equation", duration: 15,
+        narration: "A satellite is a projectile in constant free-fall around the Earth, but it moves so fast sideways that it keeps missing the planet. The speed required to maintain a stable circular orbit depends entirely on the mass of the planet and the distance from the center.",
+        subtitles: [
+          { text: "A satellite is in constant free-fall, but moves so fast sideways that it keeps missing Earth.", start: 0, end: 5.5 },
+          { text: "Orbital speed is governed by the mass of the planet and orbital radius:", start: 5.5, end: 10.5 },
+          { text: "v equals the square root of G times M, divided by r.", start: 10.5, end: 15.0 }
+        ],
+        telemetry: { alt: 400, speed: 7.66, period: 92.4, battery: 100, reaction: 2400, tempSolar: 92, tempInternal: 23, tempShadow: -85, logs: ["Equation solver loaded: v = sqrt(GM/r).", "Gravitational constant G = 6.674e-11.", "Centripetal acceleration balances gravitational pull.", "Standard orbit stability index: 1.0 (Optimal)."] }
+      },
+      {
+        id: 4, title: "4. Key Types of Orbits: LEO vs GEO", duration: 15,
+        narration: "Low Earth Orbit, or LEO, is close to Earth, making it ideal for imaging, spy satellites, and science. Geostationary Orbit, GEO, is exactly 35,786 kilometers high. At this distance, the orbital period perfectly matches Earth's 24-hour rotation, so it appears completely stationary in the sky.",
+        subtitles: [
+          { text: "Low Earth Orbit (LEO): 160 km to 2,000 km. Ideal for Hubble, ISS, and imaging.", start: 0, end: 5.5 },
+          { text: "Geostationary Orbit (GEO): Exactly 35,786 km above the equator.", start: 5.5, end: 10.0 },
+          { text: "GEO period is 24 hours, matching Earth's rotation. Satellite appears stationary.", start: 10.0, end: 15.0 }
+        ],
+        telemetry: { alt: 35786, speed: 3.07, period: 1440, battery: 45, reaction: 300, tempSolar: -10, tempInternal: 18, tempShadow: -180, logs: ["Analyzing LEO (90 min period) vs GEO (24 hour period).", "Low Earth Orbit altitude: 400 km.", "Geostationary orbit insertion coordinates locked.", "Ground observer stationary track: 100% sync."] }
+      },
+      {
+        id: 5, title: "5. Satellite Anatomy: Power & Attitude", duration: 15,
+        narration: "While satellites serve different purposes, they share the same baseline bus. The Power System uses solar panels and batteries. Attitude Control uses reaction wheels, which are spinning flywheels, or tiny gas thrusters to rotate and orient the satellite.",
+        subtitles: [
+          { text: "Satellites share a baseline bus structure (the body and core electronics).", start: 0, end: 4.8 },
+          { text: "Power System: Solar panels generate electricity, charging batteries.", start: 4.8, end: 9.8 },
+          { text: "Attitude Control: Reaction wheels (spinning flywheels) or gas thrusters orient the bus.", start: 9.8, end: 15.0 }
+        ],
+        telemetry: { alt: 400, speed: 7.66, period: 92.4, battery: 92, reaction: 4800, tempSolar: 95, tempInternal: 24, tempShadow: -70, logs: ["Bus blueprint loaded. Power diagnostic: Normal.", "Reaction wheel speed adjusting: 4800 RPM.", "Attitude correction maneuver initiated.", "Sun tracker aligning solar panels."] }
+      },
+      {
+        id: 6, title: "6. Communications & Thermal Control", duration: 15,
+        narration: "Communications systems use antennas and transponders to beam data to Earth. Thermal control is crucial: space is burning hot in sunlight and freezing in shade. Satellites use multi-layer gold foil blankets and heat pipes to regulate internal temperatures.",
+        subtitles: [
+          { text: "Communications: Antennas and transponders beam data to ground control.", start: 0, end: 5.0 },
+          { text: "Thermal Control: Space is burning hot in sunlight and freezing in the shadow.", start: 5.0, end: 10.0 },
+          { text: "Satellites use gold foil blankets (MLI) and heat pipes to regulate temperature.", start: 10.0, end: 15.0 }
+        ],
+        telemetry: { alt: 400, speed: 7.66, period: 92.4, battery: 98, reaction: 1500, tempSolar: 110, tempInternal: 22, tempShadow: -120, logs: ["Communications transponders transmitting downlinks.", "Thermal control systems reporting nominal temperatures.", "Gold Multi-Layer Insulation (MLI) reflectivity: 98.4%.", "Satellite operating cycle complete."] }
+      }
+    ];
+
+    const TOTAL_DURATION = SCENES.reduce((a, s) => a + s.duration, 0);
+
+    // ─── STATE ────────────────────────────────────────────────────────────────
+    let isPlaying = false, currentTime = 0, playbackSpeed = 1.0;
+    let isMuted = false, isSoundFXOn = true;
+    let activeSceneIndex = 0, logsEmitted = new Set();
+    let lastFrameTime = Date.now(), rotationAngle = 0;
+    let lastPingTime = 0;
+
+    let sandboxAlt = 400, sandboxMass = 1.0;
+    let customAltitude = 400, customSpeed = 7.66, customPeriod = 92.4;
+
+    let currentSpeechUtterance = null, lastSpokenText = "";
+
+    // Audio
+    let audioCtx = null, reactionWheelOsc = null, reactionWheelGain = null, ambientGain = null;
+
+    // ─── DOM REFS ─────────────────────────────────────────────────────────────
+    const starCanvas    = document.getElementById("starfield");
+    const starCtx       = starCanvas.getContext("2d");
+    const screenCanvas  = document.getElementById("canvasScreen");
+    const screenCtx     = screenCanvas.getContext("2d");
+    const svgOverlay    = document.getElementById("svgOverlay");
+
+    const elSubtitlesText      = document.getElementById("subtitlesText");
+    const elTimelineSlider     = document.getElementById("timelineSlider");
+    const elTimeDisplay        = document.getElementById("timeDisplay");
+    const elSceneNumber        = document.getElementById("sceneNumber");
+    const elCurrentTimelineLabel = document.getElementById("currentTimelineLabel");
+    const elBtnPlayPause       = document.getElementById("btnPlayPause");
+    const elBtnOverlayPlay     = document.getElementById("btnOverlayPlay");
+    const elTitleCard          = document.getElementById("titleCard");
+    const elVideoContainer     = document.getElementById("videoContainer");
+
+    const elHudAltitude  = document.getElementById("hudAltitude");
+    const elHudSpeed     = document.getElementById("hudSpeed");
+    const elHudPeriod    = document.getElementById("hudPeriod");
+    const elTeleAltitude = document.getElementById("teleAltitude");
+    const elTeleSpeed    = document.getElementById("teleSpeed");
+    const elTeleBattery  = document.getElementById("teleBattery");
+    const elTeleReaction = document.getElementById("teleReaction");
+    const elBarAltitude  = document.getElementById("barAltitude");
+    const elBarSpeed     = document.getElementById("barSpeed");
+    const elBarBattery   = document.getElementById("barBattery");
+    const elBarReaction  = document.getElementById("barReaction");
+    const elTelemetryLogs = document.getElementById("telemetryLogs");
+    const elTempSolar    = document.getElementById("tempSolar");
+    const elTempInternal = document.getElementById("tempInternal");
+    const elTempShadow   = document.getElementById("tempShadow");
+    const elSysHealth    = document.getElementById("sysHealth");
+
+    const elAltSlider    = document.getElementById("altSlider");
+    const elMassSlider   = document.getElementById("massSlider");
+    const elAltVal       = document.getElementById("altVal");
+    const elMassVal      = document.getElementById("massVal");
+    const elCalcVelocity = document.getElementById("calcVelocity");
+    const elCalcPeriod   = document.getElementById("calcPeriod");
+    const elSandboxStatus = document.getElementById("sandboxStatus");
+    const elBtnSyncSandbox = document.getElementById("btnSyncSandbox");
+
+    const elBtnPrev          = document.getElementById("btnPrev");
+    const elBtnNext          = document.getElementById("btnNext");
+    const elBtnSpeed         = document.getElementById("btnSpeed");
+    const elBtnVoiceToggle   = document.getElementById("btnVoiceToggle");
+    const elBtnSoundFXToggle = document.getElementById("btnSoundFXToggle");
+    const elBtnFullscreen    = document.getElementById("btnFullscreen");
+    const elBtnToggleContext = document.getElementById("btnToggleContext");
+    const elContextBody      = document.getElementById("contextBody");
+    const elSpeedOptions     = document.querySelectorAll(".speed-option");
+    const elTabBtns          = document.querySelectorAll(".tab-btn");
+    const elTabPanes         = document.querySelectorAll(".tab-pane");
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    function init() {
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
+      createStars();
+      setupEventListeners();
+      updateSandboxCalculations();
+      animateStarfield();
+      renderScreenLoop();
+
+      document.querySelectorAll(".tick").forEach(tick => {
+        tick.addEventListener("click", e => {
+          e.stopPropagation();
+          seekToPercent(parseFloat(tick.getAttribute("data-time")));
+        });
+      });
+    }
+
+    function resizeCanvas() {
+      starCanvas.width  = window.innerWidth;
+      starCanvas.height = window.innerHeight;
+      const rect = elVideoContainer.getBoundingClientRect();
+      screenCanvas.width  = rect.width;
+      screenCanvas.height = Math.max(rect.height - 100, 10);
+    }
+
+    // ─── STARFIELD ────────────────────────────────────────────────────────────
+    let stars = [];
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < 120; i++) {
+        stars.push({
+          x: Math.random() * starCanvas.width, y: Math.random() * starCanvas.height,
+          radius: Math.random() * 1.3, alpha: Math.random(),
+          twinkleSpeed: 0.005 + Math.random() * 0.01,
+          driftX: -0.05 - Math.random() * 0.08,
+          driftY: -0.01 - Math.random() * 0.03
+        });
+      }
+    }
+
+    function animateStarfield() {
+      starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+      starCtx.fillStyle = "rgba(3,6,17,0.4)";
+      starCtx.fillRect(0, 0, starCanvas.width, starCanvas.height);
+
+      const speedMult = isPlaying ? (activeSceneIndex === 3 ? 0.5 : 2.0) : 1.0;
+
+      stars.forEach(s => {
+        s.alpha += s.twinkleSpeed;
+        if (s.alpha > 1 || s.alpha < 0.1) s.twinkleSpeed = -s.twinkleSpeed;
+        s.x += s.driftX * speedMult;
+        s.y += s.driftY * speedMult;
+        if (s.x < 0) s.x = starCanvas.width;
+        if (s.y < 0) s.y = starCanvas.height;
+        starCtx.beginPath();
+        starCtx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        starCtx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+        starCtx.fill();
+      });
+
+      requestAnimationFrame(animateStarfield);
+    }
+
+    // ─── AUDIO ────────────────────────────────────────────────────────────────
+    function initAudio() {
+      if (audioCtx) return;
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AC();
+
+      const humOsc = audioCtx.createOscillator();
+      humOsc.type = "sine"; humOsc.frequency.value = 60;
+      const lfoOsc = audioCtx.createOscillator();
+      lfoOsc.type = "sine"; lfoOsc.frequency.value = 0.15;
+      const lfoGain = audioCtx.createGain(); lfoGain.gain.value = 1.5;
+      lfoOsc.connect(lfoGain); lfoGain.connect(humOsc.frequency);
+      ambientGain = audioCtx.createGain(); ambientGain.gain.value = 0.035;
+      humOsc.connect(ambientGain); ambientGain.connect(audioCtx.destination);
+      humOsc.start(); lfoOsc.start();
+
+      reactionWheelOsc = audioCtx.createOscillator();
+      reactionWheelOsc.type = "sine"; reactionWheelOsc.frequency.value = 150;
+      reactionWheelGain = audioCtx.createGain(); reactionWheelGain.gain.value = 0;
+      reactionWheelOsc.connect(reactionWheelGain);
+      reactionWheelGain.connect(audioCtx.destination);
+      reactionWheelOsc.start();
+    }
+
+    function playTelemetryPing() {
+      if (!audioCtx || !isSoundFXOn) return;
+      const t = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(Math.random() > 0.5 ? 1200 : 1600, t);
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.06, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(t); osc.stop(t + 0.4);
+    }
+
+    function playThrusterPuff() {
+      if (!audioCtx || !isSoundFXOn) return;
+      const t = audioCtx.currentTime;
+      const bufSize = audioCtx.sampleRate * 0.15;
+      const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = audioCtx.createBufferSource(); noise.buffer = buf;
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "highpass";
+      filter.frequency.setValueAtTime(1200, t);
+      filter.frequency.exponentialRampToValueAtTime(300, t + 0.15);
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.linearRampToValueAtTime(0.001, t + 0.15);
+      noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+      noise.start(t);
+    }
+
+    function updateAudioFX(idx, tf) {
+      if (!audioCtx || !isSoundFXOn) return;
+      if (audioCtx.state === "suspended") audioCtx.resume();
+
+      if (isPlaying && idx === 4) {
+        reactionWheelOsc.frequency.setTargetAtTime(120 + Math.sin(tf * Math.PI * 4) * 180, audioCtx.currentTime, 0.1);
+        reactionWheelGain.gain.setTargetAtTime(0.015 + Math.abs(Math.sin(tf * Math.PI * 4)) * 0.025, audioCtx.currentTime, 0.15);
+      } else {
+        reactionWheelGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+      }
+
+      ambientGain.gain.setTargetAtTime(isPlaying ? 0.045 : 0.015, audioCtx.currentTime, 0.4);
+    }
+
+    function processTelemetryPings() {
+      if (!isPlaying) return;
+      const now = Date.now();
+      if (now - lastPingTime > 2500) { lastPingTime = now; playTelemetryPing(); }
+    }
+
+    // ─── VIDEO LOOP ───────────────────────────────────────────────────────────
+    function videoLoop() {
+      if (!isPlaying) return;
+      const now = Date.now();
+      currentTime += ((now - lastFrameTime) / 1000) * playbackSpeed;
+      lastFrameTime = now;
+
+      if (currentTime >= TOTAL_DURATION) {
+        currentTime = 0; logsEmitted.clear(); clearSystemLogs();
+      }
+
+      updateTimelineUI();
+      updatePlaybackState();
+      processTelemetryPings();
+      requestAnimationFrame(videoLoop);
+    }
+
+    function seekToPercent(pct) {
+      currentTime = (pct / 100) * TOTAL_DURATION;
+      logsEmitted.clear(); clearSystemLogs();
+      if (isPlaying) speakCurrentSceneText();
+      updateTimelineUI(); updatePlaybackState();
+    }
+
+    function updateTimelineUI() {
+      const pct = (currentTime / TOTAL_DURATION) * 100;
+      elTimelineSlider.value = pct;
+      const m = Math.floor(currentTime/60), s = Math.floor(currentTime%60);
+      const tm = Math.floor(TOTAL_DURATION/60), ts = Math.floor(TOTAL_DURATION%60);
+      elTimeDisplay.textContent = `${pad(m)}:${pad(s)} / ${pad(tm)}:${pad(ts)}`;
+      document.querySelectorAll(".tick").forEach(tick => {
+        tick.classList.toggle("active", pct >= parseFloat(tick.getAttribute("data-time")));
+      });
+    }
+
+    function updatePlaybackState() {
+      let sceneIndex = 0, acc = 0;
+      for (let i = 0; i < SCENES.length; i++) {
+        if (currentTime >= acc && currentTime < acc + SCENES[i].duration) { sceneIndex = i; break; }
+        acc += SCENES[i].duration;
+        if (i === SCENES.length - 1) sceneIndex = i;
+      }
+      let accForScene = 0;
+      for (let i = 0; i < sceneIndex; i++) accForScene += SCENES[i].duration;
+
+      const scene = SCENES[sceneIndex];
+      const tLocal    = Math.min(currentTime - accForScene, scene.duration - 0.01);
+      const tFraction = tLocal / scene.duration;
+
+      if (activeSceneIndex !== sceneIndex) {
+        activeSceneIndex = sceneIndex;
+        elSceneNumber.textContent = scene.id;
+        elCurrentTimelineLabel.textContent = scene.title;
+        if (isPlaying) speakCurrentSceneText();
+      }
+
+      const tel = scene.telemetry;
+      let currentAlt = tel.alt, currentSpeedVal = tel.speed, currentPeriodVal = tel.period;
+      if (sceneIndex >= 2) { currentAlt = customAltitude; currentSpeedVal = customSpeed; currentPeriodVal = customPeriod; }
+
+      let batt = tel.battery, rxn = tel.reaction;
+      let tSol = tel.tempSolar, tShad = tel.tempShadow;
+
+      if (sceneIndex === 3 || sceneIndex === 5) {
+        const cycle = Math.sin(tFraction * Math.PI);
+        if (cycle < 0.2) { batt = tel.battery - 12 * (1 - cycle * 5); tSol = tel.tempSolar - 80; }
+      }
+
+      if (sceneIndex === 4) {
+        rxn = tel.reaction + Math.sin(tFraction * Math.PI * 4) * 2000;
+        if (isPlaying && Math.abs(Math.cos(tFraction * Math.PI * 4)) > 0.98) playThrusterPuff();
+      }
+
+      updateTelemetryUI(currentAlt, currentSpeedVal, currentPeriodVal, batt, rxn, tSol, tel.tempInternal, tShad);
+
+      tel.logs.forEach((msg, i) => {
+        const lid = `${sceneIndex}-${i}`;
+        if (tFraction >= (i+1)/(tel.logs.length+1) && !logsEmitted.has(lid)) {
+          logsEmitted.add(lid);
+          addSystemLog(msg, sceneIndex);
+        }
+      });
+
+      updateSubtitles(scene, tLocal);
+      updateAudioFX(sceneIndex, tFraction);
+    }
+
+    // ─── TELEMETRY UI ─────────────────────────────────────────────────────────
+    function updateTelemetryUI(alt, speed, period, batt, rxn, tSol, tInt, tShad) {
+      const altF = alt >= 1000 ? alt.toLocaleString() + " km" : alt.toFixed(1) + " km";
+      const spdF = speed.toFixed(2) + " km/s";
+      let perF = period.toFixed(1) + " min";
+      if (period >= 1440) perF = (period/1440).toFixed(1) + " days (GEO)";
+      else if (period > 180) perF = (period/60).toFixed(1) + " hours";
+
+      elHudAltitude.textContent = altF;
+      elHudSpeed.textContent    = spdF;
+      elHudPeriod.textContent   = perF;
+      elTeleAltitude.textContent   = altF;
+      elTeleSpeed.textContent      = spdF;
+      elTeleBattery.textContent    = batt.toFixed(1) + "%";
+      elTeleReaction.textContent   = Math.round(rxn).toLocaleString() + " RPM";
+      elTempSolar.textContent    = Math.round(tSol) + " °C";
+      elTempInternal.textContent = Math.round(tInt) + " °C";
+      elTempShadow.textContent   = Math.round(tShad) + " °C";
+
+      if (tSol > 105 || tShad < -110) {
+        elSysHealth.textContent = "THERMAL STRESS HIGH"; elSysHealth.className = "health-val orange";
+      } else {
+        elSysHealth.textContent = "CORE NOMINAL"; elSysHealth.className = "health-val green";
+      }
+
+      elBarAltitude.style.width  = Math.min((alt/36000)*100, 100) + "%";
+      elBarSpeed.style.width     = Math.min((speed/8)*100, 100) + "%";
+      elBarBattery.style.width   = batt + "%";
+      elBarReaction.style.width  = Math.min((rxn/6000)*100, 100) + "%";
+      elBarBattery.className = "tele-bar " + (batt < 20 ? "danger" : batt < 75 ? "highlight" : "success");
+    }
+
+    function updateSubtitles(scene, tLocal) {
+      const match = scene.subtitles.find(s => tLocal >= s.start && tLocal < s.end);
+      elSubtitlesText.textContent = match ? match.text : "";
+    }
+
+    function addSystemLog(msg, idx) {
+      const line = document.createElement("div");
+      line.className = "log-line" + (idx===1?" text-cyan":idx===2?" text-gold":idx===4?" text-orange":idx===5?" text-green":"");
+      line.textContent = `> ${msg}`;
+      elTelemetryLogs.appendChild(line);
+      elTelemetryLogs.scrollTop = elTelemetryLogs.scrollHeight;
+    }
+
+    function clearSystemLogs() {
+      elTelemetryLogs.innerHTML = "";
+      addSystemLog("Telemetry reconnect: core online.", 0);
+    }
+
+    // ─── CANVAS RENDERER ──────────────────────────────────────────────────────
+    function renderScreenLoop() {
+      const w = screenCanvas.width, h = screenCanvas.height;
+      const center = { x: w/2, y: h/2 };
+      screenCtx.clearRect(0, 0, w, h);
+      screenCtx.fillStyle = "#010207";
+      screenCtx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        rotationAngle += (activeSceneIndex === 3 ? 0.0001 : 0.001) * playbackSpeed;
+      }
+
+      let tLocal = 0;
+      if (isPlaying) {
+        let a = 0;
+        for (let i = 0; i < activeSceneIndex; i++) a += SCENES[i].duration;
+        tLocal = currentTime - a;
+      }
+
+      switch(activeSceneIndex) {
+        case 0: drawScene1(center, rotationAngle, tLocal); break;
+        case 1: drawScene2(center, rotationAngle, tLocal); break;
+        case 2: drawScene3(center, rotationAngle, tLocal); break;
+        case 3: drawScene4(center, rotationAngle, tLocal); break;
+        case 4: drawScene5(center, rotationAngle, tLocal); break;
+        case 5: drawScene6(center, rotationAngle, tLocal); break;
+      }
+
+      drawTechnicalOverlays(activeSceneIndex);
+      requestAnimationFrame(renderScreenLoop);
+    }
+
+    // Scene 1: Orbit Insertion
+    function drawScene1(center, angle, t) {
+      const earthPos = { x: center.x - 200, y: center.y + 150 };
+      drawEarth(earthPos, 180, angle);
+
+      const prog = Math.min(t / 15, 1.0);
+      const fx = center.x + 100 * prog, fy = center.y - 80 * prog;
+      screenCtx.save(); screenCtx.translate(fx, fy); screenCtx.rotate(0.2);
+      screenCtx.fillStyle = "rgba(200,200,200,0.6)";
+      screenCtx.fillRect(-20, -10 - 30*prog, 40, 20);
+      screenCtx.fillRect(-20, 10 + 30*prog, 40, 20);
+      screenCtx.restore();
+
+      drawSatellite({ x: center.x - 50 + 80*prog, y: center.y + 40 - 50*prog }, 0.8, 0.4 + 0.2*Math.sin(t));
+    }
+
+    // Scene 2: Newton's Cannonball
+    function drawScene2(center, angle, t) {
+      const earthPos = { x: center.x, y: center.y + 180 };
+      const rEarth = 130;
+      drawEarth(earthPos, rEarth, 0);
+
+      const mtnX = earthPos.x, mtnY = earthPos.y - rEarth, mtnH = 35;
+      screenCtx.beginPath();
+      screenCtx.moveTo(mtnX-15, mtnY); screenCtx.lineTo(mtnX, mtnY-mtnH); screenCtx.lineTo(mtnX+15, mtnY);
+      screenCtx.fillStyle = "#1e293b"; screenCtx.fill();
+      screenCtx.strokeStyle = "rgba(0,240,255,0.4)"; screenCtx.stroke();
+
+      screenCtx.fillStyle = "rgba(0,240,255,0.8)";
+      screenCtx.fillRect(mtnX-4, mtnY-mtnH-6, 8, 6);
+      screenCtx.fillStyle = "#e2e8f0";
+      screenCtx.fillRect(mtnX-2, mtnY-mtnH-10, 12, 4);
+
+      const pTime = (t % 3) / 3;
+      screenCtx.lineWidth = 1.5;
+
+      // Slow (red)
+      screenCtx.beginPath();
+      screenCtx.moveTo(mtnX+8, mtnY-mtnH-8);
+      screenCtx.quadraticCurveTo(mtnX+30, mtnY-mtnH-6, mtnX+45, mtnY-50);
+      screenCtx.strokeStyle = "rgba(239,68,68,0.6)"; screenCtx.stroke();
+      if (t < 5) drawProjectile(mtnX+8, mtnY-mtnH-8, mtnX+45, mtnY-50, pTime, "#ef4444");
+
+      // Medium (orange)
+      screenCtx.beginPath();
+      screenCtx.moveTo(mtnX+8, mtnY-mtnH-8);
+      screenCtx.quadraticCurveTo(mtnX+90, mtnY-mtnH-6, mtnX+115, mtnY+30);
+      screenCtx.strokeStyle = "rgba(245,158,11,0.6)"; screenCtx.stroke();
+      if (t >= 5 && t < 10) drawProjectile(mtnX+8, mtnY-mtnH-8, mtnX+115, mtnY+30, pTime, "#f59e0b");
+
+      // Orbital (green)
+      screenCtx.beginPath();
+      screenCtx.arc(earthPos.x, earthPos.y, rEarth+mtnH, -Math.PI/2, Math.PI*1.5);
+      screenCtx.strokeStyle = "rgba(57,255,20,0.7)";
+      screenCtx.setLineDash([5,5]); screenCtx.stroke(); screenCtx.setLineDash([]);
+
+      if (t >= 10) {
+        const oa = -Math.PI/2 + t * 0.8;
+        const px = earthPos.x + (rEarth+mtnH)*Math.cos(oa);
+        const py = earthPos.y + (rEarth+mtnH)*Math.sin(oa);
+        screenCtx.beginPath(); screenCtx.arc(px, py, 5, 0, Math.PI*2);
+        screenCtx.fillStyle = "#39ff14";
+        screenCtx.shadowBlur = 10; screenCtx.shadowColor = "#39ff14";
+        screenCtx.fill(); screenCtx.shadowBlur = 0;
+      }
+    }
+
+    // Scene 3: Orbital Equation
+    function drawScene3(center, angle, t) {
+      drawEarth(center, 100, angle);
+      const rOrbit = 170;
+      screenCtx.beginPath(); screenCtx.arc(center.x, center.y, rOrbit, 0, Math.PI*2);
+      screenCtx.strokeStyle = "rgba(0,240,255,0.25)"; screenCtx.stroke();
+
+      const oa = t * 0.25;
+      const satPos = { x: center.x + rOrbit*Math.cos(oa), y: center.y + rOrbit*Math.sin(oa) };
+
+      screenCtx.beginPath(); screenCtx.moveTo(satPos.x, satPos.y); screenCtx.lineTo(center.x, center.y);
+      screenCtx.strokeStyle = "rgba(255,123,0,0.5)"; screenCtx.lineWidth = 2; screenCtx.stroke();
+      drawArrowhead(center, satPos, 12, "rgba(255,123,0,0.5)");
+
+      const velPos = { x: satPos.x - 60*Math.sin(oa), y: satPos.y + 60*Math.cos(oa) };
+      screenCtx.beginPath(); screenCtx.moveTo(satPos.x, satPos.y); screenCtx.lineTo(velPos.x, velPos.y);
+      screenCtx.strokeStyle = "rgba(0,240,255,0.8)"; screenCtx.stroke();
+      drawArrowhead(velPos, satPos, 12, "rgba(0,240,255,0.8)");
+
+      screenCtx.fillStyle = "rgba(255,123,0,0.8)"; screenCtx.font = "11px 'Fira Code', monospace";
+      screenCtx.fillText("Gravity (F_g)", (center.x+satPos.x)/2+10, (center.y+satPos.y)/2);
+      screenCtx.fillStyle = "#00f0ff";
+      screenCtx.fillText("Velocity (v)", velPos.x+10, velPos.y+5);
+
+      drawSatellite(satPos, 0.7, oa);
+    }
+
+    // Scene 4: LEO vs GEO
+    function drawScene4(center, angle, t) {
+      drawEarth(center, 50, angle);
+
+      const rLeo = 80;
+      screenCtx.beginPath(); screenCtx.arc(center.x, center.y, rLeo, 0, Math.PI*2);
+      screenCtx.strokeStyle = "rgba(0,240,255,0.2)"; screenCtx.stroke();
+      const leoA = t * 1.5;
+      const leoPos = { x: center.x + rLeo*Math.cos(leoA), y: center.y + rLeo*Math.sin(leoA) };
+      drawSatellite(leoPos, 0.4, leoA);
+      screenCtx.fillStyle = "#00f0ff"; screenCtx.font = "9px Outfit, sans-serif";
+      screenCtx.fillText("LEO (Hubble/ISS) - 90 min", leoPos.x+10, leoPos.y-5);
+
+      const rGeo = 180;
+      screenCtx.beginPath(); screenCtx.arc(center.x, center.y, rGeo, 0, Math.PI*2);
+      screenCtx.strokeStyle = "rgba(255,215,0,0.25)"; screenCtx.stroke();
+      const geoPos = { x: center.x + rGeo*Math.cos(angle), y: center.y + rGeo*Math.sin(angle) };
+      drawSatellite(geoPos, 0.6, angle);
+      screenCtx.fillStyle = "#ffd700";
+      screenCtx.fillText("GEO (Weather/TV) - 24 hour sync", geoPos.x+10, geoPos.y-5);
+
+      screenCtx.beginPath(); screenCtx.moveTo(center.x, center.y); screenCtx.lineTo(geoPos.x, geoPos.y);
+      screenCtx.strokeStyle = "rgba(255,215,0,0.15)";
+      screenCtx.setLineDash([4,4]); screenCtx.stroke(); screenCtx.setLineDash([]);
+    }
+
+    // Scene 5: Anatomy
+    function drawScene5(center, angle, t) {
+      screenCtx.strokeStyle = "rgba(0,240,255,0.05)"; screenCtx.lineWidth = 1;
+      for (let x = 0; x < screenCanvas.width; x += 30) {
+        screenCtx.beginPath(); screenCtx.moveTo(x,0); screenCtx.lineTo(x,screenCanvas.height); screenCtx.stroke();
+      }
+      for (let y = 0; y < screenCanvas.height; y += 30) {
+        screenCtx.beginPath(); screenCtx.moveTo(0,y); screenCtx.lineTo(screenCanvas.width,y); screenCtx.stroke();
+      }
+
+      drawSatellite(center, 1.8, 0.1*Math.sin(t*0.2));
+
+      screenCtx.save();
+      screenCtx.translate(center.x, center.y - 10);
+      screenCtx.rotate(t * 6);
+      screenCtx.strokeStyle = "#00f0ff"; screenCtx.lineWidth = 2;
+      screenCtx.beginPath(); screenCtx.arc(0, 0, 16, 0, Math.PI*2); screenCtx.stroke();
+      for (let i = 0; i < 4; i++) {
+        screenCtx.rotate(Math.PI/2);
+        screenCtx.beginPath(); screenCtx.moveTo(0,0); screenCtx.lineTo(16,0); screenCtx.stroke();
+      }
+      screenCtx.restore();
+    }
+
+    // Scene 6: Comms & Thermal
+    function drawScene6(center, angle, t) {
+      const sunPos = { x: screenCanvas.width - 50, y: 50 };
+      const sunGrad = screenCtx.createRadialGradient(sunPos.x, sunPos.y, 10, sunPos.x, sunPos.y, 80);
+      sunGrad.addColorStop(0, "#ffffff");
+      sunGrad.addColorStop(0.3, "rgba(255,220,0,0.4)");
+      sunGrad.addColorStop(1, "rgba(255,220,0,0)");
+      screenCtx.fillStyle = sunGrad;
+      screenCtx.beginPath(); screenCtx.arc(sunPos.x, sunPos.y, 80, 0, Math.PI*2); screenCtx.fill();
+
+      const satPos = { x: center.x, y: center.y - 20 };
+      drawSatellite(satPos, 1.4, -0.4, true);
+
+      const antPos = { x: satPos.x + 20, y: satPos.y + 35 };
+      screenCtx.strokeStyle = "rgba(0,240,255,0.7)"; screenCtx.lineWidth = 2;
+      const wc = (t * 2) % 3;
+      screenCtx.beginPath(); screenCtx.arc(antPos.x, antPos.y+40, wc*25, 0.35*Math.PI, 0.65*Math.PI); screenCtx.stroke();
+      screenCtx.beginPath(); screenCtx.arc(antPos.x, antPos.y+40, ((wc+1)%3)*25, 0.35*Math.PI, 0.65*Math.PI); screenCtx.stroke();
+
+      drawEarth({ x: center.x+10, y: screenCanvas.height+80 }, 120, angle);
+    }
+
+    // ─── DRAWING HELPERS ──────────────────────────────────────────────────────
+    function drawEarth(pos, r, angle) {
+      screenCtx.save();
+      screenCtx.shadowBlur = 25;
+      screenCtx.shadowColor = "rgba(0,136,204,0.6)";
+      const grad = screenCtx.createRadialGradient(pos.x-r/3, pos.y-r/3, 5, pos.x, pos.y, r);
+      grad.addColorStop(0, "#00b4d8"); grad.addColorStop(0.5, "#0077b6"); grad.addColorStop(1, "#03045e");
+      screenCtx.fillStyle = grad;
+      screenCtx.beginPath(); screenCtx.arc(pos.x, pos.y, r, 0, Math.PI*2); screenCtx.fill();
+      screenCtx.shadowBlur = 0;
+
+      screenCtx.beginPath(); screenCtx.arc(pos.x, pos.y, r, 0, Math.PI*2); screenCtx.clip();
+      screenCtx.fillStyle = "rgba(34,197,94,0.35)";
+      screenCtx.save(); screenCtx.translate(pos.x, pos.y); screenCtx.rotate(angle);
+      [[-r/2,-r/3,r/2],[r/3,r/4,r/1.8],[-r/4,r/2,r/3]].forEach(([cx,cy,cr]) => {
+        screenCtx.beginPath(); screenCtx.arc(cx, cy, cr, 0, Math.PI*2); screenCtx.fill();
+      });
+      screenCtx.restore();
+
+      screenCtx.fillStyle = "rgba(255,255,255,0.12)";
+      screenCtx.save(); screenCtx.translate(pos.x, pos.y); screenCtx.rotate(angle*1.3);
+      screenCtx.beginPath(); screenCtx.arc(-r/5,r/5,r/1.5,0,Math.PI*2); screenCtx.arc(r/2,-r/4,r/2,0,Math.PI*2); screenCtx.fill();
+      screenCtx.restore();
+
+      const shade = screenCtx.createRadialGradient(pos.x+r/3, pos.y+r/3, r/2, pos.x, pos.y, r);
+      shade.addColorStop(0, "rgba(0,0,0,0)"); shade.addColorStop(0.8, "rgba(0,0,0,0.6)"); shade.addColorStop(1, "rgba(0,0,0,0.95)");
+      screenCtx.fillStyle = shade;
+      screenCtx.beginPath(); screenCtx.arc(pos.x, pos.y, r, 0, Math.PI*2); screenCtx.fill();
+      screenCtx.restore();
+    }
+
+    function drawSatellite(pos, scale, rot, goldFoil = false) {
+      screenCtx.save();
+      screenCtx.translate(pos.x, pos.y); screenCtx.rotate(rot); screenCtx.scale(scale, scale);
+
+      // Solar panels
+      screenCtx.fillStyle = "rgba(0,136,204,0.85)";
+      screenCtx.strokeStyle = "rgba(0,240,255,0.8)"; screenCtx.lineWidth = 1.5;
+      screenCtx.fillRect(-65,-12,40,24); screenCtx.strokeRect(-65,-12,40,24);
+      screenCtx.beginPath(); screenCtx.moveTo(-45,-12); screenCtx.lineTo(-45,12); screenCtx.moveTo(-65,0); screenCtx.lineTo(-25,0); screenCtx.stroke();
+      screenCtx.fillRect(25,-12,40,24); screenCtx.strokeRect(25,-12,40,24);
+      screenCtx.beginPath(); screenCtx.moveTo(45,-12); screenCtx.lineTo(45,12); screenCtx.moveTo(25,0); screenCtx.lineTo(65,0); screenCtx.stroke();
+
+      screenCtx.strokeStyle = "#94a3b8"; screenCtx.lineWidth = 3;
+      screenCtx.beginPath(); screenCtx.moveTo(-25,0); screenCtx.lineTo(25,0); screenCtx.stroke();
+
+      // Bus body
+      if (goldFoil) {
+        const g = screenCtx.createLinearGradient(-15,-18,15,18);
+        g.addColorStop(0,"#ffe066"); g.addColorStop(0.3,"#ffd700"); g.addColorStop(0.7,"#cca300"); g.addColorStop(1,"#806600");
+        screenCtx.fillStyle = g;
+        screenCtx.shadowBlur = 8; screenCtx.shadowColor = "rgba(255,215,0,0.4)";
+      } else {
+        screenCtx.fillStyle = "rgba(255,255,255,0.15)"; screenCtx.shadowBlur = 0;
+      }
+      screenCtx.strokeStyle = "#00f0ff"; screenCtx.lineWidth = 2;
+      screenCtx.fillRect(-15,-18,30,36); screenCtx.strokeRect(-15,-18,30,36);
+      screenCtx.shadowBlur = 0;
+
+      // Dish
+      screenCtx.beginPath(); screenCtx.arc(12,24,10,Math.PI,0);
+      screenCtx.fillStyle = "rgba(148,163,184,0.4)"; screenCtx.fill(); screenCtx.stroke();
+      screenCtx.beginPath(); screenCtx.moveTo(12,24); screenCtx.lineTo(12,32); screenCtx.stroke();
+
+      // Boom
+      screenCtx.beginPath(); screenCtx.moveTo(-10,-18); screenCtx.lineTo(-20,-32); screenCtx.stroke();
+
+      screenCtx.restore();
+    }
+
+    function drawProjectile(sx, sy, ex, ey, t, color) {
+      const cx = sx + (ex-sx)*t;
+      const cy = sy + (ey-sy)*t - 20*Math.sin(t*Math.PI);
+      screenCtx.beginPath(); screenCtx.arc(cx, cy, 4, 0, Math.PI*2);
+      screenCtx.fillStyle = color; screenCtx.fill();
+    }
+
+    function drawArrowhead(to, from, size, color) {
+      const angle = Math.atan2(to.y - from.y, to.x - from.x);
+      screenCtx.save();
+      screenCtx.translate(to.x, to.y); screenCtx.rotate(angle);
+      screenCtx.beginPath(); screenCtx.moveTo(0,0); screenCtx.lineTo(-size,-size/2); screenCtx.lineTo(-size,size/2); screenCtx.closePath();
+      screenCtx.fillStyle = color; screenCtx.fill();
+      screenCtx.restore();
+    }
+
+    // ─── SVG OVERLAYS ─────────────────────────────────────────────────────────
+    function drawTechnicalOverlays(idx) {
+      svgOverlay.innerHTML = "";
+      if (idx === 2) {
+        createSVGText("PLANET MASS (M)", 380, 200, "rgba(255,255,255,0.4)", "10px");
+        createSVGText("RADIUS (r)", 420, 260, "rgba(255,255,255,0.4)", "10px");
+        createSVGText("v = sqrt(GM / r)", 520, 160, "#00f0ff", "14px");
+      } else if (idx === 4) {
+        createSVGCallout(250, 220, 180, 140, "POWER SYSTEM: SOLAR ARRAYS", "Generates electrical power");
+        createSVGCallout(400, 215, 550, 120, "ATTITUDE CONTROL: FLYWHEELS", "Rotates/stabilizes satellite direction");
+        createSVGCallout(380, 240, 220, 310, "THERMAL CONTROL: GOLD MLI", "Gold foil insulates core from extremes");
+        createSVGCallout(420, 260, 560, 310, "COMMUNICATIONS: HIGH-GAIN DISH", "Transmits science payload downlinks");
+      }
+    }
+
+    function createSVGText(text, x, y, color, size) {
+      const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      t.setAttribute("x", x); t.setAttribute("y", y);
+      t.setAttribute("fill", color); t.setAttribute("font-size", size);
+      t.setAttribute("font-family", "Fira Code, monospace");
+      t.textContent = text;
+      svgOverlay.appendChild(t);
+    }
+
+    function createSVGCallout(sx, sy, ex, ey, title, subtitle) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      line.setAttribute("points", `${sx},${sy} ${ex>sx?ex-10:ex+10},${ey} ${ex},${ey}`);
+      line.setAttribute("stroke", "#00f0ff"); line.setAttribute("stroke-width", "1"); line.setAttribute("fill", "none");
+      svgOverlay.appendChild(line);
+
+      const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      dot.setAttribute("cx", sx); dot.setAttribute("cy", sy);
+      dot.setAttribute("r", "3"); dot.setAttribute("fill", "#00f0ff");
+      svgOverlay.appendChild(dot);
+
+      const h = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      h.setAttribute("x", ex); h.setAttribute("y", ey-5);
+      h.setAttribute("fill", "#fff"); h.setAttribute("font-size", "11px");
+      h.setAttribute("font-weight", "600"); h.setAttribute("font-family", "Outfit, sans-serif");
+      h.setAttribute("text-anchor", ex > sx ? "start" : "end");
+      h.textContent = title; svgOverlay.appendChild(h);
+
+      const s = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      s.setAttribute("x", ex); s.setAttribute("y", ey+12);
+      s.setAttribute("fill", "#94a3b8"); s.setAttribute("font-size", "9px");
+      s.setAttribute("font-family", "Outfit, sans-serif");
+      s.setAttribute("text-anchor", ex > sx ? "start" : "end");
+      s.textContent = subtitle; svgOverlay.appendChild(s);
+    }
+
+    // ─── SPEECH ───────────────────────────────────────────────────────────────
+    function speakCurrentSceneText() {
+      if (isMuted || !window.speechSynthesis) return;
+      const scene = SCENES[activeSceneIndex];
+      if (lastSpokenText === scene.narration) {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      currentSpeechUtterance = new SpeechSynthesisUtterance(scene.narration);
+      lastSpokenText = scene.narration;
+      currentSpeechUtterance.rate = 1.0 * playbackSpeed;
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.lang.includes("en") && (v.name.includes("Google US English") || v.name.includes("Natural") || v.name.includes("Male")));
+      if (preferred) currentSpeechUtterance.voice = preferred;
+      window.speechSynthesis.speak(currentSpeechUtterance);
+    }
+
+    // ─── SANDBOX ──────────────────────────────────────────────────────────────
+    function updateSandboxCalculations() {
+      sandboxAlt  = parseFloat(elAltSlider.value);
+      sandboxMass = parseFloat(elMassSlider.value);
+      elAltVal.textContent  = sandboxAlt.toLocaleString();
+      elMassVal.textContent = sandboxMass.toFixed(1);
+
+      const G = 6.6743e-11, M_earth = 5.972e24, R_earth = 6371000;
+      const M = sandboxMass * M_earth;
+      const r = R_earth + sandboxAlt * 1000;
+      const v = Math.sqrt((G * M) / r);
+      const T_min = (2 * Math.PI * r / v) / 60;
+
+      elCalcVelocity.textContent = (v/1000).toFixed(2) + " km/s";
+      let perStr = T_min.toFixed(1) + " min";
+      if (T_min >= 1440) perStr = (T_min/1440).toFixed(2) + " days";
+      else if (T_min > 180) perStr = (T_min/60).toFixed(1) + " hours";
+      elCalcPeriod.textContent = perStr;
+
+      elSandboxStatus.removeAttribute("style");
+      if (sandboxAlt >= 160 && sandboxAlt <= 2000) {
+        elSandboxStatus.className = "sandbox-status feasible";
+        elSandboxStatus.innerHTML = `🛰️ <strong>LOW EARTH ORBIT (LEO)</strong><br>Optimal for scientific surveys (e.g. Hubble, ISS, Starlink). Period: ${T_min.toFixed(1)} mins.`;
+      } else if (sandboxAlt > 2000 && sandboxAlt < 35000) {
+        elSandboxStatus.className = "sandbox-status feasible";
+        elSandboxStatus.style.background = "rgba(0,136,204,0.08)";
+        elSandboxStatus.style.borderColor = "#0088cc";
+        elSandboxStatus.innerHTML = `📡 <strong>MEDIUM EARTH ORBIT (MEO)</strong><br>Standard region for GPS and navigation constellations.`;
+      } else if (sandboxAlt >= 35000 && sandboxAlt <= 36000) {
+        elSandboxStatus.className = "sandbox-status feasible";
+        elSandboxStatus.style.background = "rgba(255,215,0,0.08)";
+        elSandboxStatus.style.borderColor = "#ffd700";
+        elSandboxStatus.innerHTML = `🌍 <strong>GEOSTATIONARY ORBIT (GEO)</strong><br>Satellite period aligns with Earth's rotation (24h). Ideal for global TV and climate monitors.`;
+      } else {
+        elSandboxStatus.className = "sandbox-status warning";
+        elSandboxStatus.innerHTML = `⚠️ <strong>HIGH OUT-OF-BOUNDS ORBIT</strong><br>Orbital speed decreases as gravity weakens at extreme distances.`;
+      }
+    }
+
+    // ─── EVENTS ───────────────────────────────────────────────────────────────
+    function setupEventListeners() {
+      elBtnOverlayPlay.addEventListener("click", () => {
+        elTitleCard.classList.add("hidden");
+        initAudio(); togglePlayState(true);
+      });
+
+      elBtnPlayPause.addEventListener("click", () => togglePlayState());
+
+      elTimelineSlider.addEventListener("input", e => seekToPercent(parseFloat(e.target.value)));
+
+      document.addEventListener("keydown", e => {
+        if (e.code === "Space") { e.preventDefault(); togglePlayState(); }
+        else if (e.code === "ArrowLeft") seekOffset(-5);
+        else if (e.code === "ArrowRight") seekOffset(5);
+      });
+
+      elBtnPrev.addEventListener("click", () => seekOffset(-15));
+      elBtnNext.addEventListener("click", () => seekOffset(15));
+
+      elBtnSpeed.addEventListener("click", e => {
+        e.stopPropagation();
+        const cycle = [1, 1.5, 2, 0.5];
+        setPlaybackSpeed(cycle[(cycle.indexOf(playbackSpeed)+1) % cycle.length]);
+      });
+
+      elSpeedOptions.forEach(opt => {
+        opt.addEventListener("click", e => {
+          e.stopPropagation();
+          setPlaybackSpeed(parseFloat(opt.getAttribute("data-speed")));
+        });
+      });
+
+      elBtnVoiceToggle.addEventListener("click", () => {
+        isMuted = !isMuted;
+        elBtnVoiceToggle.textContent = isMuted ? "🔇" : "🔊";
+        elBtnVoiceToggle.classList.toggle("active", !isMuted);
+        if (isMuted) window.speechSynthesis.cancel();
+        else if (isPlaying) speakCurrentSceneText();
+      });
+
+      elBtnSoundFXToggle.addEventListener("click", () => {
+        isSoundFXOn = !isSoundFXOn;
+        elBtnSoundFXToggle.textContent = isSoundFXOn ? "🔥" : "💨";
+        elBtnSoundFXToggle.classList.toggle("active", isSoundFXOn);
+      });
+
+      elBtnFullscreen.addEventListener("click", () => {
+        if (!document.fullscreenElement) elVideoContainer.requestFullscreen().catch(console.error);
+        else document.exitFullscreen();
+      });
+
+      elBtnToggleContext.addEventListener("click", () => {
+        elContextBody.classList.toggle("collapsed");
+        elBtnToggleContext.textContent = elContextBody.classList.contains("collapsed")
+          ? "Show Full Script [+]" : "Hide Full Script [-]";
+      });
+
+      elTabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          elTabBtns.forEach(b => b.classList.remove("active"));
+          elTabPanes.forEach(p => p.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById(`tab-${btn.getAttribute("data-tab")}`).classList.add("active");
+        });
+      });
+
+      elAltSlider.addEventListener("input", updateSandboxCalculations);
+      elMassSlider.addEventListener("input", updateSandboxCalculations);
+
+      elBtnSyncSandbox.addEventListener("click", () => {
+        const G = 6.6743e-11, M_earth = 5.972e24, R_earth = 6371000;
+        const r = R_earth + sandboxAlt * 1000;
+        const v = Math.sqrt((G * sandboxMass * M_earth) / r);
+        customAltitude = sandboxAlt;
+        customSpeed    = v / 1000;
+        customPeriod   = (2 * Math.PI * r / v) / 60;
+        addSystemLog(`ORBIT SYNCED: Alt ${customAltitude} km → Speed ${customSpeed.toFixed(2)} km/s`, activeSceneIndex);
+        elTabBtns[0].click();
+      });
+    }
+
+    function togglePlayState(force = null) {
+      const next = force !== null ? force : !isPlaying;
+      if (next === isPlaying) return;
+      isPlaying = next;
+
+      if (isPlaying) {
+        elBtnPlayPause.textContent = "⏸"; elBtnPlayPause.classList.add("active");
+        lastFrameTime = Date.now();
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        speakCurrentSceneText(); videoLoop();
+      } else {
+        elBtnPlayPause.textContent = "▶"; elBtnPlayPause.classList.remove("active");
+        if (window.speechSynthesis) window.speechSynthesis.pause();
+      }
+    }
+
+    function seekOffset(secs) {
+      currentTime = Math.max(0, Math.min(TOTAL_DURATION, currentTime + secs));
+      logsEmitted.clear(); clearSystemLogs();
+      if (isPlaying) speakCurrentSceneText();
+      updateTimelineUI(); updatePlaybackState();
+    }
+
+    function setPlaybackSpeed(speed) {
+      playbackSpeed = speed;
+      elBtnSpeed.textContent = speed + "x";
+      elSpeedOptions.forEach(o => o.classList.toggle("active", parseFloat(o.getAttribute("data-speed")) === speed));
+      if (isPlaying && !isMuted) speakCurrentSceneText();
+    }
+
+    function pad(n) { return n < 10 ? "0" + n : n; }
+
+    if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = () => {};
+    window.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
