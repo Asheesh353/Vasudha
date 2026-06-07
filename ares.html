@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ARES - Interplanetary Research Vessel</title>
+<style>
+  :root {
+    --neon-blue: #00d4ff;
+    --neon-green: #00ff88;
+    --neon-orange: #ffaa00;
+    --bg-panel: rgba(0, 15, 30, 0.9);
+    --border-glow: rgba(0, 212, 255, 0.4);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { 
+    background: #000; 
+    overflow: hidden; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    cursor: crosshair;
+  }
+  canvas { display: block; }
+
+  /* HUD Layout */
+  #hud {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    padding: 20px;
+    display: grid;
+    grid-template-areas: 
+      "tl tc tr"
+      "ml . mr"
+      "bl bc br";
+    grid-template-columns: 280px 1fr 280px;
+    grid-template-rows: auto 1fr auto;
+    gap: 15px;
+    opacity: 0.9;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glow);
+    padding: 12px;
+    border-radius: 2px;
+    box-shadow: inset 0 0 15px rgba(0, 150, 255, 0.1), 0 0 10px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .panel-title {
+    color: var(--neon-blue);
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-glow);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  /* Specific Panels */
+  .p-tl { grid-area: tl; }
+  .p-tr { grid-area: tr; }
+  .p-bl { grid-area: bl; }
+  .p-br { grid-area: br; }
+  .p-bc { grid-area: bc; justify-self: center; text-align: center; width: 400px; }
+  .p-tc { grid-area: tc; justify-self: center; border-top: none; padding-top: 5px; }
+
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .bar-container { height: 4px; background: rgba(255,255,255,0.1); width: 100%; margin-top: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; width: 100%; transition: width 0.3s ease; }
+  .b-blue { background: var(--neon-blue); box-shadow: 0 0 5px var(--neon-blue); }
+  .b-green { background: var(--neon-green); box-shadow: 0 0 5px var(--neon-green); }
+  .b-orange { background: var(--neon-orange); box-shadow: 0 0 5px var(--neon-orange); }
+
+  #xh {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px; height: 20px;
+    pointer-events: none;
+  }
+  #xh::before, #xh::after {
+    content: ''; position: absolute; background: var(--neon-blue); opacity: 0.6;
+  }
+  #xh::before { width: 1px; height: 20px; left: 10px; }
+  #xh::after { width: 20px; height: 1px; top: 10px; }
+
+  #overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    pointer-events: all;
+    transition: opacity 0.5s;
+  }
+  #overlay.hidden { opacity: 0; pointer-events: none; }
+  #overlay h1 { font-size: 32px; letter-spacing: 10px; margin-bottom: 20px; color: var(--neon-blue); }
+  #overlay button {
+    background: transparent;
+    border: 1px solid var(--neon-blue);
+    color: var(--neon-blue);
+    padding: 10px 30px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  #overlay button:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
+
+  .minimap {
+    width: 100%;
+    height: 120px;
+    background: rgba(0, 20, 40, 0.5);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    position: relative;
+    margin-top: 10px;
+  }
+  .player-dot {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: var(--neon-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--neon-green);
+    transform: translate(-50%, -50%);
+  }
+
+  .alert-ticker {
+    color: var(--neon-orange);
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <h1>ARES</h1>
+  <button id="start-btn">INITIALIZE SYSTEMS</button>
+  <p style="margin-top: 20px; font-size: 10px; color: #666;">W-A-S-D: MOVE | MOUSE: LOOK | ESC: RELEASE</p>
+</div>
+
+<div id="hud">
+  <div class="panel p-tl">
+    <div class="panel-title">Vessel Status</div>
+    <div class="stat-row"><span>ID:</span><span>ARES-01</span></div>
+    <div class="stat-row"><span>TRANSIT:</span><span>EARTH-MARS</span></div>
+    <div class="stat-row"><span>PRESSURE:</span><span>101.3 kPa</span></div>
+    <div class="bar-container"><div class="bar-fill b-blue" style="width: 100%"></div></div>
+    <div class="stat-row" style="margin-top:10px;"><span>O2 LEVEL:</span><span id="o2-val">21.0%</span></div>
+    <div class="bar-container"><div class="bar-fill b-green" id="o2-bar" style="width: 100%"></div></div>
+    <div class="stat-row" style="margin-top:4px;"><span>CO2 LEVEL:</span><span>0.04%</span></div>
+    <div class="bar-container"><div class="bar-fill b-orange" style="width: 5%"></div></div>
+  </div>
+
+  <div class="panel p-tc" style="height: 30px; display: flex; align-items: center;">
+    <div class="alert-ticker" id="ticker">SYST_OK // NAVIGATION LOCKED // MISSION DAY 187 // ALL SYSTEMS NOMINAL...</div>
+  </div>
+
+  <div class="panel p-tr">
+    <div class="panel-title">Mission Progress</div>
+    <div class="stat-row"><span>MET:</span><span id="met-val">187:12:44:02</span></div>
+    <div class="stat-row"><span>DIST TO MARS:</span><span>42.1M KM</span></div>
+    <div class="stat-row"><span>VELOCITY:</span><span>24.5 KM/S</span></div>
+    <div class="panel-title" style="margin-top:15px;">Crew Comms</div>
+    <div class="stat-row"><span>COMMANDER:</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>PILOT:</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>SCI-01:</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>ENG-01:</span><span style="color:var(--neon-orange)">SLEEP</span></div>
+  </div>
+
+  <div class="panel p-bl">
+    <div class="panel-title">Tactical Map</div>
+    <div class="minimap" id="minimap">
+      <!-- Simplified ship outline in CSS/SVG could go here, or handled in JS -->
+      <div id="player-dot" class="player-dot"></div>
+    </div>
+  </div>
+
+  <div class="panel p-bc">
+    <div id="location-name" style="font-size: 16px; color: #fff; text-shadow: 0 0 10px var(--neon-blue);">[ SPINAL CORRIDOR ]</div>
+    <div style="color: #666; margin-top: 4px;">THRUSTER ARRAYS: STANDBY | REACTOR: 88%</div>
+  </div>
+
+  <div class="panel p-br">
+    <div class="panel-title">Environment</div>
+    <div class="stat-row"><span>EXT TEMP:</span><span>-270.4 C</span></div>
+    <div class="stat-row"><span>INT TEMP:</span><span>22.5 C</span></div>
+    <div class="stat-row"><span>SHIELDING:</span><span>100%</span></div>
+    <div class="bar-container" style="margin-top:8px;"><div class="bar-fill b-blue" style="width: 100%"></div></div>
+  </div>
+</div>
+
+<div id="xh"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/** 
+ * ARES REDESIGN
+ * COMPACT, DETAILED, REALISTIC INTERIOR
+ */
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020408);
+scene.fog = new THREE.Fog(0x020408, 5, 25);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMappingExposure = 1.5;
+document.body.appendChild(renderer.domElement);
+
+// Dimensions
+const CH = 2.35; // Ceiling Height
+const FY = -CH/2; // Floor Y
+const EY = 1.6; // Eye Level from floor
+camera.position.set(0, FY + EY, 0);
+
+// Materials
+const matPanel = new THREE.MeshStandardMaterial({ color: 0x888a8c, roughness: 0.7, metalness: 0.3 });
+const matFloor = new THREE.MeshStandardMaterial({ color: 0x444648, roughness: 0.9, metalness: 0.1 });
+const matMetal = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.8 });
+const matGlowB = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 2 });
+const matGlowG = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 2 });
+const matGlowO = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0xffaa00, emissiveIntensity: 2 });
+const matScreen = new THREE.MeshStandardMaterial({ color: 0x000a14, emissive: 0x001428, emissiveIntensity: 1 });
+const matGlass = new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.2, roughness: 0, metalness: 0.5 });
+const matYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.8, metalness: 0.2 });
+
+// Helpers
+function box(w, h, d, mat, x=0, y=0, z=0) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  m.position.set(x, y, z);
+  m.castShadow = true; m.receiveShadow = true;
+  scene.add(m);
+  return m;
+}
+
+function cyl(r, h, mat, x=0, y=0, z=0, rx=0, rz=0) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 12), mat);
+  m.position.set(x, y, z);
+  m.rotation.x = rx;
+  m.rotation.z = rz;
+  m.castShadow = true; m.receiveShadow = true;
+  scene.add(m);
+  return m;
+}
+
+// Modular Details
+function addRack(x, y, z, orient='x') {
+  const w = (orient==='x') ? 0.8 : 0.1;
+  const d = (orient==='x') ? 0.1 : 0.8;
+  const p = box(w, 1.2, d, matPanel, x, y, z);
+  // Add some "slots" or details
+  for(let i=0; i<3; i++) {
+    box(w*0.8, 0.2, d+0.02, matMetal, x, y - 0.4 + i*0.4, z);
+    if(Math.random() > 0.5) box(0.05, 0.05, d+0.03, matGlowB, x - w*0.3, y - 0.4 + i*0.4, z);
+  }
+}
+
+function addHandrail(x, y, z, len, orient='z') {
+  const rx = (orient==='z') ? Math.PI/2 : 0;
+  const rz = (orient==='x') ? Math.PI/2 : 0;
+  cyl(0.02, len, matYellow, x, y, z, rx, rz);
+}
+
+function addConduit(x, y, z, len, orient='z') {
+  const rx = (orient==='z') ? Math.PI/2 : 0;
+  cyl(0.03, len, matMetal, x, y, z, rx, 0);
+}
+
+// ─── WORLD BUILDING ────────────────────────────────────────────────────────
+
+// 1. SPINAL CORRIDOR (z: -16 to 9, width: 2.4)
+const corridorWidth = 2.4;
+const corridorZStart = -16;
+const corridorZEnd = 9;
+const corridorLen = corridorZEnd - corridorZStart;
+
+// Floor & Ceiling
+box(corridorWidth, 0.1, corridorLen, matFloor, 0, FY, (corridorZStart + corridorZEnd)/2);
+box(corridorWidth, 0.1, corridorLen, matPanel, 0, CH/2, (corridorZStart + corridorZEnd)/2);
+
+// Side Walls with details
+for (let z = corridorZStart + 1; z < corridorZEnd; z += 1.2) {
+  // Walls
+  if (Math.abs(z - (-12)) > 1.5 && Math.abs(z - 0) > 1.5 && Math.abs(z - 6) > 1.5) {
+    box(0.1, CH, 1.2, matPanel, -corridorWidth/2, 0, z);
+    box(0.1, CH, 1.2, matPanel, corridorWidth/2, 0, z);
+    // Add Racks
+    addRack(-corridorWidth/2 + 0.1, 0, z, 'y');
+    addRack(corridorWidth/2 - 0.1, 0, z, 'y');
+  }
+}
+
+// Handrails & Conduits
+addHandrail(-corridorWidth/2 + 0.15, 0.5, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addHandrail(corridorWidth/2 - 0.15, 0.5, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addConduit(-0.8, CH/2 - 0.15, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addConduit(0.8, CH/2 - 0.15, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+
+// Lights
+for (let z = corridorZStart + 2; z < corridorZEnd; z += 4) {
+  const lp = box(0.6, 0.05, 0.2, matGlowB, 0, CH/2 - 0.05, z);
+  const pl = new THREE.PointLight(0x00d4ff, 0.8, 8);
+  pl.position.set(0, CH/2 - 0.3, z);
+  scene.add(pl);
+}
+
+// 2. COCKPIT (North end)
+const cockpitW = 5, cockpitD = 6;
+const cockpitZ = corridorZStart - cockpitD/2;
+// Floor/Ceiling
+box(cockpitW, 0.1, cockpitD, matFloor, 0, FY, cockpitZ);
+box(cockpitW, 0.1, cockpitD, matPanel, 0, CH/2, cockpitZ);
+// Walls
+box(cockpitW, CH, 0.1, matPanel, 0, 0, cockpitZ - cockpitD/2); // Forward
+box(0.1, CH, cockpitD, matPanel, -cockpitW/2, 0, cockpitZ); // West
+box(0.1, CH, cockpitD, matPanel, cockpitW/2, 0, cockpitZ); // East
+
+// Window & Main Console
+box(cockpitW*0.8, CH*0.6, 0.15, matMetal, 0, 0.2, cockpitZ - cockpitD/2 + 0.05);
+box(cockpitW*0.75, CH*0.5, 0.05, matGlass, 0, 0.2, cockpitZ - cockpitD/2 - 0.05);
+
+// Pilot Seats
+for(let x of [-1.2, 1.2]) {
+  const seat = box(0.6, 0.1, 0.6, matFloor, x, FY + 0.4, cockpitZ - 1.5);
+  box(0.6, 0.8, 0.1, matFloor, x, FY + 0.85, cockpitZ - 1.8);
+  // Consoles
+  box(0.8, 0.05, 0.6, matMetal, x, FY + 0.7, cockpitZ - 0.8);
+  box(0.7, 0.02, 0.5, matScreen, x, FY + 0.73, cockpitZ - 0.8);
+}
+
+// 3. SCIENCE LAB (West, z=-12)
+function mkModule(x, z, name, color=0x00ff88) {
+  const mW = 5, mD = 6;
+  const matG = new THREE.MeshStandardMaterial({color: color, emissive: color, emissiveIntensity: 1});
+  // Floor/Ceiling
+  box(mW, 0.1, mD, matFloor, x, FY, z);
+  box(mW, 0.1, mD, matPanel, x, CH/2, z);
+  // Walls (Outer)
+  if (x < 0) box(0.1, CH, mD, matPanel, x - mW/2, 0, z); // Far West
+  else box(0.1, CH, mD, matPanel, x + mW/2, 0, z); // Far East
+  box(mW, CH, 0.1, matPanel, x, 0, z - mD/2); // North
+  box(mW, CH, 0.1, matPanel, x, 0, z + mD/2); // South
+  
+  // Doorway wall (Inner)
+  const wallX = (x < 0) ? x + mW/2 : x - mW/2;
+  box(0.1, CH, (mD - 1.8)/2, matPanel, wallX, 0, z - (mD + 1.8)/4 - 0.45);
+  box(0.1, CH, (mD - 1.8)/2, matPanel, wallX, 0, z + (mD + 1.8)/4 + 0.45);
+  box(0.1, CH - 2.0, 1.8, matPanel, wallX, (CH-2.0)/2 + 1.0, z);
+
+  // Light
+  const pl = new THREE.PointLight(color, 0.6, 10);
+  pl.position.set(x, CH/2 - 0.5, z);
+  scene.add(pl);
+  
+  return {x, z, mW, mD};
+}
+
+const sciLab = mkModule(-3.7, -12, 'Science Lab', 0x00ff88);
+// Sci Lab Details
+box(3, 0.05, 0.8, matMetal, sciLab.x - 0.5, FY + 0.9, sciLab.z);
+for(let i=0; i<4; i++) cyl(0.15, 0.6, matGlowG, sciLab.x - 1 + i*0.5, FY + 1.2, sciLab.z);
+
+const medBay = mkModule(3.7, -12, 'Medical Bay', 0x00d4ff);
+// Med Bay Details
+box(1.8, 0.4, 3, matPanel, medBay.x + 1, FY + 0.4, medBay.z); // Medical Berth
+
+const habitat = mkModule(-3.7, 0, 'Habitat', 0xaaaaaa);
+// Habitat Details
+for(let i=0; i<3; i++) {
+  const pz = habitat.z - 1.5;
+  box(2, 0.8, 1.8, matPanel, habitat.x - 1, FY + 0.4 + i*0.9, pz); // Pod shell
+  // Beds / Mattresses
+  box(1.8, 0.1, 1.6, new THREE.MeshStandardMaterial({color:0xffffff, roughness:1}), habitat.x - 1, FY + 0.5 + i*0.9, pz);
+  // Pillow
+  box(0.4, 0.12, 0.6, new THREE.MeshStandardMaterial({color:0xeeeeee, roughness:1}), habitat.x - 1.6, FY + 0.55 + i*0.9, pz);
+}
+
+const engineering = mkModule(3.7, 0, 'Engineering', 0xffaa00);
+// Engineering Details
+for(let i=0; i<4; i++) cyl(0.3, 2, matMetal, engineering.x + 1, 0, engineering.z - 1.5 + i*1, 0, 0); // Tanks
+
+// 4. AIRLOCK (South end)
+const airlockW = 3, airlockD = 4;
+const airlockZ = corridorZEnd + airlockD/2;
+box(airlockW, 0.1, airlockD, matFloor, 0, FY, airlockZ);
+box(airlockW, 0.1, airlockD, matPanel, 0, CH/2, airlockZ);
+box(airlockW, CH, 0.1, matPanel, 0, 0, airlockZ + airlockD/2); // Outer Hatch
+box(0.1, CH, airlockD, matPanel, -airlockW/2, 0, airlockZ);
+box(0.1, CH, airlockD, matPanel, airlockW/2, 0, airlockZ);
+
+// Hatch Porthole
+cyl(0.4, 0.2, matMetal, 0, 0.2, airlockZ + airlockD/2, Math.PI/2, 0);
+cyl(0.35, 0.22, matGlass, 0, 0.2, airlockZ + airlockD/2, Math.PI/2, 0);
+
+// EVA Suits
+for(let x of [-0.8, 0.8]) {
+  box(0.5, 1.4, 0.4, matPanel, x, FY + 0.7, airlockZ + 1);
+  cyl(0.2, 0.3, matGlass, x, FY + 1.6, airlockZ + 1);
+}
+
+// ─── ENVIRONMENT ──────────────────────────────────────────────────────────
+
+// Mars
+const marsGeom = new THREE.SphereGeometry(20, 32, 32);
+const marsMat = new THREE.MeshStandardMaterial({ 
+  color: 0xcc5533, 
+  roughness: 0.8, 
+  emissive: 0x221100,
+  emissiveIntensity: 0.2
+});
+const mars = new THREE.Mesh(marsGeom, marsMat);
+mars.position.set(40, -10, -80);
+scene.add(mars);
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+sun.position.set(100, 50, -50);
+scene.add(sun);
+
+// Stars
+const starGeom = new THREE.BufferGeometry();
+const starPos = [];
+for(let i=0; i<5000; i++) {
+  starPos.push((Math.random()-0.5)*400, (Math.random()-0.5)*400, (Math.random()-0.5)*400);
+}
+starGeom.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2 });
+scene.add(new THREE.Points(starGeom, starMat));
+
+// Floating Debris
+const debrisCount = 15;
+const debris = [];
+for(let i=0; i<debrisCount; i++) {
+  const d = box(0.05, 0.05, 0.05, matMetal, (Math.random()-0.5)*6, (Math.random()-0.5)*2, (Math.random()-0.5)*20);
+  d.userData = { 
+    rot: new THREE.Vector3(Math.random()*0.02, Math.random()*0.02, Math.random()*0.02),
+    vel: new THREE.Vector3((Math.random()-0.5)*0.005, (Math.random()-0.5)*0.002, (Math.random()-0.5)*0.002)
+  };
+  debris.push(d);
+}
+
+// ─── CONTROLS & LOGIC ─────────────────────────────────────────────────────
+
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+let rotateLeft = false, rotateRight = false;
+let yaw = 0, pitch = 0;
+const mouseSpeed = 0.002;
+const walkSpeed = 0.06;
+const rotSpeed = 0.03;
+
+const startBtn = document.getElementById('start-btn');
+const overlay = document.getElementById('overlay');
+
+startBtn.addEventListener('click', () => {
+  document.body.requestPointerLock();
+});
+
+document.addEventListener('pointerlockchange', () => {
+  if (document.pointerLockElement === document.body) {
+    overlay.classList.add('hidden');
+  } else {
+    overlay.classList.remove('hidden');
+  }
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (document.pointerLockElement === document.body) {
+    yaw -= e.movementX * mouseSpeed;
+    pitch -= e.movementY * mouseSpeed;
+    pitch = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, pitch));
+  }
+});
+
+const onKeyDown = (e) => {
+  switch (e.code) {
+    case 'KeyW': case 'ArrowUp': moveForward = true; break;
+    case 'KeyS': case 'ArrowDown': moveBackward = true; break;
+    case 'KeyA': moveLeft = true; break;
+    case 'KeyD': moveRight = true; break;
+    case 'ArrowLeft': rotateLeft = true; break;
+    case 'ArrowRight': rotateRight = true; break;
+  }
+};
+const onKeyUp = (e) => {
+  switch (e.code) {
+    case 'KeyW': case 'ArrowUp': moveForward = false; break;
+    case 'KeyS': case 'ArrowDown': moveBackward = false; break;
+    case 'KeyA': moveLeft = false; break;
+    case 'KeyD': moveRight = false; break;
+    case 'ArrowLeft': rotateLeft = false; break;
+    case 'ArrowRight': rotateRight = false; break;
+  }
+};
+document.addEventListener('keydown', onKeyDown);
+document.addEventListener('keyup', onKeyUp);
+
+// HUD Updates
+const metVal = document.getElementById('met-val');
+const o2Val = document.getElementById('o2-val');
+const o2Bar = document.getElementById('o2-bar');
+const locName = document.getElementById('location-name');
+const playerDot = document.getElementById('player-dot');
+
+const zones = [
+  { name: '[ COCKPIT ]', zMin: -22, zMax: -16, xMin: -2.5, xMax: 2.5 },
+  { name: '[ SPINAL CORRIDOR ]', zMin: -16, zMax: 9, xMin: -1.2, xMax: 1.2 },
+  { name: '[ SCIENCE LAB ]', zMin: -15, zMax: -9, xMin: -6.5, xMax: -1.2 },
+  { name: '[ MEDICAL BAY ]', zMin: -15, zMax: -9, xMin: 1.2, xMax: 6.5 },
+  { name: '[ HABITAT ]', zMin: -3, zMax: 3, xMin: -6.5, xMax: -1.2 },
+  { name: '[ ENGINEERING ]', zMin: -3, zMax: 3, xMin: 1.2, xMax: 6.5 },
+  { name: '[ AIRLOCK ]', zMin: 9, zMax: 13, xMin: -1.5, xMax: 1.5 },
+];
+
+function updateHUD(t) {
+  // MET
+  const d = Math.floor(187 + t/86400);
+  const h = Math.floor((t % 86400) / 3600).toString().padStart(2, '0');
+  const m = Math.floor((t % 3600) / 60).toString().padStart(2, '0');
+  const s = Math.floor(t % 60).toString().padStart(2, '0');
+  metVal.textContent = `${d}:${h}:${m}:${s}`;
+
+  // O2 (slow drain/fluctuation)
+  const o2 = 21.0 + Math.sin(t*0.1)*0.05;
+  o2Val.textContent = o2.toFixed(1) + '%';
+  o2Bar.style.width = (o2 / 21 * 100) + '%';
+
+  // Location
+  const px = camera.position.x, pz = camera.position.z;
+  let currentZone = '[ DEEP SPACE ]';
+  for(const z of zones) {
+    if(px >= z.xMin && px <= z.xMax && pz >= z.zMin && pz <= z.zMax) {
+      currentZone = z.name;
+      break;
+    }
+  }
+  locName.textContent = currentZone;
+
+  // Minimap (Map range: x:-7 to 7, z:-22 to 13)
+  const mx = ((px + 7) / 14) * 100;
+  const my = ((pz + 22) / 35) * 100;
+  playerDot.style.left = mx + '%';
+  playerDot.style.top = my + '%';
+}
+
+// Main Loop
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const time = clock.getElapsedTime();
+
+  // Rotation from arrows
+  if (rotateLeft) yaw += rotSpeed;
+  if (rotateRight) yaw -= rotSpeed;
+
+  // Movement
+  if (document.pointerLockElement === document.body || rotateLeft || rotateRight || moveForward || moveBackward) {
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    dir.y = 0; dir.normalize();
+    
+    const side = new THREE.Vector3().crossVectors(camera.up, dir).normalize();
+
+    if (moveForward) camera.position.addScaledVector(dir, walkSpeed);
+    if (moveBackward) camera.position.addScaledVector(dir, -walkSpeed);
+    if (moveLeft) camera.position.addScaledVector(side, walkSpeed);
+    if (moveRight) camera.position.addScaledVector(side, -walkSpeed);
+
+    // Head bob
+    if (moveForward || moveBackward || moveLeft || moveRight) {
+      camera.position.y = (FY + EY) + Math.sin(time * 10) * 0.02;
+    }
+
+    // Collision (Simple box bounds)
+    camera.position.x = Math.max(-6, Math.min(6, camera.position.x));
+    camera.position.z = Math.max(-21.5, Math.min(12.5, camera.position.z));
+  }
+
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+
+  // Animations
+  mars.rotation.y += 0.0005;
+  debris.forEach(d => {
+    d.rotation.x += d.userData.rot.x;
+    d.rotation.y += d.userData.rot.y;
+    d.position.add(d.userData.vel);
+    if(Math.abs(d.position.x) > 10) d.position.x *= -1;
+    if(Math.abs(d.position.z) > 30) d.position.z *= -1;
+  });
+
+  updateHUD(time);
+  renderer.render(scene, camera);
+}
+
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+</script>
+</body>
+</html>
