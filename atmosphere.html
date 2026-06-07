@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocket Launch Atmosphere Simulator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  #sim-root { width: 680px; border-radius: 12px; overflow: hidden; }
+  #sky-canvas { display: block; width: 100%; height: 500px; position: relative; overflow: hidden; }
+  #hud { position: absolute; top: 12px; left: 16px; z-index: 10; }
+  #hud .stat { font-size: 13px; color: #fff; text-shadow: 0 1px 4px #0005; margin-bottom: 4px; font-weight: 500; letter-spacing: 0.02em; }
+  #hud .stat span { font-weight: 400; opacity: 0.85; }
+  #layer-label { position: absolute; top: 12px; right: 16px; z-index: 10; text-align: right; }
+  #layer-label .lname { font-size: 16px; font-weight: 500; color: #fff; text-shadow: 0 1px 8px #0007; }
+  #layer-label .lrange { font-size: 12px; color: rgba(255,255,255,0.7); text-shadow: 0 1px 4px #0005; margin-top: 2px; }
+  #controls { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #111; border-top: 1px solid #222; }
+  #controls button { padding: 8px 20px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: #eee; font-size: 14px; cursor: pointer; }
+  #controls button:hover { background: #222; }
+  #throttle-wrap { display: flex; align-items: center; gap: 8px; flex: 1; }
+  #throttle-wrap label { font-size: 13px; color: #888; white-space: nowrap; }
+  #throttle { flex: 1; accent-color: #4af; }
+  #throttle-val { font-size: 13px; min-width: 36px; color: #eee; }
+  #progress-bar-wrap { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; z-index: 9; background: rgba(0,0,0,0.3); }
+  #progress-bar { height: 100%; background: rgba(255,255,255,0.5); transition: width 0.1s; }
+</style>
+</head>
+<body>
+<div id="sim-root">
+  <div id="sky-canvas" style="position:relative;">
+    <canvas id="bg-canvas" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+    <div id="hud">
+      <div class="stat">altitude <span id="alt-val">0 km</span></div>
+      <div class="stat">speed <span id="spd-val">0 m/s</span></div>
+      <div class="stat">temp <span id="tmp-val">15 °C</span></div>
+      <div class="stat">pressure <span id="prs-val">1013 hPa</span></div>
+    </div>
+    <div id="layer-label">
+      <div class="lname" id="layer-name">Troposphere</div>
+      <div class="lrange" id="layer-range">0 – 12 km</div>
+    </div>
+    <div id="progress-bar-wrap"><div id="progress-bar" style="width:0%"></div></div>
+    <canvas id="particle-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6;"></canvas>
+  </div>
+  <div id="controls">
+    <button id="btn-launch">🚀 Launch</button>
+    <button id="btn-reset">↺ Reset</button>
+    <div id="throttle-wrap">
+      <label for="throttle">Throttle</label>
+      <input type="range" id="throttle" min="1" max="10" value="5" step="1">
+      <span id="throttle-val">50%</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const MAX_ALT = 600;
+
+const LAYERS = [
+  { name: "Troposphere",   range: "0 – 12 km",    start: 0,   end: 12,  color0: [70,130,220],  color1: [100,160,240] },
+  { name: "Tropopause",    range: "~12 km",        start: 12,  end: 14,  color0: [60,110,200],  color1: [50,90,170]  },
+  { name: "Stratosphere",  range: "12 – 50 km",    start: 14,  end: 50,  color0: [40,70,160],   color1: [20,40,120]  },
+  { name: "Stratopause",   range: "~50 km",        start: 50,  end: 53,  color0: [25,35,110],   color1: [20,28,95]   },
+  { name: "Mesosphere",    range: "50 – 80 km",    start: 53,  end: 80,  color0: [15,22,80],    color1: [8,12,50]    },
+  { name: "Mesopause",     range: "~80 km",        start: 80,  end: 85,  color0: [6,9,40],      color1: [4,6,28]     },
+  { name: "Thermosphere",  range: "80 – 500 km",   start: 85,  end: 500, color0: [2,4,18],      color1: [0,1,4]      },
+  { name: "Exosphere",     range: "500 km+",       start: 500, end: 600, color0: [0,0,2],       color1: [0,0,0]      },
+];
+
+function getLayer(alt) {
+  for (let i = LAYERS.length-1; i >= 0; i--) {
+    if (alt >= LAYERS[i].start) return LAYERS[i];
+  }
+  return LAYERS[0];
+}
+
+function getColor(alt) {
+  for (let i = 0; i < LAYERS.length; i++) {
+    const l = LAYERS[i];
+    const next = LAYERS[i+1];
+    if (alt >= l.start && (!next || alt < next.start)) {
+      const t = Math.min(1, (alt - l.start) / Math.max(1, l.end - l.start));
+      return l.color0.map((c,j) => Math.round(c + t*(l.color1[j]-c)));
+    }
+  }
+  return [0,0,0];
+}
+
+function getTemp(alt) {
+  if (alt < 11) return 15 - 6.5*alt;
+  if (alt < 20) return -56.5;
+  if (alt < 47) return -56.5 + (alt-20)*2.8;
+  if (alt < 51) return -2.5;
+  if (alt < 71) return -2.5 - (alt-51)*2.8;
+  if (alt < 86) return -58.5 - (alt-71)*2.5;
+  return 1000 - 980*Math.exp(-(alt-86)/50);
+}
+
+function getPressure(alt) {
+  return 1013.25 * Math.exp(-alt/8.5);
+}
+
+function getSpeed(alt, throttle) {
+  const base = 100 + throttle * 40;
+  const density = Math.min(1, getPressure(alt)/1013.25);
+  return base + alt * 2.5 * (1-density*0.3);
+}
+
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+const pCanvas = document.getElementById('particle-canvas');
+const pCtx = pCanvas.getContext('2d');
+const skySel = document.getElementById('sky-canvas');
+
+function resizeCanvases() {
+  const w = skySel.clientWidth, h = skySel.clientHeight;
+  bgCanvas.width = w; bgCanvas.height = h;
+  pCanvas.width = w; pCanvas.height = h;
+}
+resizeCanvases();
+
+let altitude = 0, running = false, raf = null, lastTime = null;
+let throttle = 5;
+let stars = [];
+
+function genStars(n) {
+  stars = [];
+  for (let i = 0; i < n; i++) {
+    stars.push({ x: Math.random(), y: Math.random(), r: Math.random()*1.4+0.3, twinkle: Math.random()*Math.PI*2 });
+  }
+}
+genStars(180);
+
+let cloudParticles = [];
+function genCloudParticles() {
+  cloudParticles = [];
+  for (let i = 0; i < 60; i++) {
+    cloudParticles.push({ x: Math.random(), y: 0.3 + Math.random()*0.5, r: 60 + Math.random()*80, alpha: 0.12 + Math.random()*0.18, speed: 0.00008 + Math.random()*0.0001 });
+  }
+}
+genCloudParticles();
+
+function drawBg(alt, time) {
+  const w = bgCanvas.width, h = bgCanvas.height;
+  const col = getColor(alt);
+  const grd = bgCtx.createLinearGradient(0, 0, 0, h);
+  const colTop = getColor(Math.min(MAX_ALT, alt+30));
+  grd.addColorStop(0, `rgb(${colTop[0]},${colTop[1]},${colTop[2]})`);
+  grd.addColorStop(1, `rgb(${col[0]},${col[1]},${col[2]})`);
+  bgCtx.fillStyle = grd;
+  bgCtx.fillRect(0, 0, w, h);
+
+  const starAlpha = Math.min(1, Math.max(0, (alt-30)/50));
+  if (starAlpha > 0) {
+    stars.forEach(s => {
+      const tw = 0.7 + 0.3*Math.sin(s.twinkle + time*0.001);
+      bgCtx.beginPath();
+      bgCtx.arc(s.x*w, s.y*h, s.r, 0, Math.PI*2);
+      bgCtx.fillStyle = `rgba(255,255,255,${starAlpha*tw*0.9})`;
+      bgCtx.fill();
+    });
+  }
+
+  const cloudAlpha = Math.max(0, 1 - (alt-3)/12);
+  if (cloudAlpha > 0) {
+    cloudParticles.forEach(c => {
+      const cx = ((c.x + c.speed*time*0.001) % 1.0) * w;
+      const cy = c.y * h;
+      const rg = bgCtx.createRadialGradient(cx, cy, 0, cx, cy, c.r);
+      rg.addColorStop(0, `rgba(255,255,255,${c.alpha*cloudAlpha})`);
+      rg.addColorStop(1, `rgba(255,255,255,0)`);
+      bgCtx.fillStyle = rg;
+      bgCtx.beginPath();
+      bgCtx.ellipse(cx, cy, c.r*1.8, c.r*0.6, 0, 0, Math.PI*2);
+      bgCtx.fill();
+    });
+  }
+
+  if (alt < 80) {
+    const sunAlpha = Math.max(0, 1 - alt/80) * 0.35;
+    const sg = bgCtx.createRadialGradient(w*0.78, h*0.15, 10, w*0.78, h*0.15, 120);
+    sg.addColorStop(0, `rgba(255,240,160,${sunAlpha+0.2})`);
+    sg.addColorStop(0.5, `rgba(255,200,80,${sunAlpha})`);
+    sg.addColorStop(1, `rgba(255,160,60,0)`);
+    bgCtx.fillStyle = sg;
+    bgCtx.fillRect(0, 0, w, h);
+  }
+
+  if (alt > 100) {
+    const auroraAlpha = Math.min(0.35, (alt-100)/200);
+    for (let a = 0; a < 3; a++) {
+      const ag = bgCtx.createLinearGradient(0, h*(0.2+a*0.15), 0, h*(0.35+a*0.15));
+      ag.addColorStop(0, `rgba(0,255,120,0)`);
+      ag.addColorStop(0.5, `rgba(0,255,120,${auroraAlpha})`);
+      ag.addColorStop(1, `rgba(80,180,255,0)`);
+      bgCtx.fillStyle = ag;
+      bgCtx.fillRect(0, h*(0.15+a*0.15), w, h*0.22);
+    }
+  }
+
+  const earthGlow = Math.min(1, Math.max(0, (alt-40)/80));
+  if (earthGlow > 0) {
+    const eg = bgCtx.createRadialGradient(w/2, h+80, w*0.4, w/2, h+80, w*1.1);
+    eg.addColorStop(0, `rgba(30,100,220,${earthGlow*0.55})`);
+    eg.addColorStop(0.5, `rgba(30,80,180,${earthGlow*0.2})`);
+    eg.addColorStop(1, `rgba(0,0,0,0)`);
+    bgCtx.fillStyle = eg;
+    bgCtx.fillRect(0, 0, w, h);
+  }
+
+  if (alt > 480) {
+    const exoAlpha = Math.min(0.92, (alt-480)/120);
+    bgCtx.fillStyle = `rgba(0,0,0,${exoAlpha})`;
+    bgCtx.fillRect(0, 0, w, h);
+  }
+}
+
+function drawOverlay() {
+  const w = pCanvas.width, h = pCanvas.height;
+  pCtx.clearRect(0, 0, w, h);
+  if (!running) return;
+
+  // Exhaust flame
+  const fx = w/2, fy = h - 10, fh = 40 + throttle*8;
+  const fg = pCtx.createRadialGradient(fx, fy, 2, fx, fy+fh*0.5, fh);
+  fg.addColorStop(0, 'rgba(255,255,200,0.95)');
+  fg.addColorStop(0.3, 'rgba(255,160,40,0.7)');
+  fg.addColorStop(0.7, 'rgba(255,80,20,0.3)');
+  fg.addColorStop(1, 'rgba(255,60,0,0)');
+  pCtx.fillStyle = fg;
+  pCtx.beginPath();
+  pCtx.ellipse(fx, fy+fh*0.5, 10+throttle*1.5, fh*0.6, 0, 0, Math.PI*2);
+  pCtx.fill();
+
+  // Vignette
+  const vg = pCtx.createRadialGradient(w/2, h/2, h*0.28, w/2, h/2, h*0.7);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(0.6, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+  pCtx.fillStyle = vg;
+  pCtx.fillRect(0, 0, w, h);
+
+  // Window frame
+  pCtx.save();
+  pCtx.strokeStyle = 'rgba(200,210,220,0.18)';
+  pCtx.lineWidth = 14;
+  pCtx.beginPath();
+  pCtx.ellipse(w/2, h/2, w*0.44, h*0.46, 0, 0, Math.PI*2);
+  pCtx.stroke();
+  pCtx.restore();
+}
+
+function updateHUD(alt) {
+  const layer = getLayer(alt);
+  const t = getTemp(alt), p = getPressure(alt), s = getSpeed(alt, throttle);
+  document.getElementById('alt-val').textContent = alt < 10 ? alt.toFixed(1)+' km' : Math.round(alt)+' km';
+  document.getElementById('spd-val').textContent = Math.round(s)+' m/s';
+  document.getElementById('tmp-val').textContent = (t>0?'+':'')+Math.round(t)+' °C';
+  document.getElementById('prs-val').textContent = p < 1 ? p.toFixed(3)+' hPa' : Math.round(p)+' hPa';
+  document.getElementById('layer-name').textContent = layer.name;
+  document.getElementById('layer-range').textContent = layer.range;
+  document.getElementById('progress-bar').style.width = Math.min(100, altitude/MAX_ALT*100)+'%';
+}
+
+function loop(ts) {
+  if (!running) return;
+  if (!lastTime) lastTime = ts;
+  const dt = Math.min(80, ts - lastTime);
+  lastTime = ts;
+  altitude = Math.min(MAX_ALT, altitude + 0.0004 * throttle * dt * (1 + altitude*0.012));
+  drawBg(altitude, ts);
+  drawOverlay();
+  updateHUD(altitude);
+  if (altitude < MAX_ALT) raf = requestAnimationFrame(loop);
+  else { running = false; document.getElementById('btn-launch').textContent = '🌌 Reached Space'; }
+}
+
+document.getElementById('btn-launch').addEventListener('click', () => {
+  if (!running && altitude < MAX_ALT) {
+    running = true; lastTime = null;
+    raf = requestAnimationFrame(loop);
+    document.getElementById('btn-launch').textContent = '⏸ In flight...';
+  }
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  running = false; if (raf) cancelAnimationFrame(raf);
+  altitude = 0; lastTime = null;
+  resizeCanvases(); drawBg(0, 0); drawOverlay(); updateHUD(0);
+  document.getElementById('btn-launch').textContent = '🚀 Launch';
+});
+
+document.getElementById('throttle').addEventListener('input', function() {
+  throttle = parseInt(this.value);
+  document.getElementById('throttle-val').textContent = (throttle*10)+'%';
+});
+
+window.addEventListener('resize', () => { resizeCanvases(); drawBg(altitude, 0); });
+drawBg(0, 0); drawOverlay(); updateHUD(0);
+</script>
+</body>
+</html>
