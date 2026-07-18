@@ -1,276 +1,771 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Project Home</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NYXARIS - Launch Sequence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Graduate&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #060b14;
-      --surface: #0d1a2b;
-      --accent: #e05c2a;
-      --accent2: #f09040;
-      --text: #e8e0d0;
-      --muted: #7a8898;
-      --border: rgba(224, 92, 42, 0.3);
+      --space-black: #050816;
+      --navy: #0A1633;
+      --cyan: #53E7FF;
+      --gold: #FFD86B;
+      --white: #ffffff;
+      --panel-bg: rgba(10, 22, 51, 0.6);
+      --glass-border: rgba(83, 231, 255, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Rajdhani', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(224,92,42,0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(240,144,64,0.07) 0%, transparent 60%);
-      pointer-events: none;
-    }
-
-    .stars {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
-      opacity: var(--o, 0.4);
-    }
-
-    @keyframes twinkle {
-      from { opacity: var(--o, 0.4); }
-      to { opacity: calc(var(--o, 0.4) * 0.3); }
-    }
-
-    main {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 680px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3rem;
-    }
-
-    header {
-      text-align: center;
-    }
-
-    .eyebrow {
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.25em;
-      color: var(--accent);
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
-
-    h1 {
-      font-size: clamp(2.2rem, 6vw, 3.5rem);
-      font-weight: 700;
-      line-height: 1.05;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--text);
-    }
-
-    h1 span {
-      color: var(--accent);
-    }
-
-    .subtitle {
-      margin-top: 0.75rem;
-      font-size: 1rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-    }
-
-    .divider {
-      width: 60px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      margin: 1.5rem auto 0;
-    }
-
-    .nav-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      width: 100%;
-    }
-
-    @media (max-width: 480px) {
-      .nav-grid { grid-template-columns: 1fr; }
-    }
-
-    .nav-card {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      padding: 1.5rem 1.75rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      text-decoration: none;
-      color: var(--text);
-      position: relative;
+      background: var(--space-black);
+      color: var(--white);
+      font-family: 'Graduate', serif;
       overflow: hidden;
-      transition: border-color 0.25s, transform 0.2s;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .nav-card::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: var(--accent);
-      transform: scaleY(0);
-      transform-origin: bottom;
-      transition: transform 0.25s ease;
+    h1, h2, h3, .heading-font {
+      font-family: 'Alfarn', 'Orbitron', sans-serif;
+      letter-spacing: 2px;
     }
 
-    .nav-card::after {
-      content: '';
+    /* Starfield Background */
+    #stars-canvas {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(224,92,42,0.06) 0%, transparent 60%);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Moving Clouds Background */
+    .clouds-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.3;
+      overflow: hidden;
+      transition: transform 6s cubic-bezier(0.5, 0, 0.5, 1);
+    }
+
+    .cloud {
+      position: absolute;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      filter: blur(20px);
+      animation: floatCloud var(--speed) linear infinite;
+    }
+
+    @keyframes floatCloud {
+      from { transform: translateX(-200px); }
+      to { transform: translateX(calc(100vw + 200px)); }
+    }
+
+    /* Interface Layer */
+    .ui-container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 24px;
+      max-width: 600px;
+      padding: 20px;
+      transition: opacity 1s ease, transform 1s ease;
+    }
+
+    .ui-container.fade-out {
       opacity: 0;
-      transition: opacity 0.25s;
+      transform: scale(0.9);
+      pointer-events: none;
     }
 
-    .nav-card:hover {
-      border-color: rgba(224,92,42,0.7);
+    .logo-container h1 {
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      font-weight: 900;
+      color: var(--white);
+      text-shadow: 0 0 20px rgba(83, 230, 255, 0.4), 0 0 40px rgba(83, 230, 255, 0.2);
+      letter-spacing: 12px;
+      margin-bottom: 8px;
+    }
+
+    .logo-container .subtitle {
+      font-size: 1.1rem;
+      color: var(--cyan);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .quote {
+      font-size: 0.85rem;
+      color: var(--gold);
+      font-style: italic;
+      letter-spacing: 1px;
+    }
+
+    /* Mission Status Card */
+    .status-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 20px 30px;
+      width: 100%;
+      max-width: 380px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    .status-card h3 {
+      font-size: 12px;
+      color: var(--cyan);
+      margin-bottom: 12px;
+      letter-spacing: 3px;
+      border-bottom: 1px solid rgba(83, 231, 255, 0.2);
+      padding-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 1px;
+    }
+
+    .status-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-item span.icon {
+      color: var(--cyan);
+      font-weight: bold;
+      text-shadow: 0 0 5px var(--cyan);
+    }
+
+    .status-item span.warn-light {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff3b30;
+      box-shadow: 0 0 8px #ff3b30;
+      animation: blink 1s infinite;
+      margin-left: auto;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Glowing Action Button */
+    .start-btn {
+      background: rgba(83, 231, 255, 0.1);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      padding: 16px 36px;
+      font-size: 16px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: 'Orbitron', sans-serif;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(83, 231, 255, 0.2);
+      margin-top: 10px;
+      pointer-events: auto;
+    }
+
+    .start-btn:hover {
+      background: var(--cyan);
+      color: var(--space-black);
+      box-shadow: 0 0 25px var(--cyan), 0 0 50px rgba(83, 231, 255, 0.5);
       transform: translateY(-2px);
     }
 
-    .nav-card:hover::before { transform: scaleY(1); }
-    .nav-card:hover::after { opacity: 1; }
-
-    .card-index {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      color: var(--accent);
-      letter-spacing: 0.15em;
+    /* Rocket & Launchpad Graphics */
+    .launchpad-container {
+      position: absolute;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 5;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      transition: transform 6s cubic-bezier(0.5, 0, 0.5, 1);
     }
 
-    .card-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
+    .gantry {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 280px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
 
-    .card-desc {
-      font-size: 0.85rem;
-      color: var(--muted);
-      letter-spacing: 0.03em;
+    /* Gantry Tower */
+    .tower {
+      width: 35px;
+      height: 260px;
+      border: 2px solid #2a3a5a;
+      background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(42,58,90,0.2) 10px, rgba(42,58,90,0.2) 20px);
+      position: relative;
     }
 
-    .card-arrow {
-      margin-top: 0.75rem;
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      color: var(--accent);
+    .tower::before {
+      content: '';
+      position: absolute;
+      top: 10px; right: -8px;
+      width: 8px; height: 3px;
+      background: #2a3a5a;
+    }
+
+    /* Gantry Red Blinking Lights */
+    .beacon {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #ff3b30;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ff3b30;
+      animation: blink 0.8s infinite;
+    }
+
+    .tower-beacon-1 { top: 0; left: 14px; }
+    .tower-beacon-2 { top: 100px; left: 14px; }
+
+    /* The Rocket */
+    .rocket {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 160px;
+      transition: transform 6s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 6;
+      will-change: transform;
+    }
+
+    .rocket-body {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    /* Nose Cone */
+    .nose-cone {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid var(--white);
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Rocket Cabin/Tank */
+    .tank {
+      width: 40px;
+      height: 95px;
+      background: linear-gradient(to right, #e6e6e6, var(--white), #d4d4d4);
+      position: absolute;
+      top: 40px;
+      left: 0;
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    /* Cabin window */
+    .window {
+      width: 14px;
+      height: 14px;
+      background: var(--cyan);
+      border: 2px solid #5a6b8c;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(83, 231, 255, 0.6);
+    }
+
+    /* US flag or insignia strip */
+    .insignia {
+      width: 25px;
+      height: 4px;
+      background: var(--cyan);
+      opacity: 0.8;
+    }
+
+    /* Rocket Engine booster bottom */
+    .engine-base {
+      width: 30px;
+      height: 15px;
+      background: #333;
+      position: absolute;
+      top: 135px;
+      left: 5px;
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* Fins */
+    .fin-left {
+      width: 0;
+      height: 0;
+      border-right: 20px solid var(--cyan);
+      border-top: 35px solid transparent;
+      position: absolute;
+      bottom: 15px;
+      left: -20px;
+    }
+
+    .fin-right {
+      width: 0;
+      height: 0;
+      border-left: 20px solid var(--cyan);
+      border-top: 35px solid transparent;
+      position: absolute;
+      bottom: 15px;
+      right: -20px;
+    }
+
+    /* Flames container */
+    .flames {
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 35px;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    .nav-card:hover .card-arrow { opacity: 1; }
-
-    footer {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      opacity: 0.5;
+    .fire-core {
+      width: 14px;
+      height: 25px;
+      background: linear-gradient(to bottom, #ffea00, #ff7700);
+      border-radius: 0 0 50% 50%;
+      box-shadow: 0 0 15px #ff7700, 0 0 25px #ff5500;
+      animation: flicker 0.15s infinite alternate;
     }
+
+    @keyframes flicker {
+      0% { transform: scaleY(0.9) scaleX(0.95); }
+      100% { transform: scaleY(1.15) scaleX(1.05); }
+    }
+
+    /* Countdown Overlay */
+    .countdown-overlay {
+      position: absolute;
+      z-index: 100;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(5,8,22,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .countdown-overlay.active {
+      opacity: 1;
+    }
+
+    .countdown-text {
+      font-size: clamp(4rem, 15vw, 9rem);
+      font-weight: 900;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--cyan);
+      text-shadow: 0 0 30px var(--cyan);
+      transform: scale(0.5);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .countdown-text.show {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    /* Screen Shake animation class */
+    .shake {
+      animation: screenShake 0.1s infinite alternate;
+    }
+
+    @keyframes screenShake {
+      0% { transform: translate(2px, 1px) rotate(0deg); }
+      100% { transform: translate(-1px, -2px) rotate(-0.5deg); }
+    }
+
+    /* Flash Overlay */
+    .flash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.5s ease-out;
+    }
+
+    /* Earth graphic that appears from bottom */
+    .earth-arrival {
+      position: absolute;
+      bottom: -400px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 0%, #1e457e 0%, #0d2347 40%, var(--space-black) 80%);
+      box-shadow: inset 0 10px 40px rgba(83, 231, 255, 0.3), 0 0 60px rgba(83, 231, 255, 0.15);
+      z-index: 4;
+      opacity: 0;
+      transition: transform 6s cubic-bezier(0.3, 0.8, 0.3, 1), opacity 4s ease-in;
+    }
+
+    .earth-arrival.show {
+      opacity: 1;
+      transform: translate(-50%, -100px);
+    }
+
   </style>
 </head>
-<body>
+<body id="main-body">
 
-  <!-- Stars background -->
-  <div class="stars" id="stars"></div>
+  <canvas id="stars-canvas"></canvas>
 
-  <main>
-    <header>
-      <p class="eyebrow">Mission Control</p>
-      <h1>Mars <span>Ares</span><br>Project</h1>
-      <p class="subtitle">Select a section to explore</p>
-      <div class="divider"></div>
-    </header>
+  <div class="clouds-container" id="clouds">
+    <!-- Will be filled by JS -->
+  </div>
 
-    <nav class="nav-grid" aria-label="Project pages">
 
-      <a href="ares.html" class="nav-card">
-        <span class="card-index">01</span>
-        <span class="card-title">Ares</span>
-        <span class="card-desc">Mission overview and objectives</span>
-        <span class="card-arrow">ENTER →</span>
-      </a>
+  <div class="ui-container" id="ui">
+    <div class="logo-container">
+      <h1>NYXARIS</h1>
+      <p class="subtitle">An Odyssey Across Our Universe</p>
+      <p class="quote">"Every great journey begins with curiosity."</p>
+    </div>
 
-      <a href="atmosphere.html" class="nav-card">
-        <span class="card-index">02</span>
-        <span class="card-title">Atmosphere</span>
-        <span class="card-desc">Martian atmospheric conditions</span>
-        <span class="card-arrow">ENTER →</span>
-      </a>
+    <button class="start-btn" id="launch-btn">🚀 Start Mission</button>
+  </div>
 
-      <a href="rocket.html" class="nav-card">
-        <span class="card-index">03</span>
-        <span class="card-title">Rocket</span>
-        <span class="card-desc">Launch vehicle specifications</span>
-        <span class="card-arrow">ENTER →</span>
-      </a>
+  <!-- Launchpad & Rocket Graphic -->
+  <div class="launchpad-container" id="launchpad">
+    <div class="gantry">
+      <!-- Center Rocket -->
+      <div class="rocket" id="rocket">
+        <div class="rocket-body">
+          <div class="nose-cone"></div>
+          <div class="tank">
+            <div class="window"></div>
+            <div class="insignia"></div>
+          </div>
+          <div class="fin-left"></div>
+          <div class="fin-right"></div>
+          <div class="engine-base"></div>
+          <div class="flames" id="rocket-flames">
+            <div class="fire-core"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <a href="faqs.html" class="nav-card">
-        <span class="card-index">04</span>
-        <span class="card-title">FAQs</span>
-        <span class="card-desc">Frequently asked questions</span>
-        <span class="card-arrow">ENTER →</span>
-      </a>
+  <!-- Earth graphic that rises up during launch -->
+  <div class="earth-arrival" id="earth-arrival"></div>
 
-    </nav>
+  <!-- Countdown Overlay -->
+  <div class="countdown-overlay" id="countdown-overlay">
+    <div class="countdown-text" id="countdown-text">T-3</div>
+  </div>
 
-    <footer>ARES PROJECT &nbsp;·&nbsp; ALL SYSTEMS GO</footer>
-  </main>
+  <!-- White transition screen -->
+  <div class="flash-overlay" id="flash-overlay"></div>
 
   <script>
-    const stars = document.getElementById('stars');
-    for (let i = 0; i < 120; i++) {
-      const s = document.createElement('div');
-      s.className = 'star';
-      const size = Math.random() * 1.8 + 0.5;
-      s.style.cssText = `
-        width: ${size}px; height: ${size}px;
-        top: ${Math.random() * 100}%;
-        left: ${Math.random() * 100}%;
-        --o: ${Math.random() * 0.5 + 0.1};
-        --d: ${Math.random() * 4 + 2}s;
-        animation-delay: ${Math.random() * 4}s;
+    // Starfield Generator
+    const canvas = document.getElementById('stars-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let stars = [];
+    let smokeParticles = [];
+    let isLaunching = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+    }
+
+    function initStars() {
+      stars = [];
+      const numStars = Math.floor((canvas.width * canvas.height) / 6000);
+      for(let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 1.5 + 0.5,
+          twinkleSpeed: Math.random() * 0.02 + 0.005,
+          opacity: Math.random(),
+          direction: Math.random() > 0.5 ? 1 : -1
+        });
+      }
+    }
+
+    // Clouds creation
+    const cloudsContainer = document.getElementById('clouds');
+    for (let i = 0; i < 6; i++) {
+      const cloud = document.createElement('div');
+      cloud.className = 'cloud';
+      const size = Math.random() * 300 + 200;
+      const speed = Math.random() * 40 + 20;
+      cloud.style.cssText = `
+        width: ${size}px;
+        height: ${size * 0.6}px;
+        top: ${Math.random() * 60}vh;
+        --speed: ${speed}s;
+        animation-delay: -${Math.random() * speed}s;
       `;
-      stars.appendChild(s);
+      cloudsContainer.appendChild(cloud);
+    }
+
+    // Smoke Particle Class
+    class SmokeParticle {
+      constructor(x, y, vx, vy) {
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.size = Math.random() * 15 + 10;
+        this.opacity = 0.8;
+        this.grow = Math.random() * 1.2 + 0.8;
+        this.color = Math.random() > 0.3 ? 'rgba(240, 240, 240, ' : 'rgba(255, 119, 0, ';
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.size += this.grow;
+        this.opacity -= 0.015;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color + this.opacity + ')';
+        ctx.fill();
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Stars
+      stars.forEach(star => {
+        star.opacity += star.twinkleSpeed * star.direction;
+        if(star.opacity >= 1) {
+          star.opacity = 1;
+          star.direction = -1;
+        } else if(star.opacity <= 0.1) {
+          star.opacity = 0.1;
+          star.direction = 1;
+        }
+        
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+        ctx.fill();
+      });
+
+      // Draw & Update Smoke particles
+      if (smokeParticles.length > 0) {
+        for(let i = smokeParticles.length - 1; i >= 0; i--) {
+          const p = smokeParticles[i];
+          p.update();
+          if (p.opacity <= 0) {
+            smokeParticles.splice(i, 1);
+          } else {
+            p.draw();
+          }
+        }
+      }
+
+      // Generate flight dust when rocket is climbing
+      if (isLaunching) {
+        const rocketRect = document.getElementById('rocket').getBoundingClientRect();
+        const rx = rocketRect.left + rocketRect.width / 2;
+        const ry = rocketRect.bottom;
+        
+        // Emit smoke
+        for (let k = 0; k < 6; k++) {
+          smokeParticles.push(new SmokeParticle(
+            rx + (Math.random() - 0.5) * 15,
+            ry + (Math.random() - 0.5) * 10,
+            (Math.random() - 0.5) * 6,
+            Math.random() * 3 + 1
+          ));
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    animate();
+
+    // Launch Logic
+    const launchBtn = document.getElementById('launch-btn');
+    const ui = document.getElementById('ui');
+    const countdownOverlay = document.getElementById('countdown-overlay');
+    const countdownText = document.getElementById('countdown-text');
+    const rocketFlames = document.getElementById('rocket-flames');
+    const mainBody = document.getElementById('main-body');
+    const rocket = document.getElementById('rocket');
+    const launchpad = document.getElementById('launchpad');
+    const clouds = document.getElementById('clouds');
+    const earthArrival = document.getElementById('earth-arrival');
+    const flashOverlay = document.getElementById('flash-overlay');
+
+    launchBtn.addEventListener('click', () => {
+      // Step 1: Fade UI Out
+      ui.classList.add('fade-out');
+      
+      // Step 2: Show Countdown
+      setTimeout(() => {
+        countdownOverlay.classList.add('active');
+        runCountdown();
+      }, 800);
+    });
+
+    function runCountdown() {
+      const steps = ['T-3', 'T-2', 'T-1', 'IGNITION'];
+      let stepIndex = 0;
+
+      function nextStep() {
+        if(stepIndex < steps.length) {
+          countdownText.textContent = steps[stepIndex];
+          countdownText.classList.remove('show');
+          
+          // Force layout reflow
+          void countdownText.offsetWidth;
+          
+          countdownText.classList.add('show');
+          
+          if(steps[stepIndex] === 'IGNITION') {
+            // Engine ignition!
+            rocketFlames.style.opacity = '1';
+            mainBody.classList.add('shake');
+            
+            // Create initial massive burst of smoke particles
+            const rocketRect = rocket.getBoundingClientRect();
+            const rx = rocketRect.left + rocketRect.width / 2;
+            const ry = rocketRect.bottom;
+            for(let i=0; i<80; i++) {
+              smokeParticles.push(new SmokeParticle(
+                rx + (Math.random() - 0.5) * 40,
+                ry + (Math.random() - 0.5) * 20,
+                (Math.random() - 0.5) * 15,
+                (Math.random() - 0.5) * 8
+              ));
+            }
+          }
+
+          stepIndex++;
+          setTimeout(nextStep, 1000);
+        } else {
+          // Launch!
+          countdownOverlay.classList.remove('active');
+          liftOff();
+        }
+      }
+      nextStep();
+    }
+
+    function liftOff() {
+      isLaunching = true;
+
+      // Rocket lifts off (moves up relative to screen)
+      // We animate translation of rocket and launchpad/clouds for parallax effect
+      rocket.style.transform = 'translate(-50%, -200vh)';
+      launchpad.style.transform = 'translateY(100vh)';
+      clouds.style.transform = 'translateY(150vh)';
+
+      // Earth rises up slowly to meet the camera
+      setTimeout(() => {
+        earthArrival.classList.add('show');
+        // Brighten star field over time by increasing twinkling stars
+        for (let i = 0; i < 150; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2 + 0.8,
+            twinkleSpeed: Math.random() * 0.05 + 0.02,
+            opacity: Math.random(),
+            direction: 1
+          });
+        }
+      }, 2500);
+
+      // Stop shaking screen as rocket leaves the atmosphere
+      setTimeout(() => {
+        mainBody.classList.remove('shake');
+      }, 3500);
+
+      // Final White Flash transition and Redirect
+      setTimeout(() => {
+        flashOverlay.style.opacity = '1';
+      }, 5500);
+
+      setTimeout(() => {
+        window.location.href = 'home.html';
+      }, 7000);
     }
   </script>
 </body>
