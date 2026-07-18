@@ -155,6 +155,7 @@
   <div class="panel p-tl">
     <div class="panel-title">Vessel Status</div>
     <div class="stat-row"><span>ID:</span><span>ARES-01</span></div>
+    <div class="stat-row"><span>CLASS:</span><span>DEEP-RANGE CORVETTE</span></div>
     <div class="stat-row"><span>TRANSIT:</span><span>EARTH-MARS</span></div>
     <div class="stat-row"><span>PRESSURE:</span><span>101.3 kPa</span></div>
     <div class="bar-container"><div class="bar-fill b-blue" style="width: 100%"></div></div>
@@ -165,7 +166,7 @@
   </div>
 
   <div class="panel p-tc" style="height: 30px; display: flex; align-items: center;">
-    <div class="alert-ticker" id="ticker">SYST_OK // NAVIGATION LOCKED // MISSION DAY 187 // ALL SYSTEMS NOMINAL...</div>
+    <div class="alert-ticker" id="ticker">SYST_OK // NAVIGATION LOCKED // MISSION DAY 187 // TIGHT QUARTERS, MIND YOUR HEAD // ALL SYSTEMS NOMINAL...</div>
   </div>
 
   <div class="panel p-tr">
@@ -183,7 +184,6 @@
   <div class="panel p-bl">
     <div class="panel-title">Tactical Map</div>
     <div class="minimap" id="minimap">
-      <!-- Simplified ship outline in CSS/SVG could go here, or handled in JS -->
       <div id="player-dot" class="player-dot"></div>
     </div>
   </div>
@@ -207,14 +207,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
-/** 
+/**
  * ARES REDESIGN
- * COMPACT, DETAILED, REALISTIC INTERIOR
+ * CRAMPED, GRIMY, DETAILED INTERIOR
  */
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020408);
-scene.fog = new THREE.Fog(0x020408, 5, 25);
+scene.fog = new THREE.Fog(0x020408, 4, 20);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -225,15 +225,62 @@ renderer.toneMapping = THREE.ReinhardToneMapping;
 renderer.toneMappingExposure = 1.5;
 document.body.appendChild(renderer.domElement);
 
-// Dimensions
-const CH = 2.35; // Ceiling Height
+// Dimensions — tight, low, corvette-scale
+const CH = 2.05; // Ceiling Height (low — you can feel it overhead)
 const FY = -CH/2; // Floor Y
-const EY = 1.6; // Eye Level from floor
-camera.position.set(0, FY + EY, 0);
+const EY = 1.55; // Eye Level from floor
+camera.position.set(0, FY + EY, -5);
+
+// ─── TEXTURES (procedural, no external assets) ────────────────────────────
+
+function makeHazardTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillStyle = '#ffb800';
+  ctx.save();
+  ctx.translate(32, 32);
+  ctx.rotate(Math.PI / 4);
+  for (let i = -64; i < 64; i += 16) {
+    ctx.fillRect(i, -64, 8, 128);
+  }
+  ctx.restore();
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+function makeGratingTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3c3e40';
+  ctx.fillRect(0, 0, 64, 64);
+  ctx.strokeStyle = '#22242a';
+  ctx.lineWidth = 3;
+  for (let i = 0; i <= 64; i += 8) {
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 64); ctx.stroke();
+  }
+  ctx.strokeStyle = '#55575a';
+  ctx.lineWidth = 1;
+  for (let i = 4; i <= 64; i += 8) {
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(64, i); ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+
+const hazardTex = makeHazardTexture();
+hazardTex.repeat.set(3, 1);
+const gratingTex = makeGratingTexture();
+gratingTex.repeat.set(2, 10);
 
 // Materials
 const matPanel = new THREE.MeshStandardMaterial({ color: 0x888a8c, roughness: 0.7, metalness: 0.3 });
-const matFloor = new THREE.MeshStandardMaterial({ color: 0x444648, roughness: 0.9, metalness: 0.1 });
+const matFloor = new THREE.MeshStandardMaterial({ map: gratingTex, roughness: 0.9, metalness: 0.2 });
 const matMetal = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.8 });
 const matGlowB = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 2 });
 const matGlowG = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 2 });
@@ -241,6 +288,10 @@ const matGlowO = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0xf
 const matScreen = new THREE.MeshStandardMaterial({ color: 0x000a14, emissive: 0x001428, emissiveIntensity: 1 });
 const matGlass = new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.2, roughness: 0, metalness: 0.5 });
 const matYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.8, metalness: 0.2 });
+const matHazard = new THREE.MeshStandardMaterial({ map: hazardTex, roughness: 0.7 });
+const matCable = new THREE.MeshStandardMaterial({ color: 0x0d0d0d, roughness: 0.9 });
+const matCrate = new THREE.MeshStandardMaterial({ color: 0x4c5b46, roughness: 0.85 });
+const matRed = new THREE.MeshStandardMaterial({ color: 0xaa1e1e, roughness: 0.6, metalness: 0.3 });
 
 // Helpers
 function box(w, h, d, mat, x=0, y=0, z=0) {
@@ -261,16 +312,55 @@ function cyl(r, h, mat, x=0, y=0, z=0, rx=0, rz=0) {
   return m;
 }
 
+function torus(r, tube, mat, x, y, z, rx=0) {
+  const m = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 8, 16), mat);
+  m.position.set(x, y, z);
+  m.rotation.x = rx;
+  scene.add(m);
+  return m;
+}
+
+function bolt(x, y, z) {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(0.018, 6, 6), matMetal);
+  m.position.set(x, y, z);
+  scene.add(m);
+}
+
+// A sagging cable run along the ceiling, made of short segments (cheap, no TubeGeometry needed)
+function addCableRun(zStart, zEnd, xOff, yBase, sag, mat=matCable) {
+  const segs = Math.max(6, Math.round((zEnd - zStart) * 1.5));
+  let prevY = yBase;
+  for (let i = 0; i < segs; i++) {
+    const t0 = i / segs, t1 = (i + 1) / segs;
+    const z0 = zStart + (zEnd - zStart) * t0;
+    const z1 = zStart + (zEnd - zStart) * t1;
+    const y0 = yBase - sag * Math.sin(Math.PI * t0);
+    const y1 = yBase - sag * Math.sin(Math.PI * t1);
+    const midZ = (z0 + z1) / 2, midY = (y0 + y1) / 2;
+    const len = Math.sqrt((z1 - z0) ** 2 + (y1 - y0) ** 2);
+    const angle = Math.atan2(z1 - z0, y1 - y0);
+    const seg = cyl(0.012, len, mat, xOff, midY, midZ, 0, 0);
+    seg.rotation.x = angle;
+  }
+}
+
 // Modular Details
 function addRack(x, y, z, orient='x') {
-  const w = (orient==='x') ? 0.8 : 0.1;
-  const d = (orient==='x') ? 0.1 : 0.8;
-  const p = box(w, 1.2, d, matPanel, x, y, z);
-  // Add some "slots" or details
+  const w = (orient==='x') ? 0.8 : 0.08;
+  const d = (orient==='x') ? 0.08 : 0.8;
+  const glows = [matGlowB, matGlowG, matGlowO];
+  box(w, 1.2, d, matPanel, x, y, z);
   for(let i=0; i<3; i++) {
-    box(w*0.8, 0.2, d+0.02, matMetal, x, y - 0.4 + i*0.4, z);
-    if(Math.random() > 0.5) box(0.05, 0.05, d+0.03, matGlowB, x - w*0.3, y - 0.4 + i*0.4, z);
+    box(w*0.8, 0.18, d+0.02, matMetal, x, y - 0.4 + i*0.4, z);
+    if(Math.random() > 0.4) {
+      const g = glows[Math.floor(Math.random()*glows.length)];
+      box(0.04, 0.04, d+0.03, g, x - (orient==='x' ? 0 : w*0.3*-1), y - 0.4 + i*0.4, z + (orient==='x' ? w*0.25 : 0));
+    }
   }
+  bolt(x - w/2 + 0.03, y + 0.55, z - d/2 + 0.03);
+  bolt(x + w/2 - 0.03, y + 0.55, z - d/2 + 0.03);
+  bolt(x - w/2 + 0.03, y - 0.55, z - d/2 + 0.03);
+  bolt(x + w/2 - 0.03, y - 0.55, z - d/2 + 0.03);
 }
 
 function addHandrail(x, y, z, len, orient='z') {
@@ -284,10 +374,19 @@ function addConduit(x, y, z, len, orient='z') {
   cyl(0.03, len, matMetal, x, y, z, rx, 0);
 }
 
-// ─── WORLD BUILDING ────────────────────────────────────────────────────────
+function addValve(x, y, z, rz=0) {
+  torus(0.09, 0.02, matYellow, x, y, z, Math.PI/2);
+  cyl(0.02, 0.12, matMetal, x, y, z - 0.06, Math.PI/2, 0);
+}
 
-// 1. SPINAL CORRIDOR (z: -16 to 9, width: 2.4)
-const corridorWidth = 2.4;
+function addCrate(x, y, z, s=0.4) {
+  box(s, s*0.8, s, matCrate, x, y, z);
+  box(s*0.02, s*0.8+0.02, 0.02, matYellow, x - s/2 + 0.02, y, z + s/2);
+}
+
+// ─── WORLD BUILDING — tight corvette-scale spinal layout ──────────────────
+
+const corridorWidth = 1.3; // narrow single-file corridor
 const corridorZStart = -16;
 const corridorZEnd = 9;
 const corridorLen = corridorZEnd - corridorZStart;
@@ -296,129 +395,162 @@ const corridorLen = corridorZEnd - corridorZStart;
 box(corridorWidth, 0.1, corridorLen, matFloor, 0, FY, (corridorZStart + corridorZEnd)/2);
 box(corridorWidth, 0.1, corridorLen, matPanel, 0, CH/2, (corridorZStart + corridorZEnd)/2);
 
-// Side Walls with details
-for (let z = corridorZStart + 1; z < corridorZEnd; z += 1.2) {
-  // Walls
-  if (Math.abs(z - (-12)) > 1.5 && Math.abs(z - 0) > 1.5 && Math.abs(z - 6) > 1.5) {
-    box(0.1, CH, 1.2, matPanel, -corridorWidth/2, 0, z);
-    box(0.1, CH, 1.2, matPanel, corridorWidth/2, 0, z);
-    // Add Racks
-    addRack(-corridorWidth/2 + 0.1, 0, z, 'y');
-    addRack(corridorWidth/2 - 0.1, 0, z, 'y');
+// Floor panel seams every meter with rivets
+for (let z = corridorZStart; z <= corridorZEnd; z += 1) {
+  box(corridorWidth, 0.005, 0.02, matMetal, 0, FY + 0.055, z);
+  bolt(-corridorWidth/2 + 0.06, FY + 0.06, z);
+  bolt(corridorWidth/2 - 0.06, FY + 0.06, z);
+}
+
+// Side Walls with details (skip where modules open onto the corridor)
+for (let z = corridorZStart + 0.5; z < corridorZEnd; z += 0.9) {
+  if (Math.abs(z - (-12)) > 2.4 && Math.abs(z - 0) > 2.4) {
+    box(0.08, CH, 0.85, matPanel, -corridorWidth/2, 0, z);
+    box(0.08, CH, 0.85, matPanel, corridorWidth/2, 0, z);
+    if (Math.random() > 0.35) addRack(-corridorWidth/2 + 0.08, 0, z, 'y');
+    if (Math.random() > 0.35) addRack(corridorWidth/2 - 0.08, 0, z, 'y');
+    bolt(-corridorWidth/2 + 0.02, CH/2 - 0.1, z);
+    bolt(corridorWidth/2 - 0.02, CH/2 - 0.1, z);
   }
 }
 
-// Handrails & Conduits
-addHandrail(-corridorWidth/2 + 0.15, 0.5, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
-addHandrail(corridorWidth/2 - 0.15, 0.5, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
-addConduit(-0.8, CH/2 - 0.15, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
-addConduit(0.8, CH/2 - 0.15, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+// Handrails & primary conduits (kept close to the narrow walls)
+addHandrail(-corridorWidth/2 + 0.1, 0.55, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addHandrail(corridorWidth/2 - 0.1, 0.55, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addConduit(-0.42, CH/2 - 0.1, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addConduit(0.42, CH/2 - 0.1, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addConduit(0, CH/2 - 0.16, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
 
-// Lights
-for (let z = corridorZStart + 2; z < corridorZEnd; z += 4) {
-  const lp = box(0.6, 0.05, 0.2, matGlowB, 0, CH/2 - 0.05, z);
-  const pl = new THREE.PointLight(0x00d4ff, 0.8, 8);
-  pl.position.set(0, CH/2 - 0.3, z);
+// Sagging cable bundles overhead — the ceiling should feel busy and low
+addCableRun(corridorZStart + 1, -13, -0.2, CH/2 - 0.22, 0.06);
+addCableRun(-11, -1, 0.15, CH/2 - 0.2, 0.08);
+addCableRun(1, corridorZEnd - 1, -0.1, CH/2 - 0.22, 0.05);
+
+// Vertical drop-pipes at each module junction (z = -12 and z = 0)
+for (const jz of [-12, 0]) {
+  cyl(0.025, 0.4, matMetal, -0.42, CH/2 - 0.35, jz, 0, 0);
+  cyl(0.025, 0.4, matMetal, 0.42, CH/2 - 0.35, jz, 0, 0);
+  addValve(-0.42, CH/2 - 0.55, jz);
+  addValve(0.42, CH/2 - 0.55, jz);
+}
+
+// Lights — more frequent since ceiling is low, pools of light feel closer
+for (let z = corridorZStart + 1.5; z < corridorZEnd; z += 3) {
+  box(0.5, 0.04, 0.15, matGlowB, 0, CH/2 - 0.05, z);
+  const pl = new THREE.PointLight(0x00d4ff, 0.7, 6);
+  pl.position.set(0, CH/2 - 0.25, z);
   scene.add(pl);
 }
 
-// 2. COCKPIT (North end)
-const cockpitW = 5, cockpitD = 6;
+// Hazard-striped thresholds at every doorway
+function addThreshold(x, z, w) {
+  box(w, 0.03, 0.22, matHazard, x, FY + 0.09, z);
+}
+
+// 2. COCKPIT (North end) — a snug flight deck, not a bridge
+const cockpitW = 3.6, cockpitD = 4.4;
 const cockpitZ = corridorZStart - cockpitD/2;
-// Floor/Ceiling
 box(cockpitW, 0.1, cockpitD, matFloor, 0, FY, cockpitZ);
 box(cockpitW, 0.1, cockpitD, matPanel, 0, CH/2, cockpitZ);
-// Walls
-box(cockpitW, CH, 0.1, matPanel, 0, 0, cockpitZ - cockpitD/2); // Forward
-box(0.1, CH, cockpitD, matPanel, -cockpitW/2, 0, cockpitZ); // West
-box(0.1, CH, cockpitD, matPanel, cockpitW/2, 0, cockpitZ); // East
+box(cockpitW, CH, 0.08, matPanel, 0, 0, cockpitZ - cockpitD/2);
+box(0.08, CH, cockpitD, matPanel, -cockpitW/2, 0, cockpitZ);
+box(0.08, CH, cockpitD, matPanel, cockpitW/2, 0, cockpitZ);
+addThreshold(0, corridorZStart, corridorWidth);
 
 // Window & Main Console
-box(cockpitW*0.8, CH*0.6, 0.15, matMetal, 0, 0.2, cockpitZ - cockpitD/2 + 0.05);
-box(cockpitW*0.75, CH*0.5, 0.05, matGlass, 0, 0.2, cockpitZ - cockpitD/2 - 0.05);
+box(cockpitW*0.85, CH*0.55, 0.12, matMetal, 0, 0.2, cockpitZ - cockpitD/2 + 0.05);
+box(cockpitW*0.8, CH*0.45, 0.04, matGlass, 0, 0.2, cockpitZ - cockpitD/2 - 0.05);
 
-// Pilot Seats
-for(let x of [-1.2, 1.2]) {
-  const seat = box(0.6, 0.1, 0.6, matFloor, x, FY + 0.4, cockpitZ - 1.5);
-  box(0.6, 0.8, 0.1, matFloor, x, FY + 0.85, cockpitZ - 1.8);
-  // Consoles
-  box(0.8, 0.05, 0.6, matMetal, x, FY + 0.7, cockpitZ - 0.8);
-  box(0.7, 0.02, 0.5, matScreen, x, FY + 0.73, cockpitZ - 0.8);
+// Pilot Seats (closer together — elbow room only)
+for(let x of [-0.85, 0.85]) {
+  box(0.55, 0.1, 0.55, matFloor, x, FY + 0.4, cockpitZ - 1.2);
+  box(0.55, 0.75, 0.1, matFloor, x, FY + 0.8, cockpitZ - 1.45);
+  box(0.7, 0.05, 0.55, matMetal, x, FY + 0.7, cockpitZ - 0.65);
+  box(0.6, 0.02, 0.45, matScreen, x, FY + 0.73, cockpitZ - 0.65);
+  bolt(x - 0.35, FY + 0.72, cockpitZ - 0.4);
+  bolt(x + 0.35, FY + 0.72, cockpitZ - 0.4);
 }
+addCableRun(cockpitZ - cockpitD/2 + 0.3, cockpitZ + cockpitD/2 - 0.3, 0, CH/2 - 0.2, 0.1);
 
-// 3. SCIENCE LAB (West, z=-12)
-function mkModule(x, z, name, color=0x00ff88) {
-  const mW = 5, mD = 6;
-  const matG = new THREE.MeshStandardMaterial({color: color, emissive: color, emissiveIntensity: 1});
-  // Floor/Ceiling
+// 3. Side modules — cramped bays, not open labs
+function mkModule(x, z, color=0x00ff88) {
+  const mW = 3.6, mD = 4.6;
   box(mW, 0.1, mD, matFloor, x, FY, z);
   box(mW, 0.1, mD, matPanel, x, CH/2, z);
-  // Walls (Outer)
-  if (x < 0) box(0.1, CH, mD, matPanel, x - mW/2, 0, z); // Far West
-  else box(0.1, CH, mD, matPanel, x + mW/2, 0, z); // Far East
-  box(mW, CH, 0.1, matPanel, x, 0, z - mD/2); // North
-  box(mW, CH, 0.1, matPanel, x, 0, z + mD/2); // South
-  
-  // Doorway wall (Inner)
-  const wallX = (x < 0) ? x + mW/2 : x - mW/2;
-  box(0.1, CH, (mD - 1.8)/2, matPanel, wallX, 0, z - (mD + 1.8)/4 - 0.45);
-  box(0.1, CH, (mD - 1.8)/2, matPanel, wallX, 0, z + (mD + 1.8)/4 + 0.45);
-  box(0.1, CH - 2.0, 1.8, matPanel, wallX, (CH-2.0)/2 + 1.0, z);
+  if (x < 0) box(0.08, CH, mD, matPanel, x - mW/2, 0, z);
+  else box(0.08, CH, mD, matPanel, x + mW/2, 0, z);
+  box(mW, CH, 0.08, matPanel, x, 0, z - mD/2);
+  box(mW, CH, 0.08, matPanel, x, 0, z + mD/2);
 
-  // Light
-  const pl = new THREE.PointLight(color, 0.6, 10);
-  pl.position.set(x, CH/2 - 0.5, z);
+  const wallX = (x < 0) ? x + mW/2 : x - mW/2;
+  box(0.08, CH, (mD - 1.3)/2, matPanel, wallX, 0, z - (mD + 1.3)/4 - 0.325);
+  box(0.08, CH, (mD - 1.3)/2, matPanel, wallX, 0, z + (mD + 1.3)/4 + 0.325);
+  box(0.08, CH - 1.85, 1.3, matPanel, wallX, (CH-1.85)/2 + 0.925, z);
+  addThreshold(wallX + (x < 0 ? 0.14 : -0.14), z, 1.1);
+
+  const pl = new THREE.PointLight(color, 0.55, 8);
+  pl.position.set(x, CH/2 - 0.4, z);
   scene.add(pl);
-  
+
+  addCableRun(z - mD/2 + 0.3, z + mD/2 - 0.3, x - 0.3, CH/2 - 0.18, 0.06);
+
   return {x, z, mW, mD};
 }
 
-const sciLab = mkModule(-3.7, -12, 'Science Lab', 0x00ff88);
-// Sci Lab Details
-box(3, 0.05, 0.8, matMetal, sciLab.x - 0.5, FY + 0.9, sciLab.z);
-for(let i=0; i<4; i++) cyl(0.15, 0.6, matGlowG, sciLab.x - 1 + i*0.5, FY + 1.2, sciLab.z);
+const moduleX = corridorWidth/2 + 3.6/2; // flush against the corridor wall
 
-const medBay = mkModule(3.7, -12, 'Medical Bay', 0x00d4ff);
-// Med Bay Details
-box(1.8, 0.4, 3, matPanel, medBay.x + 1, FY + 0.4, medBay.z); // Medical Berth
+const sciLab = mkModule(-moduleX, -12, 0x00ff88);
+box(2.2, 0.04, 0.7, matMetal, sciLab.x - 0.3, FY + 0.9, sciLab.z);
+for(let i=0; i<4; i++) cyl(0.13, 0.55, matGlowG, sciLab.x - 0.8 + i*0.4, FY + 1.15, sciLab.z);
+addCrate(sciLab.x + 0.9, FY + 0.2, sciLab.z + 1.3, 0.4);
+addCrate(sciLab.x + 1.2, FY + 0.2, sciLab.z + 1.3, 0.35);
 
-const habitat = mkModule(-3.7, 0, 'Habitat', 0xaaaaaa);
-// Habitat Details
-for(let i=0; i<3; i++) {
-  const pz = habitat.z - 1.5;
-  box(2, 0.8, 1.8, matPanel, habitat.x - 1, FY + 0.4 + i*0.9, pz); // Pod shell
-  // Beds / Mattresses
-  box(1.8, 0.1, 1.6, new THREE.MeshStandardMaterial({color:0xffffff, roughness:1}), habitat.x - 1, FY + 0.5 + i*0.9, pz);
-  // Pillow
-  box(0.4, 0.12, 0.6, new THREE.MeshStandardMaterial({color:0xeeeeee, roughness:1}), habitat.x - 1.6, FY + 0.55 + i*0.9, pz);
+const medBay = mkModule(moduleX, -12, 0x00d4ff);
+box(1.5, 0.35, 2.4, matPanel, medBay.x + 0.7, FY + 0.35, medBay.z);
+addCrate(medBay.x - 1.1, FY + 0.2, medBay.z - 1.4, 0.35);
+
+const habitat = mkModule(-moduleX, 0, 0xaaaaaa);
+for(let i=0; i<2; i++) {
+  const pz = habitat.z - 1.2;
+  box(1.6, 0.7, 1.5, matPanel, habitat.x - 0.7, FY + 0.4 + i*0.8, pz);
+  box(1.4, 0.08, 1.3, new THREE.MeshStandardMaterial({color:0xffffff, roughness:1}), habitat.x - 0.7, FY + 0.48 + i*0.8, pz);
+  box(0.32, 0.1, 0.5, new THREE.MeshStandardMaterial({color:0xeeeeee, roughness:1}), habitat.x - 1.2, FY + 0.53 + i*0.8, pz);
 }
+addCrate(habitat.x + 1.0, FY + 0.2, habitat.z + 1.2, 0.4);
 
-const engineering = mkModule(3.7, 0, 'Engineering', 0xffaa00);
-// Engineering Details
-for(let i=0; i<4; i++) cyl(0.3, 2, matMetal, engineering.x + 1, 0, engineering.z - 1.5 + i*1, 0, 0); // Tanks
+const engineering = mkModule(moduleX, 0, 0xffaa00);
+for(let i=0; i<3; i++) {
+  cyl(0.26, 1.7, matMetal, engineering.x + 0.7, 0, engineering.z - 1.1 + i*1.0, 0, 0);
+  addValve(engineering.x + 0.7, 0.6, engineering.z - 1.1 + i*1.0 + 0.3);
+}
+addCrate(engineering.x - 1.1, FY + 0.2, engineering.z + 1.3, 0.4);
 
-// 4. AIRLOCK (South end)
-const airlockW = 3, airlockD = 4;
+// 4. AIRLOCK (South end) — a coffin-tight staging bay
+const airlockW = 2.0, airlockD = 3.2;
 const airlockZ = corridorZEnd + airlockD/2;
 box(airlockW, 0.1, airlockD, matFloor, 0, FY, airlockZ);
 box(airlockW, 0.1, airlockD, matPanel, 0, CH/2, airlockZ);
-box(airlockW, CH, 0.1, matPanel, 0, 0, airlockZ + airlockD/2); // Outer Hatch
-box(0.1, CH, airlockD, matPanel, -airlockW/2, 0, airlockZ);
-box(0.1, CH, airlockD, matPanel, airlockW/2, 0, airlockZ);
+box(airlockW, CH, 0.08, matPanel, 0, 0, airlockZ + airlockD/2);
+box(0.08, CH, airlockD, matPanel, -airlockW/2, 0, airlockZ);
+box(0.08, CH, airlockD, matPanel, airlockW/2, 0, airlockZ);
+addThreshold(0, corridorZEnd, corridorWidth);
+addThreshold(0, airlockZ + airlockD/2 - 0.1, airlockW);
 
 // Hatch Porthole
-cyl(0.4, 0.2, matMetal, 0, 0.2, airlockZ + airlockD/2, Math.PI/2, 0);
-cyl(0.35, 0.22, matGlass, 0, 0.2, airlockZ + airlockD/2, Math.PI/2, 0);
+cyl(0.35, 0.18, matMetal, 0, 0.2, airlockZ + airlockD/2, Math.PI/2, 0);
+cyl(0.3, 0.2, matGlass, 0, 0.2, airlockZ + airlockD/2, Math.PI/2, 0);
 
-// EVA Suits
-for(let x of [-0.8, 0.8]) {
-  box(0.5, 1.4, 0.4, matPanel, x, FY + 0.7, airlockZ + 1);
-  cyl(0.2, 0.3, matGlass, x, FY + 1.6, airlockZ + 1);
+// EVA Suits (elbow to elbow)
+for(let x of [-0.55, 0.55]) {
+  box(0.42, 1.3, 0.35, matPanel, x, FY + 0.65, airlockZ + 0.9);
+  cyl(0.16, 0.26, matGlass, x, FY + 1.45, airlockZ + 0.9);
 }
+// Fire extinguisher, tucked by the hatch
+cyl(0.07, 0.32, matRed, -0.85, FY + 0.55, airlockZ + 1.4);
+cyl(0.02, 0.08, matMetal, -0.85, FY + 0.74, airlockZ + 1.4);
 
 // ─── ENVIRONMENT ──────────────────────────────────────────────────────────
 
-// Mars
 const marsGeom = new THREE.SphereGeometry(20, 32, 32);
 const marsMat = new THREE.MeshStandardMaterial({ 
   color: 0xcc5533, 
@@ -434,7 +566,6 @@ const sun = new THREE.DirectionalLight(0xffffff, 1.5);
 sun.position.set(100, 50, -50);
 scene.add(sun);
 
-// Stars
 const starGeom = new THREE.BufferGeometry();
 const starPos = [];
 for(let i=0; i<5000; i++) {
@@ -444,14 +575,13 @@ starGeom.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
 const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.2 });
 scene.add(new THREE.Points(starGeom, starMat));
 
-// Floating Debris
-const debrisCount = 15;
+const debrisCount = 10;
 const debris = [];
 for(let i=0; i<debrisCount; i++) {
-  const d = box(0.05, 0.05, 0.05, matMetal, (Math.random()-0.5)*6, (Math.random()-0.5)*2, (Math.random()-0.5)*20);
+  const d = box(0.04, 0.04, 0.04, matMetal, (Math.random()-0.5)*3, (Math.random()-0.5)*1.4, (Math.random()-0.5)*18);
   d.userData = { 
     rot: new THREE.Vector3(Math.random()*0.02, Math.random()*0.02, Math.random()*0.02),
-    vel: new THREE.Vector3((Math.random()-0.5)*0.005, (Math.random()-0.5)*0.002, (Math.random()-0.5)*0.002)
+    vel: new THREE.Vector3((Math.random()-0.5)*0.004, (Math.random()-0.5)*0.0015, (Math.random()-0.5)*0.0015)
   };
   debris.push(d);
 }
@@ -462,7 +592,7 @@ let moveForward = false, moveBackward = false, moveLeft = false, moveRight = fal
 let rotateLeft = false, rotateRight = false;
 let yaw = 0, pitch = 0;
 const mouseSpeed = 0.002;
-const walkSpeed = 0.06;
+const walkSpeed = 0.045; // slower — this is a corridor, not a corvette sprint
 const rotSpeed = 0.03;
 
 const startBtn = document.getElementById('start-btn');
@@ -518,30 +648,29 @@ const o2Bar = document.getElementById('o2-bar');
 const locName = document.getElementById('location-name');
 const playerDot = document.getElementById('player-dot');
 
+const halfMod = 1.8; // half-width of a side module
+
 const zones = [
-  { name: '[ COCKPIT ]', zMin: -22, zMax: -16, xMin: -2.5, xMax: 2.5 },
-  { name: '[ SPINAL CORRIDOR ]', zMin: -16, zMax: 9, xMin: -1.2, xMax: 1.2 },
-  { name: '[ SCIENCE LAB ]', zMin: -15, zMax: -9, xMin: -6.5, xMax: -1.2 },
-  { name: '[ MEDICAL BAY ]', zMin: -15, zMax: -9, xMin: 1.2, xMax: 6.5 },
-  { name: '[ HABITAT ]', zMin: -3, zMax: 3, xMin: -6.5, xMax: -1.2 },
-  { name: '[ ENGINEERING ]', zMin: -3, zMax: 3, xMin: 1.2, xMax: 6.5 },
-  { name: '[ AIRLOCK ]', zMin: 9, zMax: 13, xMin: -1.5, xMax: 1.5 },
+  { name: '[ COCKPIT ]', zMin: cockpitZ - cockpitD/2, zMax: corridorZStart, xMin: -cockpitW/2, xMax: cockpitW/2 },
+  { name: '[ SPINAL CORRIDOR ]', zMin: corridorZStart, zMax: corridorZEnd, xMin: -corridorWidth/2, xMax: corridorWidth/2 },
+  { name: '[ SCIENCE LAB ]', zMin: -12 - 2.3, zMax: -12 + 2.3, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
+  { name: '[ MEDICAL BAY ]', zMin: -12 - 2.3, zMax: -12 + 2.3, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
+  { name: '[ HABITAT ]', zMin: -2.3, zMax: 2.3, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
+  { name: '[ ENGINEERING ]', zMin: -2.3, zMax: 2.3, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
+  { name: '[ AIRLOCK ]', zMin: corridorZEnd, zMax: airlockZ + airlockD/2, xMin: -airlockW/2, xMax: airlockW/2 },
 ];
 
 function updateHUD(t) {
-  // MET
   const d = Math.floor(187 + t/86400);
   const h = Math.floor((t % 86400) / 3600).toString().padStart(2, '0');
   const m = Math.floor((t % 3600) / 60).toString().padStart(2, '0');
   const s = Math.floor(t % 60).toString().padStart(2, '0');
   metVal.textContent = `${d}:${h}:${m}:${s}`;
 
-  // O2 (slow drain/fluctuation)
   const o2 = 21.0 + Math.sin(t*0.1)*0.05;
   o2Val.textContent = o2.toFixed(1) + '%';
   o2Bar.style.width = (o2 / 21 * 100) + '%';
 
-  // Location
   const px = camera.position.x, pz = camera.position.z;
   let currentZone = '[ DEEP SPACE ]';
   for(const z of zones) {
@@ -552,9 +681,8 @@ function updateHUD(t) {
   }
   locName.textContent = currentZone;
 
-  // Minimap (Map range: x:-7 to 7, z:-22 to 13)
-  const mx = ((px + 7) / 14) * 100;
-  const my = ((pz + 22) / 35) * 100;
+  const mx = ((px + 4.6) / 9.2) * 100;
+  const my = ((pz + 20.5) / 33.7) * 100;
   playerDot.style.left = mx + '%';
   playerDot.style.top = my + '%';
 }
@@ -566,11 +694,9 @@ function animate() {
   const delta = clock.getDelta();
   const time = clock.getElapsedTime();
 
-  // Rotation from arrows
   if (rotateLeft) yaw += rotSpeed;
   if (rotateRight) yaw -= rotSpeed;
 
-  // Movement
   if (document.pointerLockElement === document.body || rotateLeft || rotateRight || moveForward || moveBackward) {
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
@@ -583,28 +709,25 @@ function animate() {
     if (moveLeft) camera.position.addScaledVector(side, walkSpeed);
     if (moveRight) camera.position.addScaledVector(side, -walkSpeed);
 
-    // Head bob
     if (moveForward || moveBackward || moveLeft || moveRight) {
       camera.position.y = (FY + EY) + Math.sin(time * 10) * 0.02;
     }
 
-    // Collision (Simple box bounds)
-    camera.position.x = Math.max(-6, Math.min(6, camera.position.x));
-    camera.position.z = Math.max(-21.5, Math.min(12.5, camera.position.z));
+    camera.position.x = Math.max(-4.6, Math.min(4.6, camera.position.x));
+    camera.position.z = Math.max(-20.3, Math.min(11.9, camera.position.z));
   }
 
   camera.rotation.order = 'YXZ';
   camera.rotation.y = yaw;
   camera.rotation.x = pitch;
 
-  // Animations
   mars.rotation.y += 0.0005;
   debris.forEach(d => {
     d.rotation.x += d.userData.rot.x;
     d.rotation.y += d.userData.rot.y;
     d.position.add(d.userData.vel);
-    if(Math.abs(d.position.x) > 10) d.position.x *= -1;
-    if(Math.abs(d.position.z) > 30) d.position.z *= -1;
+    if(Math.abs(d.position.x) > 4) d.position.x *= -1;
+    if(Math.abs(d.position.z) > 18) d.position.z *= -1;
   });
 
   updateHUD(time);
