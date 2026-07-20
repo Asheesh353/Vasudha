@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ARES - Interplanetary Research Vessel</title>
+<title>ARGO III - Interplanetary Research Vessel</title>
 <style>
   :root {
     --neon-blue: #00d4ff;
@@ -33,7 +33,7 @@
     grid-template-areas: 
       "tl tc tr"
       "ml . mr"
-      "bl bc br";
+      "bl bc .";
     grid-template-columns: 280px 1fr 280px;
     grid-template-rows: auto 1fr auto;
     gap: 15px;
@@ -66,8 +66,7 @@
   .p-tl { grid-area: tl; }
   .p-tr { grid-area: tr; }
   .p-bl { grid-area: bl; }
-  .p-br { grid-area: br; }
-  .p-bc { grid-area: bc; justify-self: center; text-align: center; width: 400px; }
+  .p-bc { grid-area: bc; justify-self: center; text-align: center; width: 460px; }
   .p-tc { grid-area: tc; justify-self: center; border-top: none; padding-top: 5px; }
 
   .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
@@ -141,28 +140,42 @@
     width: 100%;
   }
 
+  #easter-msg {
+    position: fixed;
+    top: 40%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--neon-blue);
+    font-family: 'Courier New', monospace;
+    font-size: 15px;
+    line-height: 1.8;
+    text-align: center;
+    white-space: pre-line;
+    text-shadow: 0 0 10px var(--neon-blue);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    z-index: 50;
+    letter-spacing: 1px;
+  }
+  #easter-msg.visible { opacity: 1; }
 </style>
 </head>
 <body>
 
 <div id="overlay">
-  <h1>ARES</h1>
+  <h1>ARGO III</h1>
   <button id="start-btn">INITIALIZE SYSTEMS</button>
   <p style="margin-top: 20px; font-size: 10px; color: #666;">W-A-S-D: MOVE | MOUSE: LOOK | ESC: RELEASE</p>
 </div>
 
 <div id="hud">
   <div class="panel p-tl">
-    <div class="panel-title">Vessel Status</div>
-    <div class="stat-row"><span>ID:</span><span>ARES-01</span></div>
-    <div class="stat-row"><span>CLASS:</span><span>DEEP-RANGE CORVETTE</span></div>
-    <div class="stat-row"><span>TRANSIT:</span><span>EARTH-MARS</span></div>
-    <div class="stat-row"><span>PRESSURE:</span><span>101.3 kPa</span></div>
-    <div class="bar-container"><div class="bar-fill b-blue" style="width: 100%"></div></div>
-    <div class="stat-row" style="margin-top:10px;"><span>O2 LEVEL:</span><span id="o2-val">21.0%</span></div>
-    <div class="bar-container"><div class="bar-fill b-green" id="o2-bar" style="width: 100%"></div></div>
-    <div class="stat-row" style="margin-top:4px;"><span>CO2 LEVEL:</span><span>0.04%</span></div>
-    <div class="bar-container"><div class="bar-fill b-orange" style="width: 5%"></div></div>
+    <div class="panel-title">Crew Roles</div>
+    <div class="stat-row"><span>Commanding Officer</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>Pilot / Navigation</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>Science Officer</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>Medical Officer</span><span style="color:var(--neon-green)">ONLINE</span></div>
+    <div class="stat-row"><span>Chief Engineer</span><span style="color:var(--neon-orange)">SLEEP</span></div>
   </div>
 
   <div class="panel p-tc" style="height: 30px; display: flex; align-items: center;">
@@ -170,15 +183,19 @@
   </div>
 
   <div class="panel p-tr">
-    <div class="panel-title">Mission Progress</div>
-    <div class="stat-row"><span>MET:</span><span id="met-val">187:12:44:02</span></div>
-    <div class="stat-row"><span>DIST TO MARS:</span><span>42.1M KM</span></div>
-    <div class="stat-row"><span>VELOCITY:</span><span>24.5 KM/S</span></div>
-    <div class="panel-title" style="margin-top:15px;">Crew Comms</div>
-    <div class="stat-row"><span>COMMANDER:</span><span style="color:var(--neon-green)">ONLINE</span></div>
-    <div class="stat-row"><span>PILOT:</span><span style="color:var(--neon-green)">ONLINE</span></div>
-    <div class="stat-row"><span>SCI-01:</span><span style="color:var(--neon-green)">ONLINE</span></div>
-    <div class="stat-row"><span>ENG-01:</span><span style="color:var(--neon-orange)">SLEEP</span></div>
+    <div class="panel-title">Station Roles</div>
+    <div class="stat-row"><span>COCKPIT</span></div>
+    <div style="color:#666; margin-bottom:6px;">Navigation &amp; Flight Control</div>
+    <div class="stat-row"><span>SCIENCE LAB</span></div>
+    <div style="color:#666; margin-bottom:6px;">Research &amp; Sample Analysis</div>
+    <div class="stat-row"><span>MEDICAL BAY</span></div>
+    <div style="color:#666; margin-bottom:6px;">Crew Health &amp; Treatment</div>
+    <div class="stat-row"><span>HABITAT</span></div>
+    <div style="color:#666; margin-bottom:6px;">Crew Quarters &amp; Rest</div>
+    <div class="stat-row"><span>ENGINEERING</span></div>
+    <div style="color:#666; margin-bottom:6px;">Propulsion &amp; Power Systems</div>
+    <div class="stat-row"><span>AIRLOCK</span></div>
+    <div style="color:#666;">EVA Staging &amp; Docking</div>
   </div>
 
   <div class="panel p-bl">
@@ -190,25 +207,18 @@
 
   <div class="panel p-bc">
     <div id="location-name" style="font-size: 16px; color: #fff; text-shadow: 0 0 10px var(--neon-blue);">[ SPINAL CORRIDOR ]</div>
-    <div style="color: #666; margin-top: 4px;">THRUSTER ARRAYS: STANDBY | REACTOR: 88%</div>
-  </div>
-
-  <div class="panel p-br">
-    <div class="panel-title">Environment</div>
-    <div class="stat-row"><span>EXT TEMP:</span><span>-270.4 C</span></div>
-    <div class="stat-row"><span>INT TEMP:</span><span>22.5 C</span></div>
-    <div class="stat-row"><span>SHIELDING:</span><span>100%</span></div>
-    <div class="bar-container" style="margin-top:8px;"><div class="bar-fill b-blue" style="width: 100%"></div></div>
+    <div id="location-role" style="color: var(--neon-green); margin-top: 6px; font-size: 10.5px; line-height: 1.6; letter-spacing: 0.4px;">Central passage connecting all ship compartments.</div>
   </div>
 </div>
 
 <div id="xh"></div>
+<div id="easter-msg"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <script>
 /**
- * ARES REDESIGN
+ * ARGO III REDESIGN
  * CRAMPED, GRIMY, DETAILED INTERIOR
  */
 
@@ -229,7 +239,7 @@ document.body.appendChild(renderer.domElement);
 const CH = 2.05; // Ceiling Height (low — you can feel it overhead)
 const FY = -CH/2; // Floor Y
 const EY = 1.55; // Eye Level from floor
-camera.position.set(0, FY + EY, -5);
+camera.position.set(0, FY + EY, 0);
 
 // ─── TEXTURES (procedural, no external assets) ────────────────────────────
 
@@ -285,6 +295,11 @@ const matMetal = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.
 const matGlowB = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 2 });
 const matGlowG = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 2 });
 const matGlowO = new THREE.MeshStandardMaterial({ color: 0xffaa00, emissive: 0xffaa00, emissiveIntensity: 2 });
+const matGlowP = new THREE.MeshStandardMaterial({ color: 0xaa66ff, emissive: 0xaa66ff, emissiveIntensity: 2 });
+const matGlowPk = new THREE.MeshStandardMaterial({ color: 0xff4d8d, emissive: 0xff4d8d, emissiveIntensity: 2 });
+const matFlask = new THREE.MeshStandardMaterial({ color: 0x66ffcc, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.1 });
+const matFlaskAmber = new THREE.MeshStandardMaterial({ color: 0xffb347, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.1 });
+const matFlaskPink = new THREE.MeshStandardMaterial({ color: 0xff6fa5, transparent: true, opacity: 0.4, roughness: 0.1, metalness: 0.1 });
 const matScreen = new THREE.MeshStandardMaterial({ color: 0x000a14, emissive: 0x001428, emissiveIntensity: 1 });
 const matGlass = new THREE.MeshStandardMaterial({ color: 0x88ccff, transparent: true, opacity: 0.2, roughness: 0, metalness: 0.5 });
 const matYellow = new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.8, metalness: 0.2 });
@@ -295,9 +310,16 @@ const matRed = new THREE.MeshStandardMaterial({ color: 0xaa1e1e, roughness: 0.6,
 
 // Helpers
 function box(w, h, d, mat, x=0, y=0, z=0) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+  const material = mat.clone();
+  material.side = THREE.DoubleSide;
+
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    material
+  );
   m.position.set(x, y, z);
-  m.castShadow = true; m.receiveShadow = true;
+  m.castShadow = true;
+  m.receiveShadow = true;
   scene.add(m);
   return m;
 }
@@ -386,10 +408,16 @@ function addCrate(x, y, z, s=0.4) {
 
 // ─── WORLD BUILDING — tight corvette-scale spinal layout ──────────────────
 
+const interactiveDrawers = []; // clickable drawer fronts, populated as rooms are built
+const interactiveDoors = []; // clickable hinged doors (lockers), swing open/closed
+const interactiveClickables = []; // one-off clickable easter-egg items
+
 const corridorWidth = 1.3; // narrow single-file corridor
-const corridorZStart = -16;
-const corridorZEnd = 9;
+const corridorZStart = -3.25;
+const corridorZEnd = 3.25;
 const corridorLen = corridorZEnd - corridorZStart;
+const junctionA = -1.65; // sci lab / medical bay
+const junctionB = 1.65;  // habitat / engineering
 
 // Floor & Ceiling
 box(corridorWidth, 0.1, corridorLen, matFloor, 0, FY, (corridorZStart + corridorZEnd)/2);
@@ -404,15 +432,23 @@ for (let z = corridorZStart; z <= corridorZEnd; z += 1) {
 
 // Side Walls with details (skip where modules open onto the corridor)
 for (let z = corridorZStart + 0.5; z < corridorZEnd; z += 0.9) {
-  if (Math.abs(z - (-12)) > 2.4 && Math.abs(z - 0) > 2.4) {
+  if (Math.abs(z - junctionA) > 2.4 && Math.abs(z - junctionB) > 2.4) {
     box(0.08, CH, 0.85, matPanel, -corridorWidth/2, 0, z);
     box(0.08, CH, 0.85, matPanel, corridorWidth/2, 0, z);
     if (Math.random() > 0.35) addRack(-corridorWidth/2 + 0.08, 0, z, 'y');
     if (Math.random() > 0.35) addRack(corridorWidth/2 - 0.08, 0, z, 'y');
     bolt(-corridorWidth/2 + 0.02, CH/2 - 0.1, z);
     bolt(corridorWidth/2 - 0.02, CH/2 - 0.1, z);
+    if (Math.random() > 0.7) {
+      const side = Math.random() > 0.5 ? -1 : 1;
+      addCrate(side * (corridorWidth/2 - 0.14), FY + 0.18, z, 0.3);
+    }
   }
 }
+
+// Baseboard conduits — pipe running low along both walls, floor to ceiling clutter
+addConduit(-corridorWidth/2 + 0.06, FY + 0.14, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
+addConduit(corridorWidth/2 - 0.06, FY + 0.14, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
 
 // Handrails & primary conduits (kept close to the narrow walls)
 addHandrail(-corridorWidth/2 + 0.1, 0.55, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
@@ -421,13 +457,11 @@ addConduit(-0.42, CH/2 - 0.1, (corridorZStart + corridorZEnd)/2, corridorLen, 'z
 addConduit(0.42, CH/2 - 0.1, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
 addConduit(0, CH/2 - 0.16, (corridorZStart + corridorZEnd)/2, corridorLen, 'z');
 
-// Sagging cable bundles overhead — the ceiling should feel busy and low
-addCableRun(corridorZStart + 1, -13, -0.2, CH/2 - 0.22, 0.06);
-addCableRun(-11, -1, 0.15, CH/2 - 0.2, 0.08);
-addCableRun(1, corridorZEnd - 1, -0.1, CH/2 - 0.22, 0.05);
+// Sagging cable bundle overhead — corridor's short enough now for one continuous run
+addCableRun(corridorZStart + 0.2, corridorZEnd - 0.2, 0, CH/2 - 0.2, 0.05);
 
-// Vertical drop-pipes at each module junction (z = -12 and z = 0)
-for (const jz of [-12, 0]) {
+// Vertical drop-pipes at each module junction
+for (const jz of [junctionA, junctionB]) {
   cyl(0.025, 0.4, matMetal, -0.42, CH/2 - 0.35, jz, 0, 0);
   cyl(0.025, 0.4, matMetal, 0.42, CH/2 - 0.35, jz, 0, 0);
   addValve(-0.42, CH/2 - 0.55, jz);
@@ -472,9 +506,10 @@ for(let x of [-0.85, 0.85]) {
 }
 addCableRun(cockpitZ - cockpitD/2 + 0.3, cockpitZ + cockpitD/2 - 0.3, 0, CH/2 - 0.2, 0.1);
 
-// 3. Side modules — cramped bays, not open labs
+// 3. Side modules — shrunk down, coffin-tight bays
 function mkModule(x, z, color=0x00ff88) {
-  const mW = 3.6, mD = 4.6;
+  const mW = 2.6, mD = 3.2;
+  const doorW = 0.95;
   box(mW, 0.1, mD, matFloor, x, FY, z);
   box(mW, 0.1, mD, matPanel, x, CH/2, z);
   if (x < 0) box(0.08, CH, mD, matPanel, x - mW/2, 0, z);
@@ -483,47 +518,704 @@ function mkModule(x, z, color=0x00ff88) {
   box(mW, CH, 0.08, matPanel, x, 0, z + mD/2);
 
   const wallX = (x < 0) ? x + mW/2 : x - mW/2;
-  box(0.08, CH, (mD - 1.3)/2, matPanel, wallX, 0, z - (mD + 1.3)/4 - 0.325);
-  box(0.08, CH, (mD - 1.3)/2, matPanel, wallX, 0, z + (mD + 1.3)/4 + 0.325);
-  box(0.08, CH - 1.85, 1.3, matPanel, wallX, (CH-1.85)/2 + 0.925, z);
-  addThreshold(wallX + (x < 0 ? 0.14 : -0.14), z, 1.1);
+  const sideLen = (mD - doorW) / 2;
+  box(0.08, CH, sideLen, matPanel, wallX, 0, z - (doorW/2 + sideLen/2));
+  box(0.08, CH, sideLen, matPanel, wallX, 0, z + (doorW/2 + sideLen/2));
+  box(0.08, CH - 1.7, doorW, matPanel, wallX, (CH-1.7)/2 + 0.85, z);
+  addThreshold(wallX + (x < 0 ? 0.14 : -0.14), z, doorW - 0.1);
 
-  const pl = new THREE.PointLight(color, 0.55, 8);
-  pl.position.set(x, CH/2 - 0.4, z);
+  const pl = new THREE.PointLight(color, 0.5, 7);
+  pl.position.set(x, CH/2 - 0.35, z);
   scene.add(pl);
 
-  addCableRun(z - mD/2 + 0.3, z + mD/2 - 0.3, x - 0.3, CH/2 - 0.18, 0.06);
+  addCableRun(z - mD/2 + 0.25, z + mD/2 - 0.25, x - 0.25, CH/2 - 0.16, 0.05);
 
   return {x, z, mW, mD};
 }
 
-const moduleX = corridorWidth/2 + 3.6/2; // flush against the corridor wall
+const moduleX = corridorWidth/2 + 2.6/2; // flush against the corridor wall
 
-const sciLab = mkModule(-moduleX, -12, 0x00ff88);
-box(2.2, 0.04, 0.7, matMetal, sciLab.x - 0.3, FY + 0.9, sciLab.z);
-for(let i=0; i<4; i++) cyl(0.13, 0.55, matGlowG, sciLab.x - 0.8 + i*0.4, FY + 1.15, sciLab.z);
-addCrate(sciLab.x + 0.9, FY + 0.2, sciLab.z + 1.3, 0.4);
-addCrate(sciLab.x + 1.2, FY + 0.2, sciLab.z + 1.3, 0.35);
+const sciLab = mkModule(-moduleX, junctionA, 0x00ff88);
+{
+  // Desk relocated to the south wall — clear of the back-wall shelving, properly supported
+  const deskX = sciLab.x;
+  const deskZ = sciLab.z + 1.6 - 0.3; // flush against the south wall
 
-const medBay = mkModule(moduleX, -12, 0x00d4ff);
-box(1.5, 0.35, 2.4, matPanel, medBay.x + 0.7, FY + 0.35, medBay.z);
-addCrate(medBay.x - 1.1, FY + 0.2, medBay.z - 1.4, 0.35);
+  // Tabletop
+  box(1.7, 0.05, 0.55, matMetal, deskX, FY + 0.83, deskZ);
 
-const habitat = mkModule(-moduleX, 0, 0xaaaaaa);
-for(let i=0; i<2; i++) {
-  const pz = habitat.z - 1.2;
-  box(1.6, 0.7, 1.5, matPanel, habitat.x - 0.7, FY + 0.4 + i*0.8, pz);
-  box(1.4, 0.08, 1.3, new THREE.MeshStandardMaterial({color:0xffffff, roughness:1}), habitat.x - 0.7, FY + 0.48 + i*0.8, pz);
-  box(0.32, 0.1, 0.5, new THREE.MeshStandardMaterial({color:0xeeeeee, roughness:1}), habitat.x - 1.2, FY + 0.53 + i*0.8, pz);
+  // Left-side legs
+  box(0.04, 0.8, 0.04, matMetal, deskX - 0.8, FY + 0.4, deskZ - 0.2);
+  box(0.04, 0.8, 0.04, matMetal, deskX - 0.8, FY + 0.4, deskZ + 0.2);
+
+  // Right-side drawer pedestal (doubles as the desk's other support) — a hollow
+  // frame so the drawers actually have somewhere to slide into and out of
+  const pedX = deskX + 0.65;
+  box(0.02, 0.78, 0.5, matPanel, pedX - 0.19, FY + 0.39, deskZ); // left side
+  box(0.02, 0.78, 0.5, matPanel, pedX + 0.19, FY + 0.39, deskZ); // right side
+  box(0.4, 0.02, 0.5, matPanel, pedX, FY + 0.78, deskZ);          // top
+  box(0.4, 0.02, 0.5, matPanel, pedX, FY + 0.01, deskZ);          // bottom
+  box(0.4, 0.78, 0.02, matPanel, pedX, FY + 0.39, deskZ + 0.24); // back
+  box(0.36, 0.02, 0.46, matPanel, pedX, FY + 0.4, deskZ);        // divider between drawers
+
+  // Two clickable drawers, each a group (front + tray + contents) that slides as one
+  function makeDrawer(y, contents) {
+    const group = new THREE.Group();
+    scene.add(group);
+    const frontZ = deskZ - 0.265;
+    const front = box(0.34, 0.3, 0.03, matMetal, pedX, y, frontZ);
+    const handle = cyl(0.012, 0.16, matYellow, pedX, y, frontZ - 0.025, 0, Math.PI/2);
+    const trayFloor = box(0.32, 0.015, 0.4, matPanel, pedX, y - 0.13, frontZ + 0.215);
+    const trayL = box(0.015, 0.1, 0.4, matPanel, pedX - 0.15, y - 0.075, frontZ + 0.215);
+    const trayR = box(0.015, 0.1, 0.4, matPanel, pedX + 0.15, y - 0.075, frontZ + 0.215);
+    group.add(front, handle, trayFloor, trayL, trayR);
+    contents.forEach(c => group.add(c));
+    return { mesh: front, group, closedZ: 0, openZ: -0.24, open: false };
+  }
+
+  // Small tools sitting in the upper drawer
+  const d1Contents = [
+    box(0.03, 0.02, 0.14, matMetal, pedX - 0.08, FY + 0.58 - 0.11, deskZ - 0.05),
+    box(0.03, 0.02, 0.14, matYellow, pedX + 0.03, FY + 0.58 - 0.11, deskZ - 0.05),
+    cyl(0.02, 0.03, matRed, pedX + 0.1, FY + 0.58 - 0.105, deskZ - 0.05),
+  ];
+  // A few vials in the lower drawer
+  const d2Contents = [
+    cyl(0.018, 0.09, matGlowG, pedX - 0.07, FY + 0.21 - 0.08, deskZ - 0.05),
+    cyl(0.018, 0.09, matGlowP, pedX, FY + 0.21 - 0.08, deskZ - 0.05),
+    cyl(0.018, 0.09, matGlowO, pedX + 0.07, FY + 0.21 - 0.08, deskZ - 0.05),
+  ];
+
+  interactiveDrawers.push(
+    makeDrawer(FY + 0.58, d1Contents),
+    makeDrawer(FY + 0.21, d2Contents)
+  );
+
+  // Sitting bench, in front of the desk
+  const benchX = deskX - 0.2, benchZ = deskZ - 0.6;
+  box(0.42, 0.06, 0.32, matPanel, benchX, FY + 0.42, benchZ);
+  box(0.04, 0.4, 0.04, matMetal, benchX - 0.16, FY + 0.21, benchZ - 0.12);
+  box(0.04, 0.4, 0.04, matMetal, benchX + 0.16, FY + 0.21, benchZ - 0.12);
+  box(0.04, 0.4, 0.04, matMetal, benchX - 0.16, FY + 0.21, benchZ + 0.12);
+  box(0.04, 0.4, 0.04, matMetal, benchX + 0.16, FY + 0.21, benchZ + 0.12);
+
+  // Glassware row on the tabletop
+  const lineZ = deskZ - 0.05;
+  const step = 0.17;
+  let tx = deskX - 0.75;
+  const base = FY + 0.86; // tabletop surface
+
+  box(0.95, 0.03, 0.09, matMetal, tx + step * 2, base + 0.015, lineZ);
+
+  const tubeMats = [matGlowG, matGlowB, matGlowO, matGlowP, matGlowPk];
+  for (let i = 0; i < 5; i++) {
+    const r = 0.022 + Math.random() * 0.024;
+    const h = 0.14 + Math.random() * 0.2;
+    const mat = tubeMats[i % tubeMats.length];
+    cyl(r, h, mat, tx, base + h / 2, lineZ);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(r, 8, 8), mat);
+    cap.position.set(tx, base, lineZ);
+    scene.add(cap);
+    tx += step;
+  }
+
+  cyl(0.042, 0.02, matMetal, tx, base + 0.01, lineZ);
+  cyl(0.03, 0.22, matFlaskAmber, tx, base + 0.13, lineZ);
+  tx += step;
+
+  cyl(0.085, 0.02, matGlass, tx, base + 0.01, lineZ);
+  cyl(0.09, 0.012, matGlass, tx, base + 0.026, lineZ);
+  tx += step;
+
+  const flaskBody = new THREE.Mesh(new THREE.SphereGeometry(0.075, 10, 10), matFlask);
+  flaskBody.position.set(tx, base + 0.075, lineZ);
+  scene.add(flaskBody);
+  cyl(0.02, 0.1, matFlask, tx, base + 0.2, lineZ);
+  tx += step;
+
+  const flask2 = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), matFlaskPink);
+  flask2.position.set(tx, base + 0.05, lineZ);
+  scene.add(flask2);
+  cyl(0.015, 0.055, matFlaskPink, tx, base + 0.13, lineZ);
+  tx += step;
+
+  cyl(0.055, 0.3, matGlowG, tx, base + 0.15, lineZ);
 }
-addCrate(habitat.x + 1.0, FY + 0.2, habitat.z + 1.2, 0.4);
+addCrate(sciLab.x + 0.9, FY + 0.2, sciLab.z - 0.9, 0.3);
+addCrate(sciLab.x + 1.05, FY + 0.2, sciLab.z - 0.6, 0.26);
 
-const engineering = mkModule(moduleX, 0, 0xffaa00);
+// Wall shelving against the back wall (opposite the door) — two tiers
+{
+  const matPot = new THREE.MeshStandardMaterial({ color: 0x6b4a35, roughness: 0.9 });
+  const matLeaf = new THREE.MeshStandardMaterial({ color: 0x2fae5a, roughness: 0.8 });
+  const matLeaf2 = new THREE.MeshStandardMaterial({ color: 0x4fd17a, roughness: 0.8 });
+  const backWallX = sciLab.x - 1.3; // outer wall, opposite the corridor door
+  const shelfX = backWallX + 0.18; // protrudes into the room
+  const shelfLen = 2.0;
+  const shelfZ0 = sciLab.z; // shelves centered on room depth
+
+  // Upper shelf — plants and supplies
+  const shelfYUp = FY + 1.5;
+  box(0.28, 0.03, shelfLen, matMetal, shelfX, shelfYUp, shelfZ0);
+  bolt(shelfX - 0.1, shelfYUp - 0.01, shelfZ0 - shelfLen/2 + 0.1);
+  bolt(shelfX - 0.1, shelfYUp - 0.01, shelfZ0 + shelfLen/2 - 0.1);
+
+  function addPlant(z, scale=1) {
+    cyl(0.05*scale, 0.09*scale, matPot, shelfX, shelfYUp + 0.06*scale, z);
+    for (let i=0; i<4; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.035*scale, 6, 6), i % 2 === 0 ? matLeaf : matLeaf2);
+      leaf.position.set(shelfX + (Math.random()-0.5)*0.06*scale, shelfYUp + 0.13*scale + Math.random()*0.03, z + (Math.random()-0.5)*0.06*scale);
+      leaf.scale.y = 1.4;
+      scene.add(leaf);
+    }
+  }
+  addPlant(shelfZ0 - 0.7, 1.0);
+  addPlant(shelfZ0 - 0.3, 0.75);
+  addPlant(shelfZ0 + 0.6, 1.1);
+
+  // A tiny gold trident, tucked between the plants — purely decorative
+  {
+    const tridentMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.25, metalness: 0.85 });
+    const trX = shelfX, trY = shelfYUp + 0.015, trZ = shelfZ0 - 0.5;
+    cyl(0.004, 0.1, tridentMat, trX, trY + 0.05, trZ, 0, 0);
+    for (const dx of [-0.014, 0, 0.014]) {
+      cyl(0.0035, 0.035, tridentMat, trX + dx, trY + 0.115, trZ, 0, dx * 4);
+    }
+  }
+
+  cyl(0.045, 0.14, matMetal, shelfX, shelfYUp + 0.09, shelfZ0 + 0.05);
+  cyl(0.045, 0.14, matMetal, shelfX, shelfYUp + 0.09, shelfZ0 + 0.2);
+  box(0.2, 0.16, 0.2, matCrate, shelfX, shelfYUp + 0.1, shelfZ0 + 0.4);
+  box(0.2, 0.02, 0.2, matYellow, shelfX, shelfYUp + 0.19, shelfZ0 + 0.4);
+
+  // Lower shelf — storage crates
+  const shelfYLo = FY + 0.85;
+  box(0.28, 0.03, shelfLen, matMetal, shelfX, shelfYLo, shelfZ0);
+  bolt(shelfX - 0.1, shelfYLo - 0.01, shelfZ0 - shelfLen/2 + 0.1);
+  bolt(shelfX - 0.1, shelfYLo - 0.01, shelfZ0 + shelfLen/2 - 0.1);
+  addCrate(shelfX, shelfYLo + 0.16, shelfZ0 - 0.7, 0.28);
+  addCrate(shelfX, shelfYLo + 0.14, shelfZ0 - 0.35, 0.24);
+  addCrate(shelfX, shelfYLo + 0.16, shelfZ0 + 0.15, 0.28);
+  addCrate(shelfX, shelfYLo + 0.14, shelfZ0 + 0.55, 0.24);
+}
+
+const medBay = mkModule(moduleX, junctionA, 0x00d4ff);
+box(1.1, 0.3, 1.7, matPanel, medBay.x + 0.5, FY + 0.32, medBay.z);
+addCrate(medBay.x - 0.75, FY + 0.2, medBay.z - 0.95, 0.26);
+
+{
+  const berthX = medBay.x + 0.5, berthZ = medBay.z;
+  const bedMat = new THREE.MeshStandardMaterial({color:0xf2f2f2, roughness:1});
+  const pillowMat = new THREE.MeshStandardMaterial({color:0xeaeaea, roughness:1});
+  const matCurtain = new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:0.25, roughness:0.8});
+
+  // Mattress + pillow on the exam berth
+  box(1.0, 0.08, 1.6, bedMat, berthX, FY + 0.51, berthZ);
+  box(0.32, 0.08, 0.36, pillowMat, berthX, FY + 0.57, berthZ - 0.6);
+
+  // Privacy rail suspended over the berth, with a curtain bunched at one end
+  const railY = FY + 1.75;
+  cyl(0.012, 1.7, matMetal, berthX, railY, berthZ, Math.PI/2, 0);
+  cyl(0.01, railY - FY, matMetal, berthX, (railY + FY) / 2, berthZ - 0.8);
+  cyl(0.01, railY - FY, matMetal, berthX, (railY + FY) / 2, berthZ + 0.8);
+  box(0.02, 0.5, 0.42, matCurtain, berthX - 0.06, railY - 0.3, berthZ - 0.65);
+
+  // Vitals monitor mounted on the north wall, with a glowing waveform line
+  box(0.32, 0.24, 0.03, matScreen, medBay.x - 0.3, FY + 1.35, medBay.z - 1.55);
+  box(0.26, 0.012, 0.01, matGlowB, medBay.x - 0.3, FY + 1.4, medBay.z - 1.53);
+  box(0.26, 0.012, 0.01, matGlowG, medBay.x - 0.3, FY + 1.32, medBay.z - 1.53);
+
+  // IV stand beside the berth: pole, hook, hanging bag
+  cyl(0.018, 1.1, matMetal, medBay.x + 0.95, FY + 0.55, medBay.z - 0.55);
+  cyl(0.06, 0.015, matMetal, medBay.x + 0.95, FY + 0.02, medBay.z - 0.55);
+  torus(0.05, 0.008, matMetal, medBay.x + 0.95, FY + 1.08, medBay.z - 0.55, 0);
+  box(0.1, 0.14, 0.03, matGlass, medBay.x + 0.95, FY + 0.95, medBay.z - 0.55);
+
+  // Oxygen tank, tucked near the north wall on the door side
+  const matO2 = new THREE.MeshStandardMaterial({color:0x2e8b57, roughness:0.5, metalness:0.4});
+  cyl(0.08, 0.55, matO2, medBay.x - 0.55, FY + 0.4, medBay.z - 1.1);
+  cyl(0.05, 0.08, matMetal, medBay.x - 0.55, FY + 0.71, medBay.z - 1.1);
+  torus(0.05, 0.008, matYellow, medBay.x - 0.55, FY + 0.76, medBay.z - 1.1, Math.PI/2);
+
+  // Medicine cabinet, flush against the solid back wall, red cross on the door
+  const cabX = medBay.x + 1.3 - 0.15; // flush to the back wall
+  const cabZ = medBay.z + 1.0;
+  box(0.3, 0.85, 0.45, matPanel, cabX, FY + 0.65, cabZ);
+  box(0.02, 0.3, 0.04, matRed, cabX - 0.15, FY + 0.65, cabZ);
+  box(0.02, 0.05, 0.2, matRed, cabX - 0.15, FY + 0.65, cabZ);
+  bolt(cabX, FY + 0.95, cabZ - 0.18);
+  bolt(cabX, FY + 0.95, cabZ + 0.18);
+  const bottleMats = [matGlowB, matGlowG, matGlass, matFlaskAmber];
+  for (let i = 0; i < 4; i++) {
+    cyl(0.025, 0.07, bottleMats[i], cabX, FY + 1.11, cabZ - 0.15 + i * 0.1);
+  }
+
+  // Wall-mounted supply shelf on the same back wall, north of the cabinet
+  const shelfX = medBay.x + 1.3 - 0.18;
+  const shelfZ0 = medBay.z - 0.7;
+  box(0.28, 0.03, 1.3, matMetal, shelfX, FY + 1.4, shelfZ0);
+  bolt(shelfX - 0.1, FY + 1.39, shelfZ0 - 0.55);
+  bolt(shelfX - 0.1, FY + 1.39, shelfZ0 + 0.55);
+  const supplyMats = [matGlass, matGlowB, matFlaskAmber];
+  for (let i = 0; i < 3; i++) {
+    cyl(0.025, 0.16, supplyMats[i], shelfX, FY + 1.5, shelfZ0 - 0.4 + i * 0.35);
+  }
+  box(0.22, 0.1, 0.16, matCrate, shelfX, FY + 1.46, shelfZ0 + 0.5);
+
+  // Rolling supply cart at the foot of the berth
+  const cartX = berthX, cartZ = berthZ + 1.05;
+  box(0.32, 0.42, 0.24, matMetal, cartX, FY + 0.32, cartZ);
+  box(0.34, 0.02, 0.26, matPanel, cartX, FY + 0.54, cartZ);
+  for (const cx of [-0.14, 0.14]) for (const cz of [-0.1, 0.1]) {
+    cyl(0.035, 0.03, matMetal, cartX + cx, FY + 0.045, cartZ + cz);
+  }
+  cyl(0.025, 0.08, matGlass, cartX - 0.08, FY + 0.6, cartZ);
+  cyl(0.025, 0.08, matFlaskAmber, cartX + 0.08, FY + 0.6, cartZ);
+
+  // Biohazard bin by the door
+  const binX = medBay.x - 1.3 + 0.35, binZ = medBay.z + 0.65;
+  box(0.22, 0.28, 0.22, matRed, binX, FY + 0.14, binZ);
+  box(0.24, 0.03, 0.24, matYellow, binX, FY + 0.285, binZ);
+}
+
+const habitat = mkModule(-moduleX, junctionB, 0xaaaaaa);
+{
+  const bedZ = habitat.z - 0.35;
+  const bedMat = new THREE.MeshStandardMaterial({color:0xf2f2f2, roughness:1});
+  const pillowMat = new THREE.MeshStandardMaterial({color:0xeaeaea, roughness:1});
+  // Frame + mattress
+  box(1.05, 0.14, 1.55, matPanel, habitat.x - 0.45, FY + 0.27, bedZ);
+  box(0.98, 0.09, 1.46, bedMat, habitat.x - 0.45, FY + 0.35, bedZ);
+  
+  // Pillow at the head of the bed
+  box(0.36, 0.09, 0.42, pillowMat, habitat.x - 0.45, FY + 0.41, bedZ - 0.66);
+  // Restraint straps across the mattress, each with small metal buckles
+  for (const sz of [-0.15, 0.25, 0.6]) {
+    box(1.0, 0.02, 0.07, matYellow, habitat.x - 0.45, FY + 0.4, bedZ + sz);
+    box(0.09, 0.03, 0.09, matMetal, habitat.x - 0.45, FY + 0.4, bedZ + sz);
+  }
+  
+  // Wall lockers tucked into the back-wall/south-wall corner, clear of the bed —
+  // a small bank of three, standing shoulder to shoulder. Each door is hinged
+  // on its west edge and swings open into the room when clicked.
+  const lockerZ = habitat.z + 1.6 - 0.21; // flush against the south wall
+  const lockerBankX0 = habitat.x - 1.3 + 0.21; // first locker's x
+  const shelfMat = new THREE.MeshStandardMaterial({ color: 0x555a5e, roughness: 0.8 });
+  const jacketMats = [
+    new THREE.MeshStandardMaterial({ color: 0xd85a2a, roughness: 0.8 }),
+    new THREE.MeshStandardMaterial({ color: 0x3a6ea5, roughness: 0.8 }),
+    new THREE.MeshStandardMaterial({ color: 0x6b8f4e, roughness: 0.8 }),
+  ];
+  for (let i = 0; i < 3; i++) {
+    const lockerX = lockerBankX0 + i * 0.44; // flush against the back wall, marching east
+    // Left wall
+box(0.02, 1.15, 0.35, matPanel, lockerX - 0.20, FY + 0.6, lockerZ);
+
+// Right wall
+box(0.02, 1.15, 0.35, matPanel, lockerX + 0.20, FY + 0.6, lockerZ);
+
+
+
+// Top
+box(0.42, 0.02, 0.35, matPanel, lockerX, FY + 1.17, lockerZ);
+
+// Bottom
+box(0.42, 0.02, 0.35, matPanel, lockerX, FY + 0.03, lockerZ);
+    bolt(lockerX - 0.18, FY + 1.15, lockerZ - 0.19);
+    bolt(lockerX + 0.18, FY + 1.15, lockerZ - 0.19);
+
+// ---------- Interior shelf ----------
+box(0.36, 0.02, 0.34, shelfMat, lockerX, FY + 0.98, lockerZ);
+
+// Hanging jumpsuit
+box(0.18, 0.34, 0.05, jacketMats[i], lockerX, FY + 0.72, lockerZ - 0.08);
+box(0.02, 0.12, 0.02, matMetal, lockerX, FY + 0.93, lockerZ - 0.08); // hook
+
+// Folded towels
+box(0.14, 0.05, 0.12, new THREE.MeshStandardMaterial({color:0xe8e8e8}), lockerX - 0.10, FY + 1.01, lockerZ);
+box(0.14, 0.05, 0.12, new THREE.MeshStandardMaterial({color:0xbfd8ff}), lockerX + 0.10, FY + 1.01, lockerZ);
+
+// Helmet
+const helmetMat = new THREE.MeshStandardMaterial({
+    color:0xffffff,
+    metalness:0.35,
+    roughness:0.45
+});
+const helmet = new THREE.Mesh(
+    new THREE.SphereGeometry(0.07, 18, 18),
+    helmetMat
+);
+helmet.position.set(lockerX + 0.11, FY + 0.63, lockerZ);
+helmet.scale.y = 0.85;
+scene.add(helmet);
+
+// Flashlight
+cyl(
+    0.015,
+    0.12,
+    matYellow,
+    lockerX - 0.12,
+    FY + 0.58,
+    lockerZ + 0.02,
+    Math.PI/2,
+    0
+);
+
+// First aid kit
+const firstAidMat = new THREE.MeshStandardMaterial({color:0xffffff});
+box(0.10,0.08,0.06, firstAidMat, lockerX + 0.02, FY + 0.56, lockerZ + 0.05);
+
+const cross = box(
+    0.05,0.01,0.01,
+    new THREE.MeshStandardMaterial({color:0xdd2222}),
+    lockerX + 0.02,
+    FY + 0.56,
+    lockerZ + 0.081
+);
+box(
+    0.01,0.05,0.01,
+    cross.material,
+    lockerX + 0.02,
+    FY + 0.56,
+    lockerZ + 0.081
+);
+
+// Backpack
+const bagMat = new THREE.MeshStandardMaterial({color:0x3c5c8f});
+box(0.11,0.16,0.08, bagMat, lockerX - 0.02, FY + 0.55, lockerZ - 0.05);
+
+// Boots
+const bootMat = new THREE.MeshStandardMaterial({color:0x2f2f2f});
+box(0.06,0.05,0.09, bootMat, lockerX - 0.09, FY + 0.05, lockerZ - 0.05);
+box(0.06,0.05,0.09, bootMat, lockerX + 0.01, FY + 0.05, lockerZ - 0.05);
+
+// Small family photo
+const frameMat = new THREE.MeshStandardMaterial({color:0x8a6a2f});
+box(0.08,0.10,0.01, frameMat, lockerX + 0.13, FY + 0.88, lockerZ - 0.17);
+
+    // Hinged door — pivots on the west edge of the frame
+    const hingeX = lockerX - 0.175, hingeY = FY + 0.6, hingeZ = lockerZ - 0.21;
+    const doorGroup = new THREE.Group();
+    doorGroup.position.set(hingeX, hingeY, hingeZ);
+    scene.add(doorGroup);
+    const door = new THREE.Mesh(new THREE.BoxGeometry(0.42, 1.15, 0.02), matMetal);
+    door.position.set(0.21, 0, 0);
+    door.castShadow = true; door.receiveShadow = true;
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.1, 8), matYellow);
+    handle.rotation.z = Math.PI / 2;
+    handle.position.set(0.38, 0, -0.02);
+    doorGroup.add(door, handle);
+
+    interactiveDoors.push({ mesh: door, group: doorGroup, closedRot: 0, openRot: Math.PI / 1.6, open: false });
+  }
+
+  
+  // A small personal table in the northeast corner, with two working drawers
+  // that open toward the room (south)
+  {
+    const tableX = habitat.x + 0.75;
+    const tableZ = habitat.z - 1.0;
+
+    box(0.75, 0.04, 0.5, matMetal, tableX, FY + 0.82, tableZ);
+    box(0.03, 0.78, 0.03, matMetal, tableX - 0.33, FY + 0.41, tableZ - 0.2);
+    box(0.03, 0.78, 0.03, matMetal, tableX - 0.33, FY + 0.41, tableZ + 0.2);
+
+    // Drawer pedestal — hollow frame so the drawers have somewhere to slide into.
+    // Back panel sits on the north side (against the wall); drawers face south, into the room.
+    const pedX = tableX + 0.24;
+    box(0.02, 0.78, 0.44, matPanel, pedX - 0.2, FY + 0.39, tableZ);
+    box(0.02, 0.78, 0.44, matPanel, pedX + 0.2, FY + 0.39, tableZ);
+    box(0.42, 0.02, 0.44, matPanel, pedX, FY + 0.78, tableZ);
+    box(0.42, 0.02, 0.44, matPanel, pedX, FY + 0.01, tableZ);
+    box(0.42, 0.78, 0.02, matPanel, pedX, FY + 0.39, tableZ - 0.22);
+    box(0.38, 0.02, 0.4, matPanel, pedX, FY + 0.4, tableZ);
+
+    function makeHabitatDrawer(y, contents) {
+      const group = new THREE.Group();
+      scene.add(group);
+      const frontZ = tableZ + 0.24;
+      const front = box(0.36, 0.3, 0.03, matMetal, pedX, y, frontZ);
+      const handle = cyl(0.012, 0.16, matYellow, pedX, y, frontZ + 0.025, 0, Math.PI/2);
+      const trayFloor = box(0.34, 0.015, 0.4, matPanel, pedX, y - 0.13, frontZ - 0.215);
+      const trayL = box(0.015, 0.1, 0.4, matPanel, pedX - 0.16, y - 0.075, frontZ - 0.215);
+      const trayR = box(0.015, 0.1, 0.4, matPanel, pedX + 0.16, y - 0.075, frontZ - 0.215);
+      group.add(front, handle, trayFloor, trayL, trayR);
+      contents.forEach(c => group.add(c));
+      return { mesh: front, group, closedZ: 0, openZ: 0.24, open: false };
+    }
+
+    // Top drawer: personal odds and ends
+    const junkContents = [
+      box(0.05, 0.03, 0.05, matMetal, pedX - 0.09, FY + 0.58 - 0.11, tableZ + 0.05),
+      cyl(0.02, 0.1, matYellow, pedX + 0.02, FY + 0.58 - 0.09, tableZ + 0.05),
+      box(0.08, 0.015, 0.06, matPanel, pedX + 0.11, FY + 0.58 - 0.115, tableZ + 0.05),
+    ];
+
+    // Bottom drawer: the snack stash — one cookie is very much not like the others
+    const cookieMat = new THREE.MeshStandardMaterial({ color: 0xc99a54, roughness: 0.8 });
+    const blueCookieMat = new THREE.MeshStandardMaterial({ color: 0x2299ff, emissive: 0x1155aa, emissiveIntensity: 0.5, roughness: 0.5 });
+    const blueCookie = cyl(0.035, 0.012, blueCookieMat, pedX + 0.08, FY + 0.21 - 0.115, tableZ + 0.02);
+    const foodContents = [
+      cyl(0.035, 0.012, cookieMat, pedX - 0.1, FY + 0.21 - 0.115, tableZ + 0.08),
+      cyl(0.035, 0.012, cookieMat, pedX - 0.02, FY + 0.21 - 0.115, tableZ + 0.08),
+      cyl(0.035, 0.012, cookieMat, pedX - 0.1, FY + 0.21 - 0.1, tableZ - 0.02),
+      blueCookie,
+    ];
+
+    interactiveDrawers.push(
+      makeHabitatDrawer(FY + 0.58, junkContents),
+      makeHabitatDrawer(FY + 0.21, foodContents)
+    );
+
+    interactiveClickables.push({
+      mesh: blueCookie,
+      onClick: () => showMessage('Food Scanner:\n\nSugar: High\nColor: Extremely suspicious\nApproved by Percy.', 5000)
+    });
+
+    // A stool tucked under the table, on the room side
+    cyl(0.02, 0.4, matMetal, tableX - 0.05, FY + 0.23, tableZ + 0.55);
+    cyl(0.15, 0.02, matMetal, tableX - 0.05, FY + 0.03, tableZ + 0.55);
+    cyl(0.14, 0.03, matMetal, tableX - 0.05, FY + 0.44, tableZ + 0.55);
+  }
+
+// ===========================================
+// Annabeth's Yankees Cap
+// ===========================================
+
+const capGroup = new THREE.Group();
+
+const capMat = new THREE.MeshStandardMaterial({
+    color: 0x10255d,
+    roughness: 0.85
+});
+
+const whiteMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.8
+});
+
+// --------------------
+// Main dome
+// --------------------
+const dome = new THREE.Mesh(
+    new THREE.SphereGeometry(
+        0.085,
+        48,
+        32,
+        0,
+        Math.PI * 2,
+        0,
+        Math.PI * 0.58
+    ),
+    capMat
+);
+
+dome.scale.y = 0.72;
+capGroup.add(dome);
+
+// --------------------
+// Top button
+// --------------------
+const button = new THREE.Mesh(
+    new THREE.SphereGeometry(0.009,16,16),
+    whiteMat
+);
+
+button.position.y = 0.055;
+capGroup.add(button);
+
+// --------------------
+// Better brim
+// --------------------
+
+const brim = new THREE.Mesh(
+
+    new THREE.BoxGeometry(
+        0.12,   // width
+        0.006,  // thickness
+        0.1    // length
+    ),
+
+    capMat
+);
+
+brim.position.set(
+    0,
+    -0.01,
+    -0.08
+);
+
+// Completely flat angle (0 degrees)
+brim.rotation.x = THREE.MathUtils.degToRad(0);
+
+capGroup.add(brim);
+
+// --------------------
+// Seams
+// --------------------
+for(let i=0;i<6;i++){
+
+    const seam = new THREE.Mesh(
+        new THREE.BoxGeometry(0.002,0.075,0.002),
+        whiteMat
+    );
+
+    seam.position.y = 0.01;
+    seam.rotation.z = i * Math.PI/3;
+    seam.rotation.x = Math.PI/8;
+
+    capGroup.add(seam);
+}
+
+// --------------------
+// NY logo
+// --------------------
+const N1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.004,0.025,0.002),
+    whiteMat
+);
+N1.position.set(-0.008,0.002,0.081);
+capGroup.add(N1);
+
+const N2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.018,0.004,0.002),
+    whiteMat
+);
+N2.position.set(-0.008,0.012,0.081);
+capGroup.add(N2);
+
+const Y1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.004,0.025,0.002),
+    whiteMat
+);
+Y1.position.set(0.010,0.002,0.081);
+capGroup.add(Y1);
+
+const Y2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.016,0.004,0.002),
+    whiteMat
+);
+Y2.position.set(0.010,-0.004,0.081);
+capGroup.add(Y2);
+
+// --------------------
+// Position above lockers
+// --------------------
+capGroup.position.set(
+    lockerBankX0 + 0.45,
+    FY + 1.23,          // Bumped up significantly from 1.37 to 1.60 to make the height change obvious
+    lockerZ - 0.02
+);
+
+// Looks casually tossed
+capGroup.rotation.set(
+    THREE.MathUtils.degToRad(0),
+    THREE.MathUtils.degToRad(5),
+    THREE.MathUtils.degToRad(0)
+);
+
+scene.add(capGroup);
+
+// --------------------
+// Click interaction
+// --------------------
+interactiveClickables.push({
+
+    mesh: dome,
+
+    onClick: () => {
+
+        capGroup.visible = false;
+
+        showMessage(
+`Annabeth's missing...
+
+...and her cap isn't here.
+
+Again.`,
+        5000);
+
+    }
+
+});
+
+}
+addCrate(habitat.x + 0.7, FY + 0.2, habitat.z + 0.85, 0.3);
+
+const engineering = mkModule(moduleX, junctionB, 0xffaa00);
 for(let i=0; i<3; i++) {
-  cyl(0.26, 1.7, matMetal, engineering.x + 0.7, 0, engineering.z - 1.1 + i*1.0, 0, 0);
-  addValve(engineering.x + 0.7, 0.6, engineering.z - 1.1 + i*1.0 + 0.3);
+  cyl(0.19, 1.3, matMetal, engineering.x + 0.5, 0, engineering.z - 0.75 + i*0.7, 0, 0);
+  addValve(engineering.x + 0.5, 0.5, engineering.z - 0.75 + i*0.7 + 0.22);
 }
-addCrate(engineering.x - 1.1, FY + 0.2, engineering.z + 1.3, 0.4);
+addCrate(engineering.x - 0.75, FY + 0.2, engineering.z + 0.9, 0.3);
+
+{
+  // Control panel on the north wall, with switches and a status screen
+  box(0.5, 0.55, 0.04, matPanel, engineering.x - 0.5, FY + 1.0, engineering.z - 1.55);
+  box(0.4, 0.16, 0.02, matScreen, engineering.x - 0.5, FY + 1.16, engineering.z - 1.53);
+  const btnMats = [matGlowO, matGlowG, matGlowB, matRed];
+  for (let i = 0; i < 4; i++) {
+    box(0.05, 0.05, 0.02, btnMats[i], engineering.x - 0.66 + i * 0.11, FY + 0.9, engineering.z - 1.53);
+  }
+  for (let i = 0; i < 3; i++) {
+    box(0.03, 0.1, 0.02, matMetal, engineering.x - 0.6 + i * 0.13, FY + 0.78, engineering.z - 1.53);
+  }
+
+  // Trio of analog gauges beside the control panel, same wall
+  function addGauge(x, y, z) {
+    cyl(0.06, 0.018, matMetal, x, y, z, Math.PI/2, 0);
+    cyl(0.05, 0.01, matScreen, x, y, z + 0.012, Math.PI/2, 0);
+    box(0.002, 0.035, 0.004, matYellow, x + 0.01, y + 0.015, z + 0.02);
+  }
+  addGauge(engineering.x - 0.05, FY + 1.1, engineering.z - 1.53);
+  addGauge(engineering.x + 0.13, FY + 1.1, engineering.z - 1.53);
+  addGauge(engineering.x + 0.31, FY + 1.1, engineering.z - 1.53);
+
+  // Secondary low console beside the main panel
+  box(0.32, 0.5, 0.3, matPanel, engineering.x - 1.0, FY + 0.4, engineering.z - 1.45);
+  box(0.26, 0.03, 0.2, matScreen, engineering.x - 1.0, FY + 0.66, engineering.z - 1.45);
+  box(0.04, 0.04, 0.02, matGlowB, engineering.x - 1.08, FY + 0.66, engineering.z - 1.36);
+
+  // Welded stool in front of the console
+  cyl(0.02, 0.42, matMetal, engineering.x - 1.0, FY + 0.24, engineering.z - 1.05);
+  cyl(0.18, 0.02, matMetal, engineering.x - 1.0, FY + 0.03, engineering.z - 1.05);
+  cyl(0.16, 0.03, matMetal, engineering.x - 1.0, FY + 0.46, engineering.z - 1.05);
+
+  // Wall-mounted fire extinguisher on the clear stretch of the door wall
+  const extX = engineering.x - 1.3 + 0.09;
+  const extZ = engineering.z - 1.0;
+  box(0.02, 0.06, 0.1, matMetal, extX - 0.05, FY + 0.75, extZ);
+  cyl(0.055, 0.28, matRed, extX, FY + 0.75, extZ);
+  cyl(0.015, 0.08, matMetal, extX, FY + 0.93, extZ, 0, Math.PI/2.5);
+
+  // Tool rack — pegboard flush against the south wall
+  const rackZ = engineering.z + 1.6 - 0.06;
+  box(0.4, 0.5, 0.03, matPanel, engineering.x - 0.55, FY + 1.0, rackZ);
+  cyl(0.012, 0.3, matMetal, engineering.x - 0.65, FY + 1.05, rackZ - 0.05, 0, Math.PI/2.2);
+  cyl(0.012, 0.22, matYellow, engineering.x - 0.5, FY + 1.15, rackZ - 0.05, 0, Math.PI/2.6);
+  cyl(0.03, 0.05, matRed, engineering.x - 0.45, FY + 0.85, rackZ - 0.05); // cable spool 1
+  cyl(0.03, 0.04, matYellow, engineering.x - 0.62, FY + 0.85, rackZ - 0.07); // cable spool 2
+
+  // Stacked spare-parts crates under the tool rack
+  addCrate(engineering.x - 0.55, FY + 0.2, rackZ - 0.2, 0.26);
+  addCrate(engineering.x - 0.55, FY + 0.39, rackZ - 0.2, 0.22);
+  addCrate(engineering.x - 0.3, FY + 0.18, rackZ - 0.15, 0.24);
+
+  // Reactor core accent — glowing central column with a cage, flush to the same wall
+  const coreZ = engineering.z + 1.6 - 0.17;
+  cyl(0.14, 1.5, matGlowO, engineering.x + 0.5, 0, coreZ, 0, 0);
+  torus(0.17, 0.012, matMetal, engineering.x + 0.5, 0.45, coreZ, Math.PI/2);
+  torus(0.17, 0.012, matMetal, engineering.x + 0.5, -0.15, coreZ, Math.PI/2);
+  torus(0.17, 0.012, matMetal, engineering.x + 0.5, -0.7, coreZ, Math.PI/2);
+
+  // Warning placard hanging over the coolant tanks
+  box(0.42, 0.18, 0.02, matHazard, engineering.x + 0.5, CH/2 - 0.35, engineering.z - 0.05);
+  cyl(0.006, 0.25, matMetal, engineering.x + 0.38, CH/2 - 0.2, engineering.z - 0.05);
+  cyl(0.006, 0.25, matMetal, engineering.x + 0.62, CH/2 - 0.2, engineering.z - 0.05);
+
+  // Hazard floor marking near the tanks
+  box(0.9, 0.005, 0.35, matHazard, engineering.x + 0.5, FY + 0.06, engineering.z - 0.4);
+}
 
 // 4. AIRLOCK (South end) — a coffin-tight staging bay
 const airlockW = 2.0, airlockD = 3.2;
@@ -578,7 +1270,7 @@ scene.add(new THREE.Points(starGeom, starMat));
 const debrisCount = 10;
 const debris = [];
 for(let i=0; i<debrisCount; i++) {
-  const d = box(0.04, 0.04, 0.04, matMetal, (Math.random()-0.5)*3, (Math.random()-0.5)*1.4, (Math.random()-0.5)*18);
+  const d = box(0.04, 0.04, 0.04, matMetal, (Math.random()-0.5)*3, (Math.random()-0.5)*1.4, (Math.random()-0.5)*14);
   d.userData = { 
     rot: new THREE.Vector3(Math.random()*0.02, Math.random()*0.02, Math.random()*0.02),
     vel: new THREE.Vector3((Math.random()-0.5)*0.004, (Math.random()-0.5)*0.0015, (Math.random()-0.5)*0.0015)
@@ -592,8 +1284,8 @@ let moveForward = false, moveBackward = false, moveLeft = false, moveRight = fal
 let rotateLeft = false, rotateRight = false;
 let yaw = 0, pitch = 0;
 const mouseSpeed = 0.002;
-const walkSpeed = 0.045; // slower — this is a corridor, not a corvette sprint
-const rotSpeed = 0.03;
+const walkSpeed = 0.06; 
+const rotSpeed = 0.055;
 
 const startBtn = document.getElementById('start-btn');
 const overlay = document.getElementById('overlay');
@@ -607,6 +1299,43 @@ document.addEventListener('pointerlockchange', () => {
     overlay.classList.add('hidden');
   } else {
     overlay.classList.remove('hidden');
+  }
+});
+
+// Easter-egg message overlay: fades in with the given text, fades out after `duration`
+const easterMsgEl = document.getElementById('easter-msg');
+let easterMsgTimeout = null;
+function showMessage(text, duration = 4000) {
+  clearTimeout(easterMsgTimeout);
+  easterMsgEl.textContent = text;
+  void easterMsgEl.offsetWidth;
+  easterMsgEl.classList.add('visible');
+  easterMsgTimeout = setTimeout(() => {
+    easterMsgEl.classList.remove('visible');
+  }, duration);
+}
+
+// Click a drawer front or a special item (aimed via the center crosshair) to interact
+const drawerRaycaster = new THREE.Raycaster();
+const REACH_DISTANCE = 2.2;
+document.addEventListener('click', () => {
+  if (document.pointerLockElement !== document.body) return;
+  drawerRaycaster.setFromCamera({ x: 0, y: 0 }, camera);
+  const drawerMeshes = interactiveDrawers.map(d => d.mesh);
+  const doorMeshes = interactiveDoors.map(d => d.mesh);
+  const clickMeshes = interactiveClickables.map(c => c.mesh);
+  const hits = drawerRaycaster.intersectObjects(drawerMeshes.concat(doorMeshes, clickMeshes));
+  if (hits.length > 0 && hits[0].distance < REACH_DISTANCE) {
+    const hitObj = hits[0].object;
+    const drawer = interactiveDrawers.find(d => d.mesh === hitObj);
+    if (drawer) { drawer.open = !drawer.open; return; }
+    const door = interactiveDoors.find(d => d.mesh === hitObj);
+    if (door) { door.open = !door.open; return; }
+    const clickable = interactiveClickables.find(c => c.mesh === hitObj);
+    if (clickable && !clickable.used) {
+      clickable.onClick();
+      if (clickable.oneShot) clickable.used = true;
+    }
   }
 });
 
@@ -642,47 +1371,38 @@ document.addEventListener('keydown', onKeyDown);
 document.addEventListener('keyup', onKeyUp);
 
 // HUD Updates
-const metVal = document.getElementById('met-val');
-const o2Val = document.getElementById('o2-val');
-const o2Bar = document.getElementById('o2-bar');
 const locName = document.getElementById('location-name');
+const roleName = document.getElementById('location-role');
 const playerDot = document.getElementById('player-dot');
 
-const halfMod = 1.8; // half-width of a side module
+const halfMod = 1.3; // half-width of a side module
 
 const zones = [
-  { name: '[ COCKPIT ]', zMin: cockpitZ - cockpitD/2, zMax: corridorZStart, xMin: -cockpitW/2, xMax: cockpitW/2 },
-  { name: '[ SPINAL CORRIDOR ]', zMin: corridorZStart, zMax: corridorZEnd, xMin: -corridorWidth/2, xMax: corridorWidth/2 },
-  { name: '[ SCIENCE LAB ]', zMin: -12 - 2.3, zMax: -12 + 2.3, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
-  { name: '[ MEDICAL BAY ]', zMin: -12 - 2.3, zMax: -12 + 2.3, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
-  { name: '[ HABITAT ]', zMin: -2.3, zMax: 2.3, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
-  { name: '[ ENGINEERING ]', zMin: -2.3, zMax: 2.3, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
-  { name: '[ AIRLOCK ]', zMin: corridorZEnd, zMax: airlockZ + airlockD/2, xMin: -airlockW/2, xMax: airlockW/2 },
+  { name: '[ COCKPIT ]', role: 'Flight deck and primary navigation suite, housing dual pilot stations and the main viewport used for manual course corrections during transit.', zMin: cockpitZ - cockpitD/2, zMax: corridorZStart, xMin: -cockpitW/2, xMax: cockpitW/2 },
+  { name: '[ SPINAL CORRIDOR ]', role: 'Central passage connecting every compartment on the ship, lined with power conduits, coolant lines, and emergency handholds along its length.', zMin: corridorZStart, zMax: corridorZEnd, xMin: -corridorWidth/2, xMax: corridorWidth/2 },
+  { name: '[ SCIENCE LAB ]', role: 'Compact research bay equipped for sample analysis and specimen storage, used to process material collected over the course of the transit.', zMin: junctionA - 1.6, zMax: junctionA + 1.6, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
+  { name: '[ MEDICAL BAY ]', role: 'Onboard clinic for treating injury and illness, fitted with an exam berth, vitals monitoring, an oxygen supply, and a locked medicine cabinet.', zMin: junctionA - 1.6, zMax: junctionA + 1.6, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
+  { name: '[ HABITAT ]', role: 'Crew sleeping quarters, providing a single restrained berth and personal storage locker for use during off-duty rest periods.', zMin: junctionB - 1.6, zMax: junctionB + 1.6, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
+  { name: '[ ENGINEERING ]', role: 'Reactor and propulsion control room, housing the coolant tanks, primary systems console, and the ship\u2019s main power core.', zMin: junctionB - 1.6, zMax: junctionB + 1.6, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
+  { name: '[ AIRLOCK ]', role: 'EVA staging bay for suiting up and cycling between the pressurized cabin and open space during external operations or docking.', zMin: corridorZEnd, zMax: airlockZ + airlockD/2, xMin: -airlockW/2, xMax: airlockW/2 },
 ];
 
 function updateHUD(t) {
-  const d = Math.floor(187 + t/86400);
-  const h = Math.floor((t % 86400) / 3600).toString().padStart(2, '0');
-  const m = Math.floor((t % 3600) / 60).toString().padStart(2, '0');
-  const s = Math.floor(t % 60).toString().padStart(2, '0');
-  metVal.textContent = `${d}:${h}:${m}:${s}`;
-
-  const o2 = 21.0 + Math.sin(t*0.1)*0.05;
-  o2Val.textContent = o2.toFixed(1) + '%';
-  o2Bar.style.width = (o2 / 21 * 100) + '%';
-
   const px = camera.position.x, pz = camera.position.z;
   let currentZone = '[ DEEP SPACE ]';
+  let currentRole = 'Unpressurized';
   for(const z of zones) {
     if(px >= z.xMin && px <= z.xMax && pz >= z.zMin && pz <= z.zMax) {
       currentZone = z.name;
+      currentRole = z.role;
       break;
     }
   }
   locName.textContent = currentZone;
+  roleName.textContent = currentRole;
 
-  const mx = ((px + 4.6) / 9.2) * 100;
-  const my = ((pz + 20.5) / 33.7) * 100;
+  const mx = ((px + 3.6) / 7.2) * 100;
+  const my = ((pz + 7.65) / 14.1) * 100;
   playerDot.style.left = mx + '%';
   playerDot.style.top = my + '%';
 }
@@ -713,8 +1433,8 @@ function animate() {
       camera.position.y = (FY + EY) + Math.sin(time * 10) * 0.02;
     }
 
-    camera.position.x = Math.max(-4.6, Math.min(4.6, camera.position.x));
-    camera.position.z = Math.max(-20.3, Math.min(11.9, camera.position.z));
+    camera.position.x = Math.max(-3.6, Math.min(3.6, camera.position.x));
+    camera.position.z = Math.max(-7.55, Math.min(6.15, camera.position.z));
   }
 
   camera.rotation.order = 'YXZ';
@@ -727,7 +1447,17 @@ function animate() {
     d.rotation.y += d.userData.rot.y;
     d.position.add(d.userData.vel);
     if(Math.abs(d.position.x) > 4) d.position.x *= -1;
-    if(Math.abs(d.position.z) > 18) d.position.z *= -1;
+    if(Math.abs(d.position.z) > 14) d.position.z *= -1;
+  });
+
+  interactiveDrawers.forEach(d => {
+    const targetZ = d.open ? d.openZ : d.closedZ;
+    d.group.position.z += (targetZ - d.group.position.z) * Math.min(1, delta * 6);
+  });
+
+  interactiveDoors.forEach(d => {
+    const targetRot = d.open ? d.openRot : d.closedRot;
+    d.group.rotation.y += (targetRot - d.group.rotation.y) * Math.min(1, delta * 6);
   });
 
   updateHUD(time);
@@ -741,7 +1471,6 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
 </script>
 </body>
 </html>
