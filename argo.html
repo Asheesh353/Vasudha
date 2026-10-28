@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>ARGO III - Interplanetary Research Vessel</title>
+<title>ARGO-III - Interplanetary Research Vessel</title>
 <style>
   :root {
     --neon-blue: #00d4ff;
@@ -30,10 +30,10 @@
     z-index: 10;
     padding: 20px;
     display: grid;
-    grid-template-areas: 
-      "tl tc tr"
+    grid-template-areas:
+      ". tc ."
       "ml . mr"
-      "bl bc .";
+      "bl bc br";
     grid-template-columns: 280px 1fr 280px;
     grid-template-rows: auto 1fr auto;
     gap: 15px;
@@ -63,11 +63,23 @@
   }
 
   /* Specific Panels */
-  .p-tl { grid-area: tl; }
-  .p-tr { grid-area: tr; }
   .p-bl { grid-area: bl; }
   .p-bc { grid-area: bc; justify-self: center; text-align: center; width: 460px; }
   .p-tc { grid-area: tc; justify-self: center; border-top: none; padding-top: 5px; }
+  .p-br {
+    grid-area: br;
+    justify-self: end;
+    align-self: end;
+    width: 220px;
+    font-size: 9.5px;
+    line-height: 1.5;
+    color: #888;
+    opacity: 0.85;
+  }
+  .p-br .panel-title {
+    color: #aaa;
+    font-size: 10px;
+  }
 
   .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
   .bar-container { height: 4px; background: rgba(255,255,255,0.1); width: 100%; margin-top: 2px; overflow: hidden; }
@@ -144,58 +156,162 @@
     position: fixed;
     top: 40%; left: 50%;
     transform: translate(-50%, -50%);
-    color: var(--neon-blue);
-    font-family: 'Courier New', monospace;
-    font-size: 15px;
-    line-height: 1.8;
-    text-align: center;
+    max-width: 460px;
+    padding: 20px 28px;
     white-space: pre-line;
-    text-shadow: 0 0 10px var(--neon-blue);
+    text-align: center;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.55s ease;
     z-index: 50;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+    line-height: 1.75;
   }
   #easter-msg.visible { opacity: 1; }
+
+  /* ── SCIENTIFIC SCAN — blue hologram ── */
+  #easter-msg.popup-scan {
+    background: rgba(6, 28, 46, 0.5);
+    border: 1px solid rgba(110, 205, 255, 0.55);
+    color: #8fe3ff;
+    font-family: 'Courier New', monospace;
+    font-size: 14.5px;
+    text-shadow: 0 0 10px rgba(120, 215, 255, 0.85);
+    box-shadow: 0 0 30px rgba(70, 190, 255, 0.3), inset 0 0 25px rgba(70, 190, 255, 0.08);
+    background-image: repeating-linear-gradient(0deg, rgba(140,220,255,0.05) 0px, rgba(140,220,255,0.05) 1px, transparent 2px, transparent 4px);
+    animation: hologramFlicker 3.2s infinite;
+  }
+  @keyframes hologramFlicker {
+    0%, 100% { filter: brightness(1); }
+    4% { filter: brightness(0.82); }
+    6% { filter: brightness(1.05); }
+    41% { filter: brightness(0.9); }
+    43% { filter: brightness(1); }
+    77% { filter: brightness(0.88); }
+    79% { filter: brightness(1); }
+  }
+
+  /* ── MISSION LOGS / TERMINALS — cyan terminal with typing cursor ── */
+  #easter-msg.popup-log {
+    background: rgba(2, 10, 8, 0.85);
+    border: 1px solid rgba(60, 255, 200, 0.5);
+    color: #6dffc4;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 14px;
+    text-align: left;
+    text-shadow: 0 0 6px rgba(90, 255, 200, 0.7);
+    box-shadow: 0 0 22px rgba(60, 255, 200, 0.25);
+  }
+  #easter-msg.popup-log::after {
+    content: '\2588';
+    animation: cursorBlink 0.9s steps(1) infinite;
+    margin-left: 2px;
+  }
+  @keyframes cursorBlink { 50% { opacity: 0; } }
+
+  /* ── WARNINGS — flashing red ── */
+  #easter-msg.popup-warning {
+    background: rgba(40, 0, 0, 0.75);
+    border: 2px solid #ff3b3b;
+    color: #ffffff;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    animation: warnFlash 0.7s infinite;
+  }
+  @keyframes warnFlash {
+    0%, 100% { box-shadow: 0 0 35px rgba(255, 40, 40, 0.75); border-color: #ff3b3b; }
+    50% { box-shadow: 0 0 10px rgba(255, 40, 40, 0.25); border-color: #7a0000; }
+  }
+
+  /* ── PLANTS — green botanical card ── */
+  #easter-msg.popup-botanical {
+    background: linear-gradient(180deg, rgba(18, 40, 22, 0.92), rgba(10, 26, 14, 0.92));
+    border: 1px solid rgba(120, 220, 130, 0.5);
+    color: #cdf7d2;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 14.5px;
+    box-shadow: 0 0 20px rgba(90, 200, 100, 0.25);
+  }
+  #easter-msg.popup-botanical::before {
+    content: '\1F33F';
+    display: block;
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  /* ── ROBOT DIALOGUE — rounded speech bubble, yellow accents ── */
+  #easter-msg.popup-speech {
+    background: rgba(40, 34, 8, 0.88);
+    border: 2px solid #ffd23f;
+    border-radius: 26px;
+    color: #ffe9a8;
+    font-family: 'Trebuchet MS', Verdana, sans-serif;
+    font-size: 15px;
+    box-shadow: 0 0 20px rgba(255, 210, 63, 0.3);
+  }
+  #easter-msg.popup-speech::after {
+    content: '';
+    position: absolute;
+    bottom: -14px; left: 50%;
+    transform: translateX(-50%);
+    border-width: 14px 10px 0 10px;
+    border-style: solid;
+    border-color: #ffd23f transparent transparent transparent;
+  }
+
+  /* ── MISSION CONTROL — black translucent panel ── */
+  #easter-msg.popup-missioncontrol {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #f2f2f2;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.8px;
+  }
+
+  /* ── INVENTORY / EQUIPMENT — metallic UI ── */
+  #easter-msg.popup-inventory {
+    background: linear-gradient(160deg, #3a3f44, #1c1f22 60%, #3a3f44);
+    border: 1px solid rgba(200, 210, 220, 0.4);
+    color: #dfe6ec;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13.5px;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    box-shadow: inset 0 0 12px rgba(255,255,255,0.08), 0 0 16px rgba(0,0,0,0.6);
+  }
+
+  /* ── EASTER EGGS — elegant gold glow ── */
+  #easter-msg.popup-easter {
+    background: rgba(30, 24, 4, 0.85);
+    border: 1px solid rgba(255, 210, 90, 0.7);
+    color: #ffe9b0;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 15px;
+    animation: goldPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes goldPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(255, 205, 80, 0.35); }
+    50% { box-shadow: 0 0 34px rgba(255, 205, 80, 0.65); }
+  }
 </style>
 </head>
 <body>
 
 <div id="overlay">
-  <h1>ARGO III</h1>
+  <h1>ARGO-III</h1>
   <button id="start-btn">INITIALIZE SYSTEMS</button>
   <p style="margin-top: 20px; font-size: 10px; color: #666;">W-A-S-D: MOVE | MOUSE: LOOK | ESC: RELEASE</p>
 </div>
 
 <div id="hud">
-  <div class="panel p-tl">
-    <div class="panel-title">Crew Roles</div>
-    <div class="stat-row"><span>Commanding Officer</span><span style="color:var(--neon-green)">ONLINE</span></div>
-    <div class="stat-row"><span>Pilot / Navigation</span><span style="color:var(--neon-green)">ONLINE</span></div>
-    <div class="stat-row"><span>Science Officer</span><span style="color:var(--neon-orange)">SLEEP</span></div>
-    <div class="stat-row"><span>Medical Officer</span><span style="color:var(--neon-green)">ONLINE</span></div>
-    <div class="stat-row"><span>Chief Engineer</span><span style="color:var(--neon-orange)">SLEEP</span></div>
-  </div>
-
   <div class="panel p-tc" style="height: 30px; display: flex; align-items: center;">
     <div class="alert-ticker" id="ticker">SYST_OK // NAVIGATION LOCKED // MISSION DAY 187 // TIGHT QUARTERS, MIND YOUR HEAD // ALL SYSTEMS NOMINAL...</div>
-  </div>
-
-  <div class="panel p-tr">
-    <div class="panel-title">Station Roles</div>
-    <div class="stat-row"><span>COCKPIT</span></div>
-    <div style="color:#666; margin-bottom:6px;">Navigation &amp; Flight Control</div>
-    <div class="stat-row"><span>SCIENCE LAB</span></div>
-    <div style="color:#666; margin-bottom:6px;">Research &amp; Sample Analysis</div>
-    <div class="stat-row"><span>MEDICAL BAY</span></div>
-    <div style="color:#666; margin-bottom:6px;">Crew Health &amp; Treatment</div>
-    <div class="stat-row"><span>HABITAT</span></div>
-    <div style="color:#666; margin-bottom:6px;">Crew Quarters &amp; Rest</div>
-    <div class="stat-row"><span>ENGINEERING</span></div>
-    <div style="color:#666; margin-bottom:6px;">Propulsion &amp; Power Systems</div>
-    <div class="stat-row"><span>AIRLOCK</span></div>
-    <div style="color:#666;">EVA Staging &amp; Docking</div>
   </div>
 
   <div class="panel p-bl">
@@ -208,6 +324,11 @@
   <div class="panel p-bc">
     <div id="location-name" style="font-size: 16px; color: #fff; text-shadow: 0 0 10px var(--neon-blue);">[ SPINAL CORRIDOR ]</div>
     <div id="location-role" style="color: var(--neon-green); margin-top: 6px; font-size: 10.5px; line-height: 1.6; letter-spacing: 0.4px;">Central passage connecting all ship compartments.</div>
+  </div>
+
+  <div class="panel p-br">
+    <div class="panel-title">Disclaimer</div>
+    This is a fan-made, fictional rendering for fun — layout, systems, and details are not meant to be accurate.
   </div>
 </div>
 
@@ -420,6 +541,7 @@ function createHologramScreen(x, y, z, color = 0x00d4ff){
         })
     );
     group.add(panel);
+    group.userData.panel = panel; // for a subtle ambient refresh-flicker animation
 
     // Glowing border frame
     const border = new THREE.LineSegments(
@@ -608,7 +730,24 @@ const cockpitW = 3.6, cockpitD = 4.4;
 const cockpitZ = corridorZStart - cockpitD/2;
 box(cockpitW, 0.1, cockpitD, matFloor, 0, FY, cockpitZ);
 box(cockpitW, 0.1, cockpitD, matPanel, 0, CH/2, cockpitZ);
-box(cockpitW, CH, 0.08, matPanel, 0, 0, cockpitZ - cockpitD/2);
+
+// Nose wall — built as a frame AROUND the panoramic window opening (not a solid slab),
+// so the front viewport is actually visible through to space.
+const panoW = cockpitW * 0.94;
+const panoH = CH * 0.72;
+const noseZ = cockpitZ - cockpitD/2;
+const panoCenterY = FY + 1.25;
+const winTop = panoCenterY + panoH/2;
+const winBottom = panoCenterY - panoH/2;
+const noseHalfW = panoW/2, noseHalfH = panoH/2;
+// top strip (ceiling down to top of window)
+box(cockpitW, (CH/2) - winTop, 0.08, matPanel, 0, (winTop + CH/2) / 2, noseZ);
+// bottom strip (bottom of window down to floor)
+box(cockpitW, winBottom - FY, 0.08, matPanel, 0, (winBottom + FY) / 2, noseZ);
+// left pillar (floor-to-ceiling strip beside the window)
+box(cockpitW/2 - noseHalfW, panoH, 0.08, matPanel, -(noseHalfW + cockpitW/2)/2, panoCenterY, noseZ);
+// right pillar
+box(cockpitW/2 - noseHalfW, panoH, 0.08, matPanel, (noseHalfW + cockpitW/2)/2, panoCenterY, noseZ);
 
 // ── COCKPIT SIDE WALLS: solid panels + glass windows ──────────────────────
 // LEFT WALL — solid top & bottom strips
@@ -653,30 +792,95 @@ box(0.06, 0.04, cockpitD*0.3,  matMetal, cockpitW/2, FY+0.72, cockpitZ+0.7);
 
 addThreshold(0, corridorZStart, corridorWidth);
 
-// Front viewport & main console
-box(cockpitW*0.85, CH*0.55, 0.12, matMetal, 0, 0.2, cockpitZ - cockpitD/2 + 0.05);
-box(cockpitW*0.8, CH*0.45, 0.04, matGlass, 0, 0.2, cockpitZ - cockpitD/2 - 0.05);
+// ── PANORAMIC FRONT COCKPIT WINDOW ──────────────────────────────────────
+// Large reinforced viewport spanning most of the nose wall, thick blue-tinted
+// glass, rounded corners (fillet struts) and structural cross-supports.
+// (panoW / panoH / panoCenterY already defined above when the nose wall opening was cut)
+const panoZFrame = cockpitZ - cockpitD/2 + 0.05;
+const panoZGlass = cockpitZ - cockpitD/2 - 0.06;
 
+// Outer reinforced frame (deep metal surround) — built as 4 border strips so the middle stays open
+const frameBorder = 0.11;
+box(panoW + frameBorder*2, frameBorder, 0.16, matMetal, 0, panoCenterY + panoH/2 + frameBorder/2, panoZFrame); // top
+box(panoW + frameBorder*2, frameBorder, 0.16, matMetal, 0, panoCenterY - panoH/2 - frameBorder/2, panoZFrame); // bottom
+box(frameBorder, panoH, 0.16, matMetal, -panoW/2 - frameBorder/2, panoCenterY, panoZFrame); // left
+box(frameBorder, panoH, 0.16, matMetal, panoW/2 + frameBorder/2, panoCenterY, panoZFrame); // right
+// Thick blue-tinted glass pane
+const frontPano = new THREE.Mesh(new THREE.PlaneGeometry(panoW, panoH), matCockpitGlass);
+frontPano.position.set(0, panoCenterY, panoZGlass);
+scene.add(frontPano);
+// Subtle reflection sheen — a faint offset second pane, slightly smaller, additive-looking
+const sheenMat = new THREE.MeshStandardMaterial({ color: 0xcfe9ff, transparent: true, opacity: 0.05, roughness: 0, metalness: 0.9, side: THREE.DoubleSide });
+const frontSheen = new THREE.Mesh(new THREE.PlaneGeometry(panoW * 0.9, panoH * 0.55), sheenMat);
+frontSheen.position.set(-panoW*0.08, panoCenterY + panoH*0.15, panoZGlass + 0.01);
+frontSheen.rotation.z = 0.06;
+scene.add(frontSheen);
+
+// Rounded corners — small chamfer fillets at each corner of the frame opening
+const halfW = panoW/2, halfH = panoH/2;
+for (const cx of [-1, 1]) {
+  for (const cy of [-1, 1]) {
+    const fillet = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.14, 12, 1, false, 0, Math.PI/2), matMetal);
+    fillet.rotation.x = Math.PI/2;
+    fillet.rotation.z = (cx === -1 && cy === -1) ? 0 : (cx === 1 && cy === -1) ? Math.PI/2 : (cx === 1 && cy === 1) ? Math.PI : -Math.PI/2;
+    fillet.position.set(cx * (halfW - 0.05), panoCenterY + cy * (halfH - 0.05), panoZFrame - 0.02);
+    scene.add(fillet);
+  }
+}
+
+// Structural cross-supports — a horizontal and vertical reinforcement strut across the glass
+box(panoW - 0.1, 0.06, 0.03, matMetal, 0, panoCenterY, panoZGlass + 0.015);
+box(0.06, panoH - 0.1, 0.03, matMetal, 0, panoCenterY, panoZGlass + 0.015);
+// Diagonal corner braces (structural supports) tying the frame to the hull
+for (const sx of [-1, 1]) {
+  const brace = box(0.05, 0.05, 0.5, matMetal, sx * (halfW + 0.05), panoCenterY + 0.65, panoZFrame + 0.35);
+  brace.rotation.x = 0.6;
+}
+// Rivet detailing around the reinforced frame
+for (let i = -1; i <= 1; i += 0.5) {
+  bolt(i * halfW, panoCenterY + halfH + 0.11, panoZFrame);
+  bolt(i * halfW, panoCenterY - halfH - 0.11, panoZFrame);
+}
+
+// ── DUST MOTES — tiny slow-drifting particles catching the cockpit light ──
+const dustGeom = new THREE.BufferGeometry();
+const dustCount = 60;
+const dustPos = new Float32Array(dustCount * 3);
+const dustVel = [];
+for (let i = 0; i < dustCount; i++) {
+  dustPos[i*3] = (Math.random() - 0.5) * cockpitW * 0.9;
+  dustPos[i*3+1] = FY + Math.random() * 1.8;
+  dustPos[i*3+2] = cockpitZ + (Math.random() - 0.5) * cockpitD * 0.8;
+  dustVel.push({ x: (Math.random()-0.5)*0.0006, y: (Math.random())*0.0004, z: (Math.random()-0.5)*0.0006 });
+}
+dustGeom.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+const dustMat = new THREE.PointsMaterial({ color: 0xcfe9ff, size: 0.012, transparent: true, opacity: 0.35, depthWrite: false });
+const dustMotes = new THREE.Points(dustGeom, dustMat);
+scene.add(dustMotes);
+
+// Mounted above the forward consoles, angled into the pilots' forward view
 const leftScreen = createHologramScreen(
     -0.85,
-    FY + 1.15,
-    cockpitZ - 0.45
+    FY + 1.45,
+    cockpitZ - 1.95
 );
 
 const rightScreen = createHologramScreen(
      0.85,
-     FY + 1.15,
-     cockpitZ - 0.45
+     FY + 1.45,
+     cockpitZ - 1.95
 );
 
 // Pilot Seats (closer together — elbow room only)
+// NASA-style flight deck: both seats face the NOSE (front window), backrests toward the corridor.
 for (let x of [-0.85, 0.85]) {
 
     // Seat
     box(0.55, 0.1, 0.55, matFloor, x, FY + 0.4, cockpitZ - 1.2);
-    box(0.55, 0.75, 0.1, matFloor, x, FY + 0.8, cockpitZ - 1.45);
+    // Backrest now sits BEHIND the seat relative to forward-facing pilot (toward corridor/rear)
+    box(0.55, 0.75, 0.1, matFloor, x, FY + 0.8, cockpitZ - 0.65);
 
-    // Desk (make it clickable)
+    // Desk / forward console (make it clickable) — now positioned ahead of the seat, toward the nose
     const desk = box(
         0.7,
         0.05,
@@ -684,7 +888,7 @@ for (let x of [-0.85, 0.85]) {
         matMetal,
         x,
         FY + 0.7,
-        cockpitZ - 0.65
+        cockpitZ - 1.75
     );
 
     // Existing console screen
@@ -695,11 +899,11 @@ for (let x of [-0.85, 0.85]) {
         matScreen,
         x,
         FY + 0.73,
-        cockpitZ - 0.65
+        cockpitZ - 1.75
     );
 
-    bolt(x - 0.35, FY + 0.72, cockpitZ - 0.4);
-    bolt(x + 0.35, FY + 0.72, cockpitZ - 0.4);
+    bolt(x - 0.35, FY + 0.72, cockpitZ - 1.5);
+    bolt(x + 0.35, FY + 0.72, cockpitZ - 1.5);
 
     // Click the desk to toggle the hologram
     interactiveClickables.push({
@@ -777,20 +981,179 @@ const airlockMoon = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 20), airlo
 airlockMoon.position.set(2.5, FY + 0.9, _airlockZ + 16);
 spaceGroup.add(airlockMoon);
 
+// ── EXPANDED SOLAR NEIGHBORHOOD — additional planets drifting past the ship ──
+function makeRadialTexture(colorInner, colorOuter, size = 128) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  grad.addColorStop(0, colorInner);
+  grad.addColorStop(1, colorOuter);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(c);
+  return tex;
+}
+
+const driftingPlanets = [];
+function addDriftingPlanet(radius, colorHex, x, y, z, opts = {}) {
+  const mat = new THREE.MeshStandardMaterial({
+    color: colorHex,
+    roughness: opts.roughness ?? 0.75,
+    emissive: opts.emissive ?? 0x000000,
+    emissiveIntensity: opts.emissiveIntensity ?? 0
+  });
+  const p = new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 24), mat);
+  p.position.set(x, y, z);
+  spaceGroup.add(p);
+  driftingPlanets.push({ mesh: p, spin: opts.spin ?? (0.0003 + Math.random()*0.0006), drift: opts.drift ?? new THREE.Vector3(0,0,0) });
+  return p;
+}
+
+// EARTH — soft blue-green marble, visible off the right windows
+const earth = addDriftingPlanet(0.5, 0x2e6fbf, cockpitW/2 + 7, FY + 2.4, cockpitZ + 1.5, { roughness: 0.6 });
+// simple continents via a second slightly-offset green blob layer
+const earthLandMat = new THREE.MeshStandardMaterial({ color: 0x3f8f4f, roughness: 0.8, transparent: true, opacity: 0.5 });
+const earthLand = new THREE.Mesh(new THREE.SphereGeometry(0.505, 16, 16), earthLandMat);
+earth.add(earthLand);
+
+// JUPITER — large banded gas giant, distant off the left/front
+const jupiter = addDriftingPlanet(0.95, 0xd7a25f, -cockpitW/2 - 14, FY + 3.5, cockpitZ - 6, { roughness: 0.7 });
+
+// VENUS — pale yellow-white, near-side drift
+const venus = addDriftingPlanet(0.4, 0xe8d9a0, -5.5, FY + 1.2, cockpitZ - 4, { roughness: 0.5 });
+
+// MERCURY — small grey cratered rock, close pass
+const mercury = addDriftingPlanet(0.22, 0x9a9a94, 4.2, FY + 0.6, cockpitZ - 3, { roughness: 0.9 });
+
+// URANUS — pale cyan ice giant, far background
+const uranus = addDriftingPlanet(0.6, 0x9fe8e0, cockpitW/2 + 16, FY + 4, cockpitZ - 10, { roughness: 0.55 });
+
+// DISTANT DWARF PLANET — tiny, icy, way out past the airlock
+const dwarfPlanet = addDriftingPlanet(0.15, 0xccc7c2, 6, FY + 0.5, _airlockZ + 24, { roughness: 0.95 });
+
+// Gentle scan info on the new planets
+interactiveClickables.push({ mesh: earth, onClick: () => showMessage(`PLANETARY SCAN\n\nEarth detected.\n\nHome. Still there.`, 4000) });
+interactiveClickables.push({ mesh: jupiter, onClick: () => showMessage(`SCAN COMPLETE\n\nJupiter detected.\n\nKing of the gas giants.`, 4000) });
+interactiveClickables.push({ mesh: venus, onClick: () => showMessage(`SCAN COMPLETE\n\nVenus detected.\n\nSurface temp: 464°C.`, 4000) });
+interactiveClickables.push({ mesh: mercury, onClick: () => showMessage(`SCAN COMPLETE\n\nMercury detected.\n\nClosest to the sun.`, 4000) });
+interactiveClickables.push({ mesh: uranus, onClick: () => showMessage(`SCAN COMPLETE\n\nUranus detected.\n\nAxial tilt: 98°.`, 4000) });
+interactiveClickables.push({ mesh: dwarfPlanet, onClick: () => showMessage(`PLANETARY SCAN\n\nUnnamed dwarf planet.\n\nCatalogued and logged.`, 4000) });
+
+// ── NEBULAE — soft glowing translucent clouds, drifting far in the background ──
+const nebulaColors = [
+  ['rgba(140,60,200,0.55)', 'rgba(140,60,200,0)'],
+  ['rgba(60,140,220,0.5)', 'rgba(60,140,220,0)'],
+  ['rgba(220,80,120,0.45)', 'rgba(220,80,120,0)'],
+];
+const nebulae = [];
+for (let i = 0; i < 5; i++) {
+  const [inner, outer] = nebulaColors[i % nebulaColors.length];
+  const tex = makeRadialTexture(inner, outer);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.5, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  const scale = 12 + Math.random() * 18;
+  sprite.scale.set(scale, scale, 1);
+  sprite.position.set(
+    THREE.MathUtils.randFloat(-60, 60),
+    THREE.MathUtils.randFloat(-15, 20),
+    cockpitZ + THREE.MathUtils.randFloat(-90, -30)
+  );
+  spaceGroup.add(sprite);
+  nebulae.push(sprite);
+}
+
+// ── GALAXIES — tiny distant spiral smudges ──
+const galaxies = [];
+for (let i = 0; i < 3; i++) {
+  const tex = makeRadialTexture('rgba(255,255,255,0.9)', 'rgba(180,190,255,0)');
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.6, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  const scale = 2 + Math.random() * 2.5;
+  sprite.scale.set(scale * 1.6, scale, 1); // flattened, galaxy-ish
+  sprite.position.set(
+    THREE.MathUtils.randFloat(-80, 80),
+    THREE.MathUtils.randFloat(-25, 30),
+    _airlockZ + THREE.MathUtils.randFloat(30, 80)
+  );
+  spaceGroup.add(sprite);
+  galaxies.push(sprite);
+}
+
+// ── ASTEROID CLUSTERS — small drifting rock clumps near the airlock ──
+const asteroidMat = new THREE.MeshStandardMaterial({ color: 0x6b6660, roughness: 0.95 });
+const asteroidClusters = [];
+for (let c = 0; c < 3; c++) {
+  const cx = THREE.MathUtils.randFloat(-6, 6);
+  const cy = FY + THREE.MathUtils.randFloat(-1, 3);
+  const cz = _airlockZ + THREE.MathUtils.randFloat(8, 20);
+  for (let i = 0; i < 6; i++) {
+    const rock = new THREE.Mesh(new THREE.IcosahedronGeometry(0.05 + Math.random()*0.12, 0), asteroidMat);
+    rock.position.set(
+      cx + THREE.MathUtils.randFloat(-1.2, 1.2),
+      cy + THREE.MathUtils.randFloat(-0.6, 0.6),
+      cz + THREE.MathUtils.randFloat(-1.2, 1.2)
+    );
+    rock.userData.spin = new THREE.Vector3(Math.random()*0.01, Math.random()*0.01, Math.random()*0.01);
+    spaceGroup.add(rock);
+    asteroidClusters.push(rock);
+  }
+}
+
+// ── COMETS — icy bodies with a soft particle tail, slow long-period drift ──
+const comets = [];
+for (let i = 0; i < 2; i++) {
+  const group = new THREE.Group();
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0xdff5ff }));
+  group.add(head);
+  const tailTex = makeRadialTexture('rgba(200,230,255,0.8)', 'rgba(200,230,255,0)');
+  const tailMat = new THREE.SpriteMaterial({ map: tailTex, transparent: true, opacity: 0.5, depthWrite: false });
+  const tail = new THREE.Sprite(tailMat);
+  tail.scale.set(1.4, 0.35, 1);
+  tail.position.set(-0.7, 0, 0);
+  group.add(tail);
+  group.position.set(
+    THREE.MathUtils.randFloat(-15, 15),
+    FY + THREE.MathUtils.randFloat(1, 6),
+    cockpitZ + THREE.MathUtils.randFloat(-40, -15)
+  );
+  spaceGroup.add(group);
+  comets.push({ group, vel: new THREE.Vector3(0.006 + Math.random()*0.004, -0.001, 0.002) });
+}
+
+// ── OCCASIONAL METEORS — quick bright streaks, distinct from the slower shooting stars ──
+const meteors = [];
+for (let i = 0; i < 4; i++) {
+  const geo = new THREE.CylinderGeometry(0.006, 0.001, 0.5, 6);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffe9c7, transparent: true, opacity: 0.85 });
+  const m = new THREE.Mesh(geo, mat);
+  m.rotation.z = Math.PI / 2.3;
+  m.position.set(
+    THREE.MathUtils.randFloat(-20, 20),
+    FY + THREE.MathUtils.randFloat(3, 9),
+    cockpitZ + THREE.MathUtils.randFloat(-30, 5)
+  );
+  m.visible = false;
+  m.userData.active = false;
+  m.userData.cooldown = Math.random() * 8;
+  spaceGroup.add(m);
+  meteors.push(m);
+}
+
 // ── DENSE NEAR STARFIELD — clusters near cockpit side windows ──
-for(let i=0;i<60;i++){
+for(let i=0;i<110;i++){
     const star = new THREE.Mesh(new THREE.SphereGeometry(0.025+Math.random()*0.045, 6, 6), starMat);
     // distribute around the ship exterior
     const side = Math.random() > 0.5 ? 1 : -1;
     star.position.set(
-        side * (cockpitW/2 + 1.5 + Math.random()*12),
+        side * (cockpitW/2 + 1.5 + Math.random()*16),
         FY + Math.random()*3,
-        cockpitZ + THREE.MathUtils.randFloat(-3, 3)
+        cockpitZ + THREE.MathUtils.randFloat(-6, 6)
     );
     spaceGroup.add(star);
 }
 // Some stars behind the ship visible through airlock
-for(let i=0;i<40;i++){
+for(let i=0;i<70;i++){
     const star = new THREE.Mesh(new THREE.SphereGeometry(0.025+Math.random()*0.04, 6, 6), starMat);
     star.position.set(
         THREE.MathUtils.randFloat(-8, 8),
@@ -1150,6 +1513,35 @@ box(1.1, 0.3, 1.7, matPanel, medBay.x + 0.5, FY + 0.32, medBay.z);
   box(0.24, 0.03, 0.24, matYellow, binX, FY + 0.285, binZ);
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// OPTION 3: VITAL DISPLAY HOLOGRAM IN MED BAY
+// ══════════════════════════════════════════════════════════════════════
+if (typeof medBay !== 'undefined' || typeof medBayModule !== 'undefined') {
+  const mb = typeof medBay !== 'undefined' ? medBay : medBayModule;
+
+  // 1. Create the Hologram Screen at the Med Bay location
+  // Color 0x00ff88 gives it a vital sign / medical green glow
+  const medHolo = createHologramScreen(mb.x + 0.55, FY + 1.25, mb.z - 0.45, 0x00ff88);
+
+  // 2. Make it visible (since createHologramScreen creates it as visible=false)
+  medHolo.visible = true;
+
+  // 3. Angle it slightly toward the room/bed center
+  medHolo.rotation.y = -Math.PI / 4; 
+
+  // 4. (Optional) Make it toggle ON/OFF when clicked
+  // If you have a nearby mesh (like a desk or wall box), you can push to interactiveClickables:
+  /*
+  interactiveClickables.push({
+    mesh: medHolo,
+    onClick: () => {
+      medHolo.visible = !medHolo.visible;
+      showMessage(medHolo.visible ? "DIAGNOSTIC DISPLAY: ONLINE" : "DIAGNOSTIC DISPLAY: OFFLINE", 2000, 'inventory');
+    }
+  });
+  */
+}
+
 const habitat = mkModule(-moduleX, junctionB, 0xaaaaaa);
 {
 
@@ -1437,7 +1829,7 @@ scene.add(bunkGroup);
 
     interactiveClickables.push({
       mesh: blueCookie,
-      onClick: () => showMessage('Food Scanner:\n\nSugar: High\nColor: Extremely suspicious\nApproved by Percy.', 5000)
+      onClick: () => showMessage('Food Scanner:\n\nSugar: High\nColor: Extremely suspicious\nApproved by Percy.', 5000, 'inventory')
     });
 
     // A stool tucked under the table, on the room side
@@ -1455,7 +1847,7 @@ scene.add(bunkGroup);
       mesh: lampBulb,
       onClick: () => {
         lampMat.emissiveIntensity = lampMat.emissiveIntensity > 0 ? 0 : 3;
-        showMessage(`NIGHT LIGHT: ${lampMat.emissiveIntensity > 0 ? 'ON' : 'OFF'}`, 2500);
+        showMessage(`NIGHT LIGHT: ${lampMat.emissiveIntensity > 0 ? 'ON' : 'OFF'}`, 2500, 'inventory');
       }
     });
   }
@@ -1816,7 +2208,7 @@ for(let i=0; i<3; i++) {
     mesh: beaconMesh,
     onClick: () => {
       beaconMat.emissiveIntensity = beaconMat.emissiveIntensity > 2 ? 0.2 : 5.0;
-      showMessage(`EMERGENCY SIREN BEACON: ${beaconMat.emissiveIntensity > 2 ? 'ACTIVE WARNING' : 'STANDBY'}`, 3000);
+      showMessage(`EMERGENCY SIREN BEACON: ${beaconMat.emissiveIntensity > 2 ? 'ACTIVE WARNING' : 'STANDBY'}`, 3000, 'warning');
     }
   });
 
@@ -1873,7 +2265,1803 @@ for(let x of [-0.55, 0.55]) {
 cyl(0.07, 0.32, matRed, -0.85, FY + 0.55, airlockZ + 1.4);
 cyl(0.02, 0.08, matMetal, -0.85, FY + 0.74, airlockZ + 1.4);
 
-// ─── ENVIRONMENT ──────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════
+// LOWER DECK — added below the existing ship, reached ONLY via a vertical
+// ladder through a hatch in the existing Airlock floor. Nothing above this
+// point in the file has been modified.
+// ════════════════════════════════════════════════════════════════════════
+
+// Small canvas-text sprite helper (used for the "Regrowing..." sign, etc.)
+function makeTextSprite(text, { color = '#8ffca0', bg = 'rgba(4,20,10,0.85)', font = 'bold 40px Courier New' } = {}) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 96;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(3, 3, c.width - 6, c.height - 6);
+  ctx.fillStyle = color;
+  ctx.font = font;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, c.width / 2, c.height / 2);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(0.5, 0.19, 1);
+  return sprite;
+}
+
+// ── DECK GEOMETRY ──────────────────────────────────────────────────────
+const LOWER_CH = 2.05;
+const LOWER_DROP = 2.55; // vertical distance from upper deck floor to lower deck floor
+const LOWER_FY = FY - LOWER_DROP;
+const LOWER_EY = 1.5;
+const LOWER_CEIL = LOWER_FY + LOWER_CH;
+const blinkingLights = []; // shared ambient-blink registry for the lower deck (LEDs, sensors, beacons)
+
+const hydroCX = 0, hydroCZ = airlockZ + 0.45;
+const hydroW = 3.6, hydroD = 6.2;
+const hydroXMin = hydroCX - hydroW/2 + 0.25, hydroXMax = hydroCX + hydroW/2 - 0.25;
+const hydroZMin = hydroCZ - hydroD/2 + 0.25, hydroZMax = hydroCZ + hydroD/2 - 0.25;
+
+// Ladder position — directly beneath a hatch in the existing Airlock floor, tucked in a
+// clear corner well away from the grow towers so it doesn't crowd the plants below.
+const ladderX = -0.9, ladderZ = airlockZ - airlockD/2 + 0.15;
+
+const matHydroPanel = new THREE.MeshStandardMaterial({ color: 0x6f7a72, roughness: 0.75, metalness: 0.25 });
+const matHydroFloor = new THREE.MeshStandardMaterial({ map: gratingTex, roughness: 0.9, metalness: 0.2, color: 0x8a9a90 });
+const matWaterTank = new THREE.MeshStandardMaterial({ color: 0x2fb0c9, transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.2 });
+const matWater = new THREE.MeshStandardMaterial({ color: 0x1a8ea8, transparent: true, opacity: 0.55, roughness: 0.1, emissive: 0x0b3a44, emissiveIntensity: 0.4 });
+const matLEDGrow = new THREE.MeshStandardMaterial({ color: 0xff2fd6, emissive: 0xff2fd6, emissiveIntensity: 1.8 });
+const matGreenLeaf = new THREE.MeshStandardMaterial({ color: 0x3fae52, roughness: 0.85 });
+const matGreenLeaf2 = new THREE.MeshStandardMaterial({ color: 0x5cd16f, roughness: 0.85 });
+const matTomatoRed = new THREE.MeshStandardMaterial({ color: 0xd6382c, roughness: 0.5, emissive: 0x330000, emissiveIntensity: 0.15 });
+const matPepperOrange = new THREE.MeshStandardMaterial({ color: 0xe8792a, roughness: 0.5 });
+const matWheatGold = new THREE.MeshStandardMaterial({ color: 0xd8b94f, roughness: 0.7 });
+const matStrawberryRed = new THREE.MeshStandardMaterial({ color: 0xe8203f, roughness: 0.45 });
+const matBasilLeaf = new THREE.MeshStandardMaterial({ color: 0x2f8f4a, roughness: 0.85 });
+
+// ── FLOOR / CEILING with a hatch cut for the ladder ──────────────────────
+box(hydroW, 0.1, hydroD, matHydroFloor, hydroCX, LOWER_FY, hydroCZ);
+
+// Ceiling built in 4 strips around the hatch opening so the ladder shaft is actually open
+const hatchSize = 0.62;
+const hHalf = hatchSize / 2;
+
+// Simpler, robust hatch cut: build ceiling as 4 rectangular strips around (ladderX, ladderZ)
+(function buildHydroCeilingWithHatch(){
+  const zTop = hydroCZ - hydroD/2, zBot = hydroCZ + hydroD/2;
+  const xLeft = hydroCX - hydroW/2, xRight = hydroCX + hydroW/2;
+  const hz0 = ladderZ - hHalf, hz1 = ladderZ + hHalf;
+  const hx0 = ladderX - hHalf, hx1 = ladderX + hHalf;
+  // north strip (between room's north wall and hatch)
+  box(hydroW, 0.08, hz0 - zTop, matHydroPanel, hydroCX, LOWER_CEIL, (zTop + hz0)/2);
+  // south strip
+  box(hydroW, 0.08, zBot - hz1, matHydroPanel, hydroCX, LOWER_CEIL, (hz1 + zBot)/2);
+  // west strip (within the hatch's z-span only)
+  box(hx0 - xLeft, 0.08, hatchSize, matHydroPanel, (xLeft + hx0)/2, LOWER_CEIL, ladderZ);
+  // east strip
+  box(xRight - hx1, 0.08, hatchSize, matHydroPanel, (hx1 + xRight)/2, LOWER_CEIL, ladderZ);
+})();
+
+// ── WALLS ─────────────────────────────────────────────────────────────
+box(hydroW, LOWER_CH, 0.08, matHydroPanel, hydroCX, LOWER_FY + LOWER_CH/2, hydroCZ - hydroD/2); // north
+// South wall — built with a doorway opening (corridor to the Galley), not a solid slab
+const galleyDoorW = 1.1, galleyDoorH = 1.7;
+const southWallZ = hydroCZ + hydroD/2;
+box(hydroW, LOWER_CH - galleyDoorH, 0.08, matHydroPanel, hydroCX, LOWER_FY + galleyDoorH + (LOWER_CH - galleyDoorH)/2, southWallZ); // lintel above doorway
+box((hydroW - galleyDoorW)/2, galleyDoorH, 0.08, matHydroPanel, -(hydroW/2) + (hydroW - galleyDoorW)/4, LOWER_FY + galleyDoorH/2, southWallZ); // left of doorway
+box((hydroW - galleyDoorW)/2, galleyDoorH, 0.08, matHydroPanel, (hydroW/2) - (hydroW - galleyDoorW)/4, LOWER_FY + galleyDoorH/2, southWallZ); // right of doorway
+box(0.08, LOWER_CH, hydroD, matHydroPanel, hydroCX - hydroW/2, LOWER_FY + LOWER_CH/2, hydroCZ); // west
+box(0.08, LOWER_CH, hydroD, matHydroPanel, hydroCX + hydroW/2, LOWER_FY + LOWER_CH/2, hydroCZ); // east
+
+// ── LIVING WALL PANELS — dense vertical lettuce-wall facing the south end,
+// purely decorative backdrop (the interactive science towers do the real growing) ──
+const matLivingWallLeaf = new THREE.MeshStandardMaterial({ color: 0x4bbf5e, roughness: 0.85 });
+const matLivingWallLeaf2 = new THREE.MeshStandardMaterial({ color: 0x6fe07f, roughness: 0.85 });
+function addLivingWall(wallX, facing) {
+  const cols = 6, rows = 9;
+  const wallZTop = hydroCZ - hydroD/2 + 0.6;
+  const wallZBot = hydroCZ + hydroD/2 - 0.4;
+  // vertical support frame
+  box(0.04, LOWER_CH - 0.3, wallZBot - wallZTop, matPanel, wallX, LOWER_FY + LOWER_CH/2, (wallZTop + wallZBot)/2);
+  for (let r = 0; r < rows; r++) {
+    const y = LOWER_FY + 0.25 + r * ((LOWER_CH - 0.5) / rows);
+    for (let c = 0; c < cols; c++) {
+      const z = wallZTop + c * ((wallZBot - wallZTop) / (cols - 1));
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.045, 5, 5), (r + c) % 2 ? matLivingWallLeaf : matLivingWallLeaf2);
+      leaf.scale.set(1, 0.7, 1.2);
+      leaf.position.set(wallX + facing * 0.05, y + (Math.random()-0.5)*0.03, z + (Math.random()-0.5)*0.05);
+      scene.add(leaf);
+    }
+  }
+}
+addLivingWall(hydroXMin + 0.03, 1);
+
+// ── OVERHEAD LED BAR RACKS — long horizontal grow-light banks over each tower row ──
+const matLEDBar = new THREE.MeshStandardMaterial({ color: 0xeaf6ff, emissive: 0xbfe8ff, emissiveIntensity: 1.4 });
+for (const tz of [hydroCZ - 1.4, hydroCZ - 0.2, hydroCZ + 1.0, hydroCZ + 2.2]) {
+  const rack = new THREE.Mesh(new THREE.BoxGeometry(hydroW - 0.5, 0.03, 0.08), matPanel);
+  rack.position.set(hydroCX, LOWER_CEIL - 0.12, tz);
+  scene.add(rack);
+  for (let i = 0; i < 5; i++) {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.015, 0.04), matLEDBar);
+    bar.position.set(hydroCX - (hydroW - 0.5)/2 + 0.3 + i * ((hydroW - 1.1) / 4), LOWER_CEIL - 0.13, tz);
+    scene.add(bar);
+    blinkingLights.push(bar);
+  }
+}
+
+// Lighting for the bay
+for (const lz of [hydroCZ - 2.2, hydroCZ - 1.0, hydroCZ + 0.4, hydroCZ + 1.8, hydroCZ + 2.9]) {
+  const pl = new THREE.PointLight(0x66ffb0, 0.5, 6.5);
+  pl.position.set(hydroCX, LOWER_CEIL - 0.2, lz);
+  scene.add(pl);
+}
+// Extra light right at the ladder landing so the hatch/shaft is easy to see
+const ladderLight = new THREE.PointLight(0x00d4ff, 0.7, 4);
+ladderLight.position.set(ladderX, LOWER_FY + 1.6, ladderZ);
+scene.add(ladderLight);
+
+// ── LADDER (through the existing Airlock hatch) ──────────────────────────
+const hatchTopY = FY; // top of the ladder, at the existing airlock floor
+const ladderMidY = (hatchTopY + LOWER_FY) / 2;
+const ladderHeight = hatchTopY - LOWER_FY;
+const matLowerLadder = new THREE.MeshStandardMaterial({ color: 0x555c63, metalness: 0.8, roughness: 0.3 });
+for (const rx of [-0.22, 0.22]) {
+  cyl(0.016, ladderHeight, matLowerLadder, ladderX + rx, ladderMidY, ladderZ);
+}
+const rungCount = Math.floor(ladderHeight / 0.26);
+for (let i = 0; i <= rungCount; i++) {
+  box(0.48, 0.02, 0.035, matLowerLadder, ladderX, hatchTopY - i * 0.26, ladderZ);
+}
+// Hatch rim on the existing airlock floor (added ON TOP of it — airlock itself untouched)
+const matHatchGlow = new THREE.MeshStandardMaterial({ color: 0x0ee5ff, emissive: 0x0ee5ff, emissiveIntensity: 1.6 });
+torus(0.34, 0.025, matHatchGlow, ladderX, FY + 0.03, ladderZ, Math.PI/2);
+torus(0.46, 0.012, matHatchGlow, ladderX, FY + 0.015, ladderZ, Math.PI/2); // wider outer glow ring, easy to spot from across the Airlock
+box(0.7, 0.02, 0.7, matHazard, ladderX, FY + 0.011, ladderZ); // hazard-striped hatch plate, flush with floor
+// A small beacon post beside the hatch, right at eye level, so it reads clearly in the Airlock
+const beaconPost = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 8), matMetal);
+beaconPost.position.set(ladderX + 0.42, FY + 0.28, ladderZ);
+scene.add(beaconPost);
+const beaconLamp = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), matHatchGlow);
+beaconLamp.position.set(ladderX + 0.42, FY + 0.56, ladderZ);
+scene.add(beaconLamp);
+blinkingLights.push(beaconLamp);
+// Local light right at the hatch opening so it's well-lit from inside the Airlock, not just below
+const hatchTopLight = new THREE.PointLight(0x0ee5ff, 0.85, 3.2);
+hatchTopLight.position.set(ladderX, FY + 0.9, ladderZ);
+scene.add(hatchTopLight);
+// Landing ring at the bottom
+torus(0.34, 0.02, matMetal, ladderX, LOWER_FY + 0.03, ladderZ, Math.PI/2);
+
+// Ladder Deck-Change Sign
+
+// Invisible full-height hit target so the ladder is easy to click from either deck
+const ladderHitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+const ladderHit = new THREE.Mesh(new THREE.BoxGeometry(0.55, ladderHeight, 0.55), ladderHitMat);
+ladderHit.position.set(ladderX, ladderMidY, ladderZ);
+scene.add(ladderHit);
+
+interactiveClickables.push({
+  mesh: ladderHit,
+  onClick: () => useLadder()
+});
+
+// ── GROW RACKS, IRRIGATION, TANKS, VENTILATION, SENSORS ────────────────
+// Redesigned as dense NFT-style channel racks (no soil) — two long multi-tier
+// racks flanking a central walkway, closer to a real vertical-farm layout.
+
+// Water reservoir tanks — standing upright against the south wall, past the racks.
+// Each is clickable for a live system readout (unchanged interaction).
+const waterTanks = [];
+let tankIndex = 0;
+for (const tx of [-0.95, 0, 0.95]) {
+  const tankGroup = new THREE.Group();
+  const shell = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.95, 16), matWaterTank);
+  tankGroup.add(shell);
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.19, 0.65, 16), matWater);
+  water.position.y = -0.1;
+  tankGroup.add(water);
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.05, 16), matMetal);
+  cap.position.y = 0.5;
+  tankGroup.add(cap);
+  tankGroup.position.set(tx, LOWER_FY + 0.58, hydroZMax - 0.3);
+  scene.add(tankGroup);
+  waterTanks.push({ group: tankGroup, water });
+
+  tankIndex++;
+  const tankLabel = ['RESERVOIR A', 'RESERVOIR B', 'RESERVOIR C'][tankIndex - 1] || `RESERVOIR ${tankIndex}`;
+  let baseLevel = 60 + Math.floor(Math.random() * 35);
+  interactiveClickables.push({
+    mesh: tankGroup,
+    onClick: () => {
+      baseLevel = Math.max(18, baseLevel - Math.floor(Math.random() * 3));
+      const flow = (0.6 + Math.random() * 1.8).toFixed(2);
+      showMessage(
+        `WATER RESERVOIR — ${tankLabel}\n\nLevel:\n${baseLevel}%\n\nFiltration:\nNominal\n\nRecirculation Flow:\n${flow} L/min\n\nLast Cycle:\nComplete`,
+        4500, 'inventory'
+      );
+    }
+  });
+}
+
+// ── VENTILATION FANS (wall-mounted, spin continuously) ───────────────────
+const hydroFans = [];
+function addVentFan(x, y, z, ry = 0) {
+  const group = new THREE.Group();
+  const housing = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.03, 8, 20), matMetal);
+  group.add(housing);
+  const blades = new THREE.Group();
+  for (let i = 0; i < 4; i++) {
+    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.13, 0.005), matPanel);
+    blade.position.y = 0.065;
+    blade.rotation.z = (Math.PI / 2) * i;
+    blades.add(blade);
+  }
+  group.add(blades);
+  group.position.set(x, y, z);
+  group.rotation.y = ry;
+  scene.add(group);
+  hydroFans.push(blades);
+  return group;
+}
+addVentFan(hydroCX, LOWER_CEIL - 0.25, hydroCZ - hydroD/2 + 0.1, 0);
+addVentFan(hydroXMax - 0.05, LOWER_FY + 1.4, hydroCZ - 1.6, -Math.PI/2);
+
+// ── SENSOR PROBES — small blinking moisture/status sensors ───
+function addSensorProbe(x, y, z) {
+  cyl(0.01, 0.18, matMetal, x, y + 0.09, z);
+  const led = new THREE.Mesh(new THREE.SphereGeometry(0.014, 6, 6), matGlowG);
+  led.position.set(x, y + 0.19, z);
+  scene.add(led);
+  blinkingLights.push(led);
+}
+
+// ── SCIENCE CARD HELPER ──────────────────────────────────────────────────
+function plantScanText(commonName, species, status, origin, water, harvest) {
+  return `SCIENTIFIC SCAN\n\n${commonName}\n\nSpecies:\n${species}\n\nStatus:\n${status}\n\nOrigin:\n${origin}\n\nWater Requirement:\n${water}\n\nHarvest:\n${harvest}`;
+}
+
+// ── RACK GEOMETRY ─────────────────────────────────────────────────────────
+// Two long racks flanking a central walkway, well clear of the ladder corner.
+const matPVCWhite = new THREE.MeshStandardMaterial({ color: 0xe8ecef, roughness: 0.5, metalness: 0.05 });
+const matChannel = new THREE.MeshStandardMaterial({ color: 0xd6dde0, roughness: 0.4, metalness: 0.1 });
+const matNetCup = new THREE.MeshStandardMaterial({ color: 0x2b2f33, roughness: 0.6 });
+const matLEDBar2 = new THREE.MeshStandardMaterial({ color: 0xeaf6ff, emissive: 0xbfe8ff, emissiveIntensity: 1.4 });
+
+const rackZStart = 4.0, rackZEnd = 7.6;
+const rackLen = rackZEnd - rackZStart;
+const rackXs = { west: -1.0, east: 1.0 };
+const tierYs = [LOWER_FY + 0.5, LOWER_FY + 1.0, LOWER_FY + 1.5];
+const PLANTS_PER_TIER = 9;
+const plantSpacing = rackLen / (PLANTS_PER_TIER - 1);
+
+// Vertical support posts + a top irrigation manifold pipe, built once per rack
+function addRackFrame(rackX) {
+  for (const rz of [rackZStart, rackZEnd]) {
+    cyl(0.03, tierYs[2] - LOWER_FY + 0.35, matPVCWhite, rackX, LOWER_FY + (tierYs[2] - LOWER_FY + 0.35)/2, rz);
+  }
+  // A couple of mid-span posts for a fuller rack look
+  for (const rz of [rackZStart + rackLen*0.33, rackZStart + rackLen*0.66]) {
+    cyl(0.022, tierYs[2] - LOWER_FY + 0.35, matPVCWhite, rackX, LOWER_FY + (tierYs[2] - LOWER_FY + 0.35)/2, rz);
+  }
+  // Overhead irrigation manifold pipe supplying every tier
+  addConduit(rackX, tierYs[2] + 0.32, rackZStart + rackLen/2, rackLen + 0.2, 'z');
+  for (let i = 0; i < 4; i++) {
+    addValve(rackX, tierYs[2] + 0.22, rackZStart + 0.3 + i * (rackLen/3.2));
+  }
+}
+
+// One horizontal NFT channel tier: a shallow trough (no soil) with evenly spaced net-cup
+// holes and an LED grow-light bar mounted just underneath the tier above.
+function addChannelTier(rackX, y, isTopTier) {
+  const trough = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.05, rackLen + 0.1), matChannel);
+  trough.position.set(rackX, y, rackZStart + rackLen/2);
+  scene.add(trough);
+  // Return-flow lip on both edges of the trough
+  box(0.02, 0.04, rackLen + 0.1, matPVCWhite, rackX - 0.12, y + 0.02, rackZStart + rackLen/2);
+  box(0.02, 0.04, rackLen + 0.1, matPVCWhite, rackX + 0.12, y + 0.02, rackZStart + rackLen/2);
+  // LED grow-light bar mounted above this tier
+  const ledY = isTopTier ? y + 0.42 : y + 0.42;
+  const ledBar = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.02, rackLen), matLEDBar2);
+  ledBar.position.set(rackX, ledY, rackZStart + rackLen/2);
+  scene.add(ledBar);
+  blinkingLights.push(ledBar);
+  // Small drip sensor at one end
+  addSensorProbe(rackX + 0.16, y + 0.03, rackZStart + 0.15);
+  // Net-cup holes evenly spaced along the channel (purely visual — no soil, hydroponic)
+  const cupPositions = [];
+  for (let i = 0; i < PLANTS_PER_TIER; i++) {
+    const z = rackZStart + i * plantSpacing;
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.02, 0.03, 8), matNetCup);
+    cup.position.set(rackX, y + 0.035, z);
+    scene.add(cup);
+    cupPositions.push(z);
+  }
+  return cupPositions;
+}
+
+addRackFrame(rackXs.west);
+addRackFrame(rackXs.east);
+
+// Nutrient/coolant flow accent line along the ceiling walkway — dedicated material,
+// so animating "flow" doesn't touch the shared matMetal used throughout the rest of the ship.
+const matCoolantFlow = new THREE.MeshStandardMaterial({ color: 0x1a8ea8, emissive: 0x35d6ff, emissiveIntensity: 0.4 });
+const coolantPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, rackLen, 10), matCoolantFlow);
+coolantPipe.rotation.x = Math.PI / 2;
+coolantPipe.position.set(0, LOWER_CEIL - 0.15, rackZStart + rackLen/2);
+scene.add(coolantPipe);
+blinkingLights.push({ material: matCoolantFlow });
+
+// ── PLANT ROW BUILDERS ────────────────────────────────────────────────────
+// Each builds a dense row of small plant clusters along one channel tier and
+// registers ONE interactive clickable for the whole tray (same interaction
+// pattern and popup content as before — only the layout/density has changed).
+
+function buildLettuceRow(rackX, y, cupZs) {
+  const group = new THREE.Group();
+  for (const z of cupZs) {
+    const cluster = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.038, 6, 6), i % 2 ? matGreenLeaf : matGreenLeaf2);
+      const a = (i / 6) * Math.PI * 2;
+      leaf.position.set(Math.cos(a) * 0.055, 0.02 + Math.random()*0.015, Math.sin(a) * 0.055);
+      leaf.scale.set(1, 0.6, 1.3);
+      cluster.add(leaf);
+    }
+    cluster.position.set(rackX, y + 0.05, z);
+    group.add(cluster);
+  }
+  scene.add(group);
+  interactiveClickables.push({ mesh: group, onClick: () => showMessage(
+    plantScanText('Lettuce', 'Lactuca sativa', 'Healthy', 'Mediterranean / Middle East', 'Moderate–High', '45–55 days'), 5500, 'botanical') });
+}
+
+function buildTomatoRow(rackX, y, cupZs) {
+  const group = new THREE.Group();
+  for (const z of cupZs) {
+    const cluster = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.026, 6, 6), matGreenLeaf);
+      leaf.position.set((Math.random()-0.5)*0.1, 0.04 + Math.random()*0.13, (Math.random()-0.5)*0.1);
+      cluster.add(leaf);
+    }
+    for (let i = 0; i < 2; i++) {
+      const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.024, 8, 8), matTomatoRed);
+      fruit.position.set((Math.random()-0.5)*0.08, 0.08 + Math.random()*0.08, (Math.random()-0.5)*0.08);
+      cluster.add(fruit);
+    }
+    cluster.position.set(rackX, y + 0.05, z);
+    group.add(cluster);
+  }
+  scene.add(group);
+  interactiveClickables.push({ mesh: group, onClick: () => showMessage(
+    plantScanText('Tomato', 'Solanum lycopersicum', 'Healthy', 'South America', 'Moderate', '70–90 days'), 5500, 'botanical') });
+}
+
+function buildBasilRow(rackX, y, cupZs) {
+  const group = new THREE.Group();
+  let ladybugPlaced = false;
+  for (const z of cupZs) {
+    const cluster = new THREE.Group();
+    for (let i = 0; i < 8; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 6), matBasilLeaf);
+      leaf.position.set((Math.random()-0.5)*0.1, 0.02 + Math.random()*0.1, (Math.random()-0.5)*0.1);
+      leaf.scale.set(1, 0.5, 1.6);
+      cluster.add(leaf);
+    }
+    cluster.position.set(rackX, y + 0.05, z);
+    group.add(cluster);
+
+    if (!ladybugPlaced) {
+      // ── HIDDEN LADYBUG — tucked into one basil cluster ──────────────────
+      const ladybugBody = new THREE.Mesh(new THREE.SphereGeometry(0.013, 8, 8), new THREE.MeshStandardMaterial({ color: 0xdb2020, roughness: 0.4 }));
+      ladybugBody.scale.set(1, 0.8, 1.3);
+      ladybugBody.position.set(0.025, 0.07, 0.04);
+      cluster.add(ladybugBody);
+      const spotMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+      for (const off of [[-0.006,0.006,0.006],[0.006,0.006,-0.006],[0,0.008,0.011]]) {
+        const spot = new THREE.Mesh(new THREE.SphereGeometry(0.0032, 6, 6), spotMat);
+        spot.position.set(0.025 + off[0], 0.07 + off[1], 0.04 + off[2]);
+        cluster.add(spot);
+      }
+      interactiveClickables.push({ mesh: ladybugBody, onClick: () => showMessage('Biological pest control active.', 3500, 'easter') });
+      ladybugPlaced = true;
+    }
+  }
+  scene.add(group);
+  interactiveClickables.push({ mesh: group, onClick: () => showMessage(
+    plantScanText('Basil', 'Ocimum basilicum', 'Healthy', 'Central Africa / Southeast Asia', 'Moderate', '50–60 days'), 5500, 'botanical') });
+}
+
+function buildPepperRow(rackX, y, cupZs) {
+  const group = new THREE.Group();
+  for (const z of cupZs) {
+    const cluster = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.024, 6, 6), matGreenLeaf2);
+      leaf.position.set((Math.random()-0.5)*0.1, 0.03 + Math.random()*0.1, (Math.random()-0.5)*0.1);
+      cluster.add(leaf);
+    }
+    for (let i = 0; i < 2; i++) {
+      const pepper = new THREE.Mesh(new THREE.ConeGeometry(0.015, 0.05, 6), matPepperOrange);
+      pepper.rotation.x = Math.PI;
+      pepper.position.set((Math.random()-0.5)*0.07, 0.05 + Math.random()*0.07, (Math.random()-0.5)*0.07);
+      cluster.add(pepper);
+    }
+    cluster.position.set(rackX, y + 0.05, z);
+    group.add(cluster);
+  }
+  scene.add(group);
+  interactiveClickables.push({ mesh: group, onClick: () => showMessage(
+    plantScanText('Dwarf Pepper', "Capsicum annuum 'Dwarf'", 'Healthy', 'Central / South America', 'Moderate', '60–75 days'), 5500, 'botanical') });
+}
+
+function buildWheatRow(rackX, y, cupZs) {
+  const group = new THREE.Group();
+  for (const z of cupZs) {
+    const cluster = new THREE.Group();
+    for (let i = 0; i < 9; i++) {
+      const blade = new THREE.Mesh(new THREE.CylinderGeometry(0.0025, 0.004, 0.18, 4), matWheatGold);
+      blade.position.set((Math.random()-0.5)*0.1, 0.09, (Math.random()-0.5)*0.1);
+      blade.rotation.z = (Math.random()-0.5) * 0.3;
+      blade.rotation.x = (Math.random()-0.5) * 0.3;
+      cluster.add(blade);
+      const head = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.005, 0.04, 6), matWheatGold);
+      head.position.set(blade.position.x, 0.18, blade.position.z);
+      cluster.add(head);
+    }
+    cluster.position.set(rackX, y + 0.05, z);
+    group.add(cluster);
+  }
+  scene.add(group);
+  interactiveClickables.push({ mesh: group, onClick: () => showMessage(
+    plantScanText('Wheat', 'Triticum aestivum', 'Healthy', 'Fertile Crescent (Middle East)', 'Low–Moderate', '100–120 days'), 5500, 'botanical') });
+}
+
+// ── STRAWBERRY ROW — harvestable, whole tray regrows automatically ──
+function buildStrawberryRow(rackX, y, cupZs) {
+  const group = new THREE.Group();
+  const allBerryGroups = [];
+  for (const z of cupZs) {
+    const cluster = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.028, 6, 6), matGreenLeaf2);
+      leaf.position.set((Math.random()-0.5)*0.1, 0.02 + Math.random()*0.04, (Math.random()-0.5)*0.1);
+      leaf.scale.set(1, 0.4, 1.2);
+      cluster.add(leaf);
+    }
+    const berries = new THREE.Group();
+    for (let i = 0; i < 3; i++) {
+      const berry = new THREE.Mesh(new THREE.ConeGeometry(0.016, 0.028, 8), matStrawberryRed);
+      berry.rotation.x = Math.PI;
+      berry.position.set((Math.random()-0.5)*0.08, 0.015 + Math.random()*0.02, (Math.random()-0.5)*0.08);
+      berries.add(berry);
+    }
+    cluster.add(berries);
+    allBerryGroups.push(berries);
+    cluster.position.set(rackX, y + 0.05, z);
+    group.add(cluster);
+  }
+  scene.add(group);
+
+  const regrowSign = makeTextSprite('Regrowing...', { color: '#ffcf5c', bg: 'rgba(30,20,0,0.85)' });
+  regrowSign.scale.set(0.34, 0.13, 1);
+  regrowSign.position.set(rackX, y + 0.4, rackZStart + rackLen/2);
+  regrowSign.visible = false;
+  scene.add(regrowSign);
+
+  let harvested = false;
+  interactiveClickables.push({
+    mesh: group,
+    onClick: () => {
+      if (harvested) {
+        showMessage(plantScanText('Strawberry', 'Fragaria × ananassa', 'Regrowing', 'Europe (hybrid origin)', 'Moderate', '60–90 days'), 4000, 'botanical');
+        return;
+      }
+      harvested = true;
+      allBerryGroups.forEach(b => b.visible = false);
+      regrowSign.visible = true;
+      showMessage('Strawberries harvested.', 2500, 'botanical');
+      const regrowDelay = 30000 + Math.random() * 30000; // 30–60 seconds
+      setTimeout(() => {
+        allBerryGroups.forEach(b => b.visible = true);
+        regrowSign.visible = false;
+        harvested = false;
+      }, regrowDelay);
+    }
+  });
+}
+
+// ── ASSEMBLE THE SIX TRAYS (still exactly the six approved crop species) ────
+const westCupsTier0 = addChannelTier(rackXs.west, tierYs[0], false);
+const westCupsTier1 = addChannelTier(rackXs.west, tierYs[1], false);
+const westCupsTier2 = addChannelTier(rackXs.west, tierYs[2], true);
+const eastCupsTier0 = addChannelTier(rackXs.east, tierYs[0], false);
+const eastCupsTier1 = addChannelTier(rackXs.east, tierYs[1], false);
+const eastCupsTier2 = addChannelTier(rackXs.east, tierYs[2], true);
+
+buildLettuceRow(rackXs.west, tierYs[0], westCupsTier0);
+buildBasilRow(rackXs.west, tierYs[1], westCupsTier1);
+buildWheatRow(rackXs.west, tierYs[2], westCupsTier2);
+buildTomatoRow(rackXs.east, tierYs[0], eastCupsTier0);
+buildPepperRow(rackXs.east, tierYs[1], eastCupsTier1);
+buildStrawberryRow(rackXs.east, tierYs[2], eastCupsTier2);
+
+// ════════════════════════════════════════════════════════════════════════
+// LOWER-DECK CORRIDOR + GALLEY — added beyond the Hydroponics Bay's south
+// doorway. Nothing above this point (any other room) has been modified.
+// ════════════════════════════════════════════════════════════════════════
+
+const lowerCorridorW = 1.1;
+const lowerCorridorZStart = southWallZ;
+const lowerCorridorLen = 4.6;
+const lowerCorridorZEnd = lowerCorridorZStart + lowerCorridorLen;
+
+// Room enlarged (was cramped) and all wall-mounted furniture below is positioned
+// flush against the ACTUAL walls, using the reserved margin — not floating off them.
+const galleyW = 3.2, galleyD = 4.4;
+const galleyCX = 0, galleyCZ = lowerCorridorZEnd + galleyD/2;
+const galleyDoorWNorth = galleyDoorW;
+const galleyNorthWallZ = galleyCZ - galleyD/2;
+const galleyWestWallX = galleyCX - galleyW/2, galleyEastWallX = galleyCX + galleyW/2;
+const galleySouthWallZ = galleyCZ + galleyD/2;
+// Asymmetric margins: enough clearance for a real hollow locker on the west wall
+// and the full counter+backsplash depth on the east wall, so nothing gets clipped.
+const galleyXMin = galleyWestWallX + 0.6, galleyXMax = galleyEastWallX - 0.68;
+const galleyZMin = galleyCZ - galleyD/2 + 0.3, galleyZMax = galleyCZ + galleyD/2 - 0.3;
+
+// ── CORRIDOR — straight passage from the Hydroponics Bay to the Galley ───
+box(lowerCorridorW, 0.1, lowerCorridorLen, matHydroFloor, 0, LOWER_FY, lowerCorridorZStart + lowerCorridorLen/2);
+box(lowerCorridorW, 0.08, lowerCorridorLen, matHydroPanel, 0, LOWER_CEIL, lowerCorridorZStart + lowerCorridorLen/2);
+box(0.08, LOWER_CH, lowerCorridorLen, matHydroPanel, -lowerCorridorW/2, LOWER_FY + LOWER_CH/2, lowerCorridorZStart + lowerCorridorLen/2);
+box(0.08, LOWER_CH, lowerCorridorLen, matHydroPanel, lowerCorridorW/2, LOWER_FY + LOWER_CH/2, lowerCorridorZStart + lowerCorridorLen/2);
+addCableRun(lowerCorridorZStart + 0.1, lowerCorridorZEnd - 0.1, 0.3, LOWER_CEIL - 0.1, 0.05);
+
+// Lower corridor lights
+for (const clz of [lowerCorridorZStart + 0.7, lowerCorridorZEnd - 0.7]) {
+  const cl = new THREE.PointLight(0x8fd8ff, 0.4, 3);
+  cl.position.set(0, LOWER_CEIL - 0.15, clz);
+  scene.add(cl);
+  const stripLamp = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 0.06), matGlowB);
+  stripLamp.position.set(0, LOWER_CEIL - 0.06, clz);
+  scene.add(stripLamp);
+  blinkingLights.push(stripLamp);
+}
+
+// ── GALLEY ROOM SHELL — walls with a north doorway opening ───────────────
+box(galleyW, 0.1, galleyD, matHydroFloor, galleyCX, LOWER_FY, galleyCZ);
+box(galleyW, 0.08, galleyD, matHydroPanel, galleyCX, LOWER_CEIL, galleyCZ);
+box((galleyW - galleyDoorWNorth)/2, galleyDoorH, 0.08, matHydroPanel, galleyCX - galleyW/2 + (galleyW - galleyDoorWNorth)/4, LOWER_FY + galleyDoorH/2, galleyNorthWallZ);
+box((galleyW - galleyDoorWNorth)/2, galleyDoorH, 0.08, matHydroPanel, galleyCX + galleyW/2 - (galleyW - galleyDoorWNorth)/4, LOWER_FY + galleyDoorH/2, galleyNorthWallZ);
+box(galleyW, LOWER_CH - galleyDoorH, 0.08, matHydroPanel, galleyCX, LOWER_FY + galleyDoorH + (LOWER_CH - galleyDoorH)/2, galleyNorthWallZ);
+box(galleyW, LOWER_CH, 0.08, matHydroPanel, galleyCX, LOWER_FY + LOWER_CH/2, galleySouthWallZ); // south
+box(0.08, LOWER_CH, galleyD, matHydroPanel, galleyWestWallX, LOWER_FY + LOWER_CH/2, galleyCZ); // west
+box(0.08, LOWER_CH, galleyD, matHydroPanel, galleyEastWallX, LOWER_FY + LOWER_CH/2, galleyCZ); // east
+
+// Ceiling light fixture housings (three, spread across the bigger room)
+for (const glz of [galleyCZ - 1.7, galleyCZ + 0.1, galleyCZ + 1.9]) {
+  box(0.32, 0.04, 0.14, matMetal, galleyCX, LOWER_CEIL - 0.04, glz);
+  const fixturePanel = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.015, 0.1), new THREE.MeshStandardMaterial({ color: 0xfff0d0, emissive: 0xfff0d0, emissiveIntensity: 1.1 }));
+  fixturePanel.position.set(galleyCX, LOWER_CEIL - 0.065, glz);
+  scene.add(fixturePanel);
+  const gl = new THREE.PointLight(0xfff0d0, 0.55, 5);
+  gl.position.set(galleyCX, LOWER_CEIL - 0.2, glz);
+  scene.add(gl);
+}
+
+// ── WINDOW — large, glowing, unmistakable this time. South wall, flanked by two
+// small portholes for a proper "observation nook" feel ──
+const matWindowFrameGlow = new THREE.MeshStandardMaterial({ color: 0x0ee5ff, emissive: 0x0ee5ff, emissiveIntensity: 0.9 });
+box(0.85, 0.6, 0.05, matMetal, galleyCX, LOWER_FY + 1.25, galleySouthWallZ - 0.06); // deep frame recess
+box(0.95, 0.7, 0.02, matWindowFrameGlow, galleyCX, LOWER_FY + 1.25, galleySouthWallZ - 0.045); // glowing outer trim
+const galleyWindowGlass = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 0.52), matCockpitGlass);
+galleyWindowGlass.position.set(galleyCX, LOWER_FY + 1.25, galleySouthWallZ - 0.055);
+scene.add(galleyWindowGlass);
+const galleyWindowLight = new THREE.PointLight(0x6fd8ff, 0.5, 2.2);
+galleyWindowLight.position.set(galleyCX, LOWER_FY + 1.25, galleySouthWallZ - 0.3);
+scene.add(galleyWindowLight);
+for (const px of [galleyCX - 0.75, galleyCX + 0.75]) {
+  torus(0.14, 0.02, matMetal, px, LOWER_FY + 1.25, galleySouthWallZ - 0.04, Math.PI/2);
+  const smallGlass = new THREE.Mesh(new THREE.CircleGeometry(0.12, 18), matCockpitGlass);
+  smallGlass.position.set(px, LOWER_FY + 1.25, galleySouthWallZ - 0.045);
+  scene.add(smallGlass);
+}
+
+// Wall trim — kick-plate around the floor and rivet lines along the wall seams
+box(galleyW, 0.06, 0.01, matMetal, galleyCX, LOWER_FY + 0.03, galleyNorthWallZ + 0.005);
+box(galleyW, 0.06, 0.01, matMetal, galleyCX, LOWER_FY + 0.03, galleySouthWallZ - 0.005);
+box(0.01, 0.06, galleyD, matMetal, galleyWestWallX + 0.005, LOWER_FY + 0.03, galleyCZ);
+box(0.01, 0.06, galleyD, matMetal, galleyEastWallX - 0.005, LOWER_FY + 0.03, galleyCZ);
+for (let i = -1; i <= 1; i++) {
+  bolt(galleyCX + i * (galleyW/2.4), LOWER_FY + 1.9, galleyNorthWallZ + 0.045);
+  bolt(galleyCX + i * (galleyW/2.4), LOWER_FY + 1.9, galleySouthWallZ - 0.045);
+}
+// A colored floor mat under the dining area, for a bit of warmth/color
+box(1.3, 0.008, 1.3, new THREE.MeshStandardMaterial({ color: 0x8a3a2e, roughness: 0.85 }), galleyCX - 0.2, LOWER_FY + 0.055, galleyCZ + 1.9);
+
+// ── LOCKERS — flush against the west wall, properly HOLLOW with food inside,
+// door hinged on its correct room-facing edge (swings sideways into the room) ──
+const matLockerDoor = new THREE.MeshStandardMaterial({ color: 0x6b7278, roughness: 0.5, metalness: 0.45 });
+const matLockerInterior = new THREE.MeshStandardMaterial({ color: 0x3a3f43, roughness: 0.8 });
+const matFoodChunk = new THREE.MeshStandardMaterial({ color: 0xc17a3f, roughness: 0.7 });
+const matBowl = new THREE.MeshStandardMaterial({ color: 0xb8bec4, roughness: 0.35, metalness: 0.5 });
+const lockerAccentColors = [0xd6352f, 0x3f7fd8, 0x3fae52]; // red / blue / green — personalized crew lockers
+const lockerDepth = 0.42, lockerWidth = 0.5, lockerHeight = 1.5;
+const lockerFrontX = galleyWestWallX + lockerDepth;
+const lockerCXcenter = galleyWestWallX + lockerDepth/2;
+for (let i = 0; i < 3; i++) {
+  const lz = galleyNorthWallZ + 0.6 + i * 0.7;
+  const lyTop = LOWER_FY + 0.75 + lockerHeight/2, lyBot = LOWER_FY + 0.75 - lockerHeight/2;
+  // Hollow shell: back, top, bottom, left, right — no front panel (door covers it)
+  box(0.03, lockerHeight, lockerWidth, matPanel, galleyWestWallX + 0.015, LOWER_FY + 0.75, lz); // back
+  box(lockerDepth, 0.03, lockerWidth, matLockerInterior, lockerCXcenter, lyTop, lz); // top
+  box(lockerDepth, 0.03, lockerWidth, matLockerInterior, lockerCXcenter, lyBot, lz); // bottom (floor of locker)
+  box(lockerDepth, lockerHeight, 0.03, matLockerInterior, lockerCXcenter, LOWER_FY + 0.75, lz - lockerWidth/2 + 0.015); // side
+  box(lockerDepth, lockerHeight, 0.03, matLockerInterior, lockerCXcenter, LOWER_FY + 0.75, lz + lockerWidth/2 - 0.015); // side
+  // Interior back wall tint + a small shelf partway up
+  box(lockerDepth - 0.04, 0.02, lockerWidth - 0.04, matLockerInterior, lockerCXcenter, LOWER_FY + 1.15, lz);
+
+  // Door hinged on the north edge of the front face, swinging sideways into the room
+  const hingeZ = lz - lockerWidth/2 + 0.02;
+  const doorGroup = new THREE.Group();
+  doorGroup.position.set(lockerFrontX, LOWER_FY + 0.75, hingeZ);
+  scene.add(doorGroup);
+  const doorMesh = new THREE.Mesh(new THREE.BoxGeometry(0.03, lockerHeight - 0.08, lockerWidth - 0.04), matLockerDoor);
+  doorMesh.position.set(0, 0, (lockerWidth - 0.04)/2);
+  doorMesh.castShadow = true;
+  const accentStripe = new THREE.Mesh(new THREE.BoxGeometry(0.005, lockerHeight - 0.08, 0.04), new THREE.MeshStandardMaterial({ color: lockerAccentColors[i], emissive: lockerAccentColors[i], emissiveIntensity: 0.3 }));
+  accentStripe.position.set(0.018, 0, 0.05);
+  const doorHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.12, 8), matYellow);
+  doorHandle.position.set(0.03, -0.1, lockerWidth - 0.14);
+  const doorVent = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.05, 0.2), matMetal);
+  doorVent.position.set(0.017, 0.5, (lockerWidth - 0.04)/2);
+  doorGroup.add(doorMesh, accentStripe, doorHandle, doorVent);
+  interactiveDoors.push({ mesh: doorMesh, group: doorGroup, closedRot: 0, openRot: Math.PI / 1.7, open: false });
+
+  // ── FOOD STORED INSIDE (secured, not floating loose) — every locker now has real supplies ──
+  const matRationBox = new THREE.MeshStandardMaterial({ color: 0x5a6a3f, roughness: 0.75 });
+  const matCanA = new THREE.MeshStandardMaterial({ color: 0xc23b3b, roughness: 0.4, metalness: 0.5 });
+  const matCanB = new THREE.MeshStandardMaterial({ color: 0x3b7ac2, roughness: 0.4, metalness: 0.5 });
+  const matPouch = new THREE.MeshStandardMaterial({ color: 0xb8bfc4, roughness: 0.35, metalness: 0.6 });
+  const lockerFloorY = LOWER_FY + 0.015;
+  if (i === 0) {
+    // Fruit, secured in a netted bowl, on the shelf
+    cyl(0.08, 0.03, matBowl, lockerCXcenter, LOWER_FY + 1.19, lz);
+    const fruitMats = [
+      new THREE.MeshStandardMaterial({ color: 0xd6352f, roughness: 0.4 }),
+      new THREE.MeshStandardMaterial({ color: 0xf0a824, roughness: 0.5 }),
+      new THREE.MeshStandardMaterial({ color: 0xd8d84a, roughness: 0.45 }),
+    ];
+    for (const fp of [[-0.03,0,0],[0.02,0.01,0.02],[-0.01,0.015,-0.02]]) {
+      const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 10), fruitMats[Math.floor(Math.random()*fruitMats.length)]);
+      fruit.position.set(lockerCXcenter + fp[0], LOWER_FY + 1.22 + fp[1], lz + fp[2]);
+      scene.add(fruit);
+    }
+    // Stacked ration boxes on the locker floor
+    box(0.14, 0.09, 0.18, matRationBox, lockerCXcenter, lockerFloorY + 0.045, lz - 0.08);
+    box(0.14, 0.09, 0.18, matRationBox, lockerCXcenter, lockerFloorY + 0.14, lz - 0.08);
+    // A drink pouch hanging near the door
+    box(0.06, 0.09, 0.03, matPouch, lockerCXcenter + 0.14, LOWER_FY + 1.0, lz + 0.12);
+  } else if (i === 1) {
+    // A meal tray, clipped to the shelf
+    box(0.24, 0.015, 0.16, matBowl, lockerCXcenter, LOWER_FY + 1.16, lz);
+    const platePlate = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.012, 16), new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.35 }));
+    platePlate.rotation.z = Math.PI/2;
+    platePlate.position.set(lockerCXcenter, LOWER_FY + 1.17, lz);
+    scene.add(platePlate);
+    for (const fo of [[-0.015,0.01],[0.012,-0.008],[0,0.015]]) {
+      const bite = new THREE.Mesh(new THREE.SphereGeometry(0.015, 8, 8), matFoodChunk);
+      bite.position.set(lockerCXcenter + 0.01, LOWER_FY + 1.18, lz + fo[0] + fo[1]);
+      scene.add(bite);
+    }
+    // Canned goods lined up on the shelf beside the tray
+    for (const co of [-0.13, -0.09, -0.05]) {
+      cyl(0.025, 0.06, co < -0.09 ? matCanA : matCanB, lockerCXcenter + 0.06, LOWER_FY + 1.2, lz + co);
+    }
+    // A ration box and pouch stored on the floor below
+    box(0.16, 0.1, 0.2, matRationBox, lockerCXcenter, lockerFloorY + 0.05, lz);
+    box(0.06, 0.09, 0.03, matPouch, lockerCXcenter + 0.14, LOWER_FY + 1.0, lz - 0.12);
+  } else {
+    // Spare mugs on the shelf
+    const mugMat = new THREE.MeshStandardMaterial({ color: 0xe6e6e6, roughness: 0.4 });
+    for (const mo of [-0.06, 0.05]) {
+      cyl(0.022, 0.045, mugMat, lockerCXcenter + 0.03, LOWER_FY + 1.19, lz + mo);
+    }
+    // A full row of canned goods on the shelf
+    for (const co of [-0.14, -0.09, -0.04, 0.01]) {
+      cyl(0.024, 0.06, co % 2 === 0 ? matCanA : matCanB, lockerCXcenter - 0.06, LOWER_FY + 1.2, lz + co);
+    }
+    // Two ration boxes and a couple of drink pouches stacked on the floor
+    box(0.16, 0.1, 0.2, matRationBox, lockerCXcenter, lockerFloorY + 0.05, lz - 0.1);
+    box(0.16, 0.1, 0.2, matRationBox, lockerCXcenter, lockerFloorY + 0.05, lz + 0.12);
+    box(0.06, 0.09, 0.03, matPouch, lockerCXcenter + 0.14, LOWER_FY + 1.0, lz);
+    box(0.06, 0.09, 0.03, matPouch, lockerCXcenter + 0.14, LOWER_FY + 1.0, lz + 0.16);
+  }
+}
+
+// ── FOLD-OUT TABLE — tucked into the south end, clear of the main walkway ──
+const tableCX = galleyCX - 0.3, tableCZ = galleySouthWallZ - 0.8;
+box(0.9, 0.04, 0.6, matPanel, tableCX, LOWER_FY + 0.77, tableCZ); // tabletop
+box(0.06, 0.7, 0.06, matMetal, tableCX - 0.4, LOWER_FY + 0.42, tableCZ - 0.25);
+box(0.06, 0.7, 0.06, matMetal, tableCX + 0.4, LOWER_FY + 0.42, tableCZ - 0.25);
+// A couple of stools
+for (const sx of [tableCX - 0.25, tableCX + 0.25]) {
+  cyl(0.14, 0.03, matPanel, sx, LOWER_FY + 0.46, tableCZ + 0.42);
+  cyl(0.03, 0.46, matMetal, sx, LOWER_FY + 0.23, tableCZ + 0.42);
+}
+// fold-out hinge bracket against the wall, showing it stows flat when not in use
+box(0.9, 0.04, 0.1, matMetal, tableCX, LOWER_FY + 0.75, galleySouthWallZ - 0.12);
+// A tray clipped to the tabletop (secured, not loose) with a mug — small, safe amount visible
+const tableTopY = LOWER_FY + 0.79;
+box(0.26, 0.012, 0.18, matBowl, tableCX + 0.15, tableTopY + 0.006, tableCZ + 0.05);
+box(0.26, 0.02, 0.18, new THREE.MeshBasicMaterial({ visible: false }), tableCX + 0.15, tableTopY + 0.02, tableCZ + 0.05); // (clip-rim placeholder, purely conceptual)
+const tableMug = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.025, 0.05, 10), new THREE.MeshStandardMaterial({ color: 0xf0f0f0, roughness: 0.4 }));
+tableMug.position.set(tableCX + 0.15, tableTopY + 0.033, tableCZ + 0.05);
+scene.add(tableMug);
+
+// ── GALLEY COUNTER — flush against the east wall, full cabinetry run ──────
+const matCounterTop = new THREE.MeshStandardMaterial({ color: 0xc9cfd4, roughness: 0.3, metalness: 0.55 });
+const matCabinetDoor = new THREE.MeshStandardMaterial({ color: 0x2e3236, roughness: 0.45, metalness: 0.4 }); // darker, less "all-white"
+const counterX = galleyEastWallX - 0.30;
+const counterZStart = galleyNorthWallZ + 0.4, counterZEnd = galleyNorthWallZ + 3.0;
+const counterLen = counterZEnd - counterZStart;
+const counterZMid = (counterZStart + counterZEnd) / 2;
+const counterTopY = LOWER_FY + 0.53;
+
+box(0.5, 0.5, counterLen, matPanel, counterX, LOWER_FY + 0.25, counterZMid); // cabinet base
+box(0.56, 0.035, counterLen + 0.06, matCounterTop, counterX, counterTopY, counterZMid); // countertop
+box(0.04, 0.38, counterLen, matPanel, counterX + 0.28, LOWER_FY + 0.5 + 0.19, counterZMid); // backsplash
+
+// Cabinet front detail — one continuous dark panel with seam lines
+box(0.015, 0.42, counterLen - 0.1, matCabinetDoor, counterX - 0.245, LOWER_FY + 0.24, counterZMid);
+const seamCount = Math.max(3, Math.floor(counterLen / 0.5));
+for (let i = 0; i < seamCount; i++) {
+  const cz = counterZStart + 0.2 + i * (counterLen - 0.4) / Math.max(1, seamCount - 1);
+  box(0.008, 0.42, 0.01, matMetal, counterX - 0.253, LOWER_FY + 0.24, cz);
+  const knob = new THREE.Mesh(new THREE.SphereGeometry(0.011, 6, 6), matMetal.clone());
+  knob.position.set(counterX - 0.255, LOWER_FY + 0.24, cz + 0.15);
+  scene.add(knob);
+}
+
+// Overhead cabinet above the counter, plus a slim task-light strip underneath it
+box(0.35, 0.45, counterLen * 0.6, matPanel, counterX, LOWER_CEIL - 0.55, counterZMid);
+const underCabLight = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.02, counterLen * 0.55), matGlowB.clone());
+underCabLight.material.emissiveIntensity = 1.2;
+underCabLight.position.set(counterX, LOWER_CEIL - 0.79, counterZMid);
+scene.add(underCabLight);
+blinkingLights.push(underCabLight);
+
+// A small mug shelf, mounted below the overhead cabinet (clear of it now)
+box(0.3, 0.02, 0.14, matMetal, counterX - 0.18, LOWER_FY + 1.2, counterZStart + 0.15);
+const mugMat2 = new THREE.MeshStandardMaterial({ color: 0xe6e6e6, roughness: 0.4 });
+for (const mo of [-0.08, 0.02, 0.1]) {
+  cyl(0.025, 0.05, mugMat2, counterX - 0.18 + mo, LOWER_FY + 1.235, counterZStart + 0.15);
+}
+
+// A small potted plant on the counter — color and life, breaks up the grey/white
+const potMat = new THREE.MeshStandardMaterial({ color: 0x8a5a3a, roughness: 0.8 });
+cyl(0.045, 0.06, potMat, counterX - 0.18, counterTopY + 0.05, counterZEnd - 0.2);
+const plantLeafMat = new THREE.MeshStandardMaterial({ color: 0x3fae52, roughness: 0.8 });
+for (let i = 0; i < 5; i++) {
+  const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.025, 6, 6), plantLeafMat);
+  leaf.scale.set(0.5, 1.4, 0.5);
+  const a = (i/5) * Math.PI * 2;
+  leaf.position.set(counterX - 0.18 + Math.cos(a)*0.02, counterTopY + 0.11, counterZEnd - 0.2 + Math.sin(a)*0.02);
+  leaf.rotation.z = Math.cos(a) * 0.3;
+  scene.add(leaf);
+}
+
+// Trash bin at the south end of the counter run
+cyl(0.13, 0.32, matMetal, counterX, LOWER_FY + 0.16, counterZEnd + 0.2);
+torus(0.13, 0.012, matMetal, counterX, LOWER_FY + 0.32, counterZEnd + 0.2, Math.PI/2);
+
+// Ceiling conduit run above the counter, matching the rest of the ship's detailing
+addCableRun(counterZStart, counterZEnd, counterX - 0.1, LOWER_CEIL - 0.12, 0.05);
+
+// ── MICROWAVE — sitting on the counter, dark tinted glass with a visible steel frame
+// so the door actually reads as a door, not just disappears into the body ──
+const matApplianceGlass = new THREE.MeshStandardMaterial({ color: 0x0c0e10, transparent: true, opacity: 0.62, roughness: 0.15, metalness: 0.3 });
+const microwaveGroup = new THREE.Group();
+const microwaveBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.26, 0.34), new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.5, metalness: 0.5 }));
+microwaveGroup.add(microwaveBody);
+// Steel frame around the door opening so the glass has a clear visible border
+const microwaveFrame = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.23, 0.3), matMetal);
+microwaveFrame.position.set(-0.2, 0, 0);
+microwaveGroup.add(microwaveFrame);
+const microwaveDoor = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.2, 0.27), matApplianceGlass);
+microwaveDoor.position.set(-0.21, 0, 0);
+microwaveGroup.add(microwaveDoor);
+const microwaveHandle = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.2, 0.02), matMetal);
+microwaveHandle.position.set(-0.19, 0, 0.16);
+microwaveGroup.add(microwaveHandle);
+// Digital display + colored control panel (breaks up the grey)
+const microwaveDisplay = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.03, 0.005), new THREE.MeshStandardMaterial({ color: 0xff5522, emissive: 0xff5522, emissiveIntensity: 1.5 }));
+microwaveDisplay.position.set(0.15, 0.09, 0.171);
+microwaveGroup.add(microwaveDisplay);
+const microwaveLED = microwaveDisplay;
+// Visible food inside, on a turntable plate, seen through the glass door
+const microwavePlate = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.01, 16), new THREE.MeshStandardMaterial({ color: 0xe8e8e8, roughness: 0.4 }));
+microwavePlate.rotation.z = Math.PI / 2;
+microwavePlate.position.set(-0.16, -0.08, 0);
+microwaveGroup.add(microwavePlate);
+for (const fo of [[-0.02,0.02],[0.03,-0.02],[-0.04,-0.04]]) {
+  const chunk = new THREE.Mesh(new THREE.SphereGeometry(0.028, 8, 8), matFoodChunk);
+  chunk.scale.set(1, 0.6, 1);
+  chunk.position.set(-0.16, -0.06, fo[0] + fo[1]*0.2);
+  microwaveGroup.add(chunk);
+}
+// Interior glow light, off until heating
+const microwaveGlow = new THREE.PointLight(0xfff2b0, 0, 0.4);
+microwaveGlow.position.set(-0.14, 0, 0);
+microwaveGroup.add(microwaveGlow);
+// Steam wisps — hidden until the meal is ready
+const microwaveSteam = [];
+for (let i = 0; i < 3; i++) {
+  const wisp = new THREE.Mesh(new THREE.PlaneGeometry(0.03, 0.08), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide }));
+  wisp.position.set(-0.2 + i * 0.02, 0.15, (i - 1) * 0.03);
+  wisp.userData.baseY = 0.15;
+  wisp.userData.phase = i * 2.1;
+  microwaveGroup.add(wisp);
+  microwaveSteam.push(wisp);
+}
+microwaveGroup.position.set(counterX, counterTopY + 0.14, counterZStart + 0.7);
+scene.add(microwaveGroup);
+let microwaveBusy = false;
+let microwaveSteaming = false;
+interactiveClickables.push({
+  mesh: microwaveGroup,
+  onClick: () => {
+    if (microwaveBusy) return;
+    microwaveBusy = true;
+    microwaveSteaming = false;
+    showMessage('Heating Meal...', 1400, 'inventory');
+    microwaveGlow.intensity = 1.2;
+    let bars = '';
+    let step = 0;
+    const barInterval = setInterval(() => {
+      bars += '\u2588';
+      step++;
+      showMessage(`Heating Meal...\n\n${bars}`, 900, 'inventory');
+      if (step >= 9) {
+        clearInterval(barInterval);
+        setTimeout(() => {
+          showMessage('Ready.', 2200, 'inventory');
+          microwaveBusy = false;
+          microwaveGlow.intensity = 0;
+          microwaveSteaming = true;
+          setTimeout(() => { microwaveSteaming = false; }, 5000);
+        }, 700);
+      }
+    }, 260);
+  }
+});
+
+// ── COFFEE MACHINE — sitting on the counter, well clear of the microwave,
+// under its own bright reading light. Cup enlarged and pulled forward so it's
+// clearly visible instead of tucked in the body's shadow ──
+const coffeeGroup = new THREE.Group();
+const coffeeBody = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.36, 0.24), new THREE.MeshStandardMaterial({ color: 0x1c1e20, roughness: 0.4, metalness: 0.5 }));
+coffeeGroup.add(coffeeBody);
+const coffeeTank = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.18, 0.16), matApplianceGlass);
+coffeeTank.position.set(0.12, 0.05, 0);
+coffeeGroup.add(coffeeTank);
+const coffeeBeans = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.1, 0.14), new THREE.MeshStandardMaterial({ color: 0x3a2818, roughness: 0.9 }));
+coffeeBeans.position.set(0.12, 0.02, 0);
+coffeeGroup.add(coffeeBeans);
+// A red accent power button — color detail
+const coffeeButton = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.01, 10), new THREE.MeshStandardMaterial({ color: 0xdd2222, emissive: 0xdd2222, emissiveIntensity: 0.6 }));
+coffeeButton.rotation.x = Math.PI/2;
+coffeeButton.position.set(-0.08, 0.15, 0.121);
+coffeeGroup.add(coffeeButton);
+const coffeeDrip = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.02, 0.14), matMetal);
+coffeeDrip.position.set(-0.06, -0.16, 0.09);
+coffeeGroup.add(coffeeDrip);
+// Cup — enlarged, pulled forward off the front edge of the machine, clearly visible
+const coffeeCup = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.036, 0.075, 12), new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.35 }));
+coffeeCup.position.set(-0.06, -0.135, 0.14);
+coffeeGroup.add(coffeeCup);
+const coffeeCupHandle = new THREE.Mesh(new THREE.TorusGeometry(0.028, 0.007, 8, 12), new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.35 }));
+coffeeCupHandle.rotation.y = Math.PI / 2;
+coffeeCupHandle.position.set(-0.06, -0.135, 0.185);
+coffeeGroup.add(coffeeCupHandle);
+const coffeeSaucer = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.006, 14), new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.35 }));
+coffeeSaucer.position.set(-0.06, -0.172, 0.14);
+coffeeGroup.add(coffeeSaucer);
+// Liquid that actually fills up (scaled from 0 height as it "pours") instead of popping in
+const coffeeLiquidMat = new THREE.MeshStandardMaterial({ color: 0x3a2210, roughness: 0.25 });
+const coffeeLiquid = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.038, 0.065, 12), coffeeLiquidMat);
+coffeeLiquid.position.set(-0.06, -0.16, 0.14);
+coffeeLiquid.scale.y = 0.001;
+coffeeGroup.add(coffeeLiquid);
+// Visible pour stream from the drip spout down into the cup
+const coffeeStream = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.005, 0.06, 6), coffeeLiquidMat);
+coffeeStream.position.set(-0.06, -0.135, 0.14);
+coffeeStream.visible = false;
+coffeeGroup.add(coffeeStream);
+// Steam wisps rising off the fresh coffee
+const coffeeSteam = [];
+for (let i = 0; i < 2; i++) {
+  const wisp = new THREE.Mesh(new THREE.PlaneGeometry(0.03, 0.08), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide }));
+  wisp.position.set(-0.06 + i * 0.018, -0.09, 0.14);
+  wisp.userData.phase = i * 3;
+  coffeeGroup.add(wisp);
+  coffeeSteam.push(wisp);
+}
+const coffeeIndicator = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 6), matGlowG);
+coffeeIndicator.position.set(0.1, 0.15, 0.13);
+coffeeGroup.add(coffeeIndicator);
+blinkingLights.push(coffeeIndicator);
+coffeeGroup.position.set(counterX, counterTopY + 0.18, counterZStart + 1.5);
+coffeeGroup.rotation.y = -Math.PI / 2; // was built facing along +z (sideways); rotate to face into the room
+scene.add(coffeeGroup);
+// A small bright spotlight right over the coffee machine so it's unmistakable
+const coffeeSpot = new THREE.PointLight(0xfff2d0, 1.0, 1.6);
+coffeeSpot.position.set(counterX, counterTopY + 0.6, counterZStart + 1.5);
+scene.add(coffeeSpot);
+let coffeeBusy = false;
+let coffeeSteaming = false;
+interactiveClickables.push({
+  mesh: coffeeGroup,
+  onClick: () => {
+    if (coffeeBusy) return;
+    if (Math.random() < 0.28) {
+      showMessage('ERROR\n\nCoffee supply depleted.\n\nCrew morale reduced.', 3200, 'warning');
+      coffeeLiquid.scale.y = 0.001;
+      coffeeSteaming = false;
+      return;
+    }
+    coffeeBusy = true;
+    coffeeSteaming = false;
+    showMessage('Dispensing Coffee...', 1800, 'inventory');
+    coffeeLiquid.scale.y = 0.001;
+    coffeeStream.visible = true;
+    const pourStart = clock.getElapsedTime();
+    const pourDuration = 1.5;
+    function pourStep() {
+      const t = Math.min(1, (clock.getElapsedTime() - pourStart) / pourDuration);
+      coffeeLiquid.scale.y = Math.max(0.001, t);
+      coffeeLiquid.position.y = -0.16 + (t * 0.065) / 2;
+      if (t < 1) {
+        requestAnimationFrame(pourStep);
+      } else {
+        coffeeStream.visible = false;
+        coffeeBusy = false;
+        coffeeSteaming = true;
+        setTimeout(() => { coffeeSteaming = false; }, 6000);
+      }
+    }
+    pourStep();
+  }
+});
+
+// ── WATER DISPENSER — floor-standing at the south end of the counter run ──
+const dispenserGroup = new THREE.Group();
+const dispenserBody = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.72, 0.28), new THREE.MeshStandardMaterial({ color: 0x24272a, roughness: 0.5, metalness: 0.4 }));
+dispenserGroup.add(dispenserBody);
+const dispenserJug = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.3, 12), matWaterTank);
+dispenserJug.position.y = 0.48;
+dispenserGroup.add(dispenserJug);
+const dispenserSpout = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.03, 0.04), matMetal);
+dispenserSpout.position.set(0, 0.05, 0.15);
+dispenserGroup.add(dispenserSpout);
+const dispenserLED = new THREE.Mesh(new THREE.SphereGeometry(0.014, 6, 6), matGlowB);
+dispenserLED.position.set(0, 0.14, 0.15);
+dispenserGroup.add(dispenserLED);
+blinkingLights.push(dispenserLED);
+dispenserGroup.position.set(counterX, LOWER_FY + 0.36, counterZEnd + 0.55);
+scene.add(dispenserGroup);
+interactiveClickables.push({
+  mesh: dispenserGroup,
+  onClick: () => showMessage('Water Dispenser\n\nDispensing filtered water...\n\nReclaimed & Purified: 99.4%', 3000, 'inventory')
+});
+
+// ── SNACK DRAWER — a REAL sliding drawer: an open-top box with visible walls and
+// contents, that actually pulls out on click (not just a flat front panel) ──
+const matDrawerBox = new THREE.MeshStandardMaterial({ color: 0x4a5056, roughness: 0.5, metalness: 0.4 });
+const matProteinBar = new THREE.MeshStandardMaterial({ color: 0x8a5a2e, roughness: 0.6 });
+const matBlueCookie = new THREE.MeshStandardMaterial({ color: 0x3f7fd8, roughness: 0.55 });
+const matMango = new THREE.MeshStandardMaterial({ color: 0xf5a338, roughness: 0.5 });
+const matChocolate = new THREE.MeshStandardMaterial({ color: 0x3b2417, roughness: 0.4 });
+const snackDrawerZ = counterZStart + 2.0;
+const snackDrawerGroup = new THREE.Group();
+scene.add(snackDrawerGroup); // stays at origin — children below use absolute world coords
+const drawerFrontY = LOWER_FY + 0.42;
+const drawerFront = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.16, 0.42), matDrawerBox);
+drawerFront.position.set(counterX - 0.3, drawerFrontY, snackDrawerZ);
+const drawerBottom = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.02, 0.4), matDrawerBox);
+drawerBottom.position.set(counterX - 0.09, drawerFrontY - 0.06, snackDrawerZ);
+const drawerLeft = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.13, 0.02), matDrawerBox);
+drawerLeft.position.set(counterX - 0.09, drawerFrontY, snackDrawerZ - 0.19);
+const drawerRight = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.13, 0.02), matDrawerBox);
+drawerRight.position.set(counterX - 0.09, drawerFrontY, snackDrawerZ + 0.19);
+const drawerHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.28, 8), matYellow);
+drawerHandle.rotation.x = Math.PI/2;
+drawerHandle.position.set(counterX - 0.335, drawerFrontY, snackDrawerZ);
+// Visible snack contents, sitting inside the drawer
+const proteinBarMesh = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.02, 0.035), matProteinBar);
+proteinBarMesh.position.set(counterX - 0.15, drawerFrontY - 0.02, snackDrawerZ - 0.1);
+const cookieMeshes = [];
+for (const co of [[-0.02,0],[0.02,0],[0,0.03]]) {
+  const cookie = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.01, 10), matBlueCookie);
+  cookie.position.set(counterX - 0.15 + co[0], drawerFrontY - 0.02, snackDrawerZ + 0.02 + co[1]);
+  cookieMeshes.push(cookie);
+}
+const mangoMesh = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), matMango);
+mangoMesh.scale.set(1.4, 0.5, 1);
+mangoMesh.position.set(counterX - 0.02, drawerFrontY - 0.025, snackDrawerZ - 0.12);
+const chocolateMesh = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.018, 0.03), matChocolate);
+chocolateMesh.position.set(counterX - 0.02, drawerFrontY - 0.022, snackDrawerZ + 0.11);
+snackDrawerGroup.add(drawerFront, drawerBottom, drawerLeft, drawerRight, drawerHandle, proteinBarMesh, mangoMesh, chocolateMesh, ...cookieMeshes);
+
+const snackItems = ['Protein Bar', 'Blue Cookies', 'Dried Mango', 'Emergency Chocolate'];
+let snackDrawerOpen = false;
+let snackDrawerBusy = false;
+interactiveClickables.push({
+  mesh: drawerFront,
+  onClick: () => {
+    if (snackDrawerBusy) return;
+    snackDrawerBusy = true;
+    const opening = !snackDrawerOpen;
+    snackDrawerOpen = opening;
+    const startZ = snackDrawerGroup.position.x; // (unused axis guard)
+    const startX = snackDrawerGroup.position.x;
+    const targetX = opening ? -0.32 : 0;
+    const t0 = clock.getElapsedTime();
+    function slideStep() {
+      const t = Math.min(1, (clock.getElapsedTime() - t0) / 0.5);
+      snackDrawerGroup.position.x = startX + (targetX - startX) * t;
+      if (t < 1) {
+        requestAnimationFrame(slideStep);
+      } else {
+        snackDrawerBusy = false;
+      }
+    }
+    slideStep();
+    if (opening) {
+      const item = snackItems[Math.floor(Math.random() * snackItems.length)];
+      showMessage(`Snack Drawer\n\nYou grabbed:\n${item}`, 3000, 'inventory');
+    }
+  }
+});
+
+// ── WAYFINDING PLAQUE — flush wall-mounted (not a floating sign), just inside the doorway ──
+const matPlaque = new THREE.MeshStandardMaterial({ color: 0x1c2226, roughness: 0.4, metalness: 0.5, emissive: 0x0ee5ff, emissiveIntensity: 0.25 });
+box(0.5, 0.14, 0.015, matPlaque, galleyCX, LOWER_FY + 1.55, galleyNorthWallZ - 0.045);
+
+// ── FLOATING SPOON ─────────────────────────────────────────────────────
+// A small ambient easter egg — hovers near the table and always drifts gently;
+// clicking it kicks off a slow, deliberate spin.
+const floatingSpoonMat = new THREE.MeshStandardMaterial({ color: 0xd8dde2, roughness: 0.25, metalness: 0.85 });
+const floatingSpoon = new THREE.Group();
+const spoonHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.14, 8), floatingSpoonMat);
+spoonHandle.position.y = -0.07;
+floatingSpoon.add(spoonHandle);
+const spoonHead = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 8), floatingSpoonMat);
+spoonHead.scale.set(0.7, 1, 1.3);
+spoonHead.position.y = 0.03;
+floatingSpoon.add(spoonHead);
+floatingSpoon.position.set(tableCX + 0.35, LOWER_FY + 1.15, tableCZ - 0.1);
+floatingSpoon.userData.spinSpeed = 0.15;
+scene.add(floatingSpoon);
+interactiveClickables.push({
+  mesh: floatingSpoon,
+  onClick: () => {
+    floatingSpoon.userData.spinSpeed = 2.4;
+    showMessage('The spoon spins for no apparent reason.', 3000, 'easter');
+    setTimeout(() => { floatingSpoon.userData.spinSpeed = 0.15; }, 4000);
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════
+// ECLSS BAY (Environmental Control & Life Support System) — a THIRD deck,
+// reached by a second ladder dropped through a new hatch in the floor of the
+// existing Lower Corridor. The corridor's own floor/walls are not touched —
+// the hatch rim is laid ON TOP of the existing floor, exactly like the first
+// ladder's hatch was added on top of the Airlock floor. No existing room
+// (Hydroponics Bay, Lower Corridor, Galley, or any upper-deck room) is
+// modified below.
+// ════════════════════════════════════════════════════════════════════════
+
+const THIRD_CH = 2.05;
+const THIRD_DROP = 2.5;
+const THIRD_FY = LOWER_FY - THIRD_DROP;
+const THIRD_EY = 1.5;
+const THIRD_CEIL = THIRD_FY + THIRD_CH;
+
+// Second ladder — lands well inside the existing Lower Corridor's floor,
+// clear of its side walls.
+const ladder2X = 0;
+const ladder2Z = lowerCorridorZStart + 1.4;
+
+const eclssW = 3.0, eclssD = 4.2;
+const eclssCX = 0, eclssCZ = ladder2Z;
+const eclssXMin = eclssCX - eclssW/2 + 0.3, eclssXMax = eclssCX + eclssW/2 - 0.3;
+const eclssZMin = eclssCZ - eclssD/2 + 0.3, eclssZMax = eclssCZ + eclssD/2 - 0.3;
+const eXW = eclssCX - eclssW/2 + 0.35, eXE = eclssCX + eclssW/2 - 0.35;
+const eZN = eclssCZ - eclssD/2 + 0.35, eZS = eclssCZ + eclssD/2 - 0.35;
+
+// Dedicated ECLSS materials — new instances, so nothing elsewhere shares or
+// is affected by their pulsing/emissive animation.
+const matEclssUnit = new THREE.MeshStandardMaterial({ color: 0xd8dfe2, roughness: 0.45, metalness: 0.35 });
+const matEclssUnitDark = new THREE.MeshStandardMaterial({ color: 0x3a4248, roughness: 0.5, metalness: 0.4 });
+const matFilterMesh = new THREE.MeshStandardMaterial({ color: 0xbfc8cc, roughness: 0.6, metalness: 0.5 });
+const matO2Accent = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 1.8 });
+const matCO2Accent = new THREE.MeshStandardMaterial({ color: 0xff6633, emissive: 0xff6633, emissiveIntensity: 1.6 });
+const matPressureAccent = new THREE.MeshStandardMaterial({ color: 0x00d4ff, emissive: 0x00d4ff, emissiveIntensity: 1.6 });
+const matEclssScreenGlow = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00ff88, emissiveIntensity: 1.2 });
+const matEmergencyRed = new THREE.MeshStandardMaterial({ color: 0xff2a2a, emissive: 0xff2a2a, emissiveIntensity: 1.5 });
+
+// ── ROOM SHELL ─────────────────────────────────────────────────────────
+box(eclssW, 0.1, eclssD, matHydroFloor, eclssCX, THIRD_FY, eclssCZ);
+
+const hatchSize2 = 0.62, hHalf2 = hatchSize2 / 2;
+(function buildEclssCeilingWithHatch(){
+  const zTop = eclssCZ - eclssD/2, zBot = eclssCZ + eclssD/2;
+  const xLeft = eclssCX - eclssW/2, xRight = eclssCX + eclssW/2;
+  const hz0 = ladder2Z - hHalf2, hz1 = ladder2Z + hHalf2;
+  const hx0 = ladder2X - hHalf2, hx1 = ladder2X + hHalf2;
+  box(eclssW, 0.08, hz0 - zTop, matHydroPanel, eclssCX, THIRD_CEIL, (zTop + hz0)/2);
+  box(eclssW, 0.08, zBot - hz1, matHydroPanel, eclssCX, THIRD_CEIL, (hz1 + zBot)/2);
+  box(hx0 - xLeft, 0.08, hatchSize2, matHydroPanel, (xLeft + hx0)/2, THIRD_CEIL, ladder2Z);
+  box(xRight - hx1, 0.08, hatchSize2, matHydroPanel, (hx1 + xRight)/2, THIRD_CEIL, ladder2Z);
+})();
+
+box(eclssW, THIRD_CH, 0.08, matHydroPanel, eclssCX, THIRD_FY + THIRD_CH/2, eclssCZ - eclssD/2); // north
+// South wall — built with a doorway opening (to the Bathroom), not a solid slab
+const bathDoorW = 0.8, bathDoorH = 1.7;
+const eclssSouthWallZ = eclssCZ + eclssD/2;
+box(eclssW, THIRD_CH - bathDoorH, 0.08, matHydroPanel, eclssCX, THIRD_FY + bathDoorH + (THIRD_CH - bathDoorH)/2, eclssSouthWallZ); // lintel
+box((eclssW - bathDoorW)/2, bathDoorH, 0.08, matHydroPanel, eclssCX - eclssW/2 + (eclssW - bathDoorW)/4, THIRD_FY + bathDoorH/2, eclssSouthWallZ); // left of doorway
+box((eclssW - bathDoorW)/2, bathDoorH, 0.08, matHydroPanel, eclssCX + eclssW/2 - (eclssW - bathDoorW)/4, THIRD_FY + bathDoorH/2, eclssSouthWallZ); // right of doorway
+box(0.08, THIRD_CH, eclssD, matHydroPanel, eclssCX - eclssW/2, THIRD_FY + THIRD_CH/2, eclssCZ); // west
+box(0.08, THIRD_CH, eclssD, matHydroPanel, eclssCX + eclssW/2, THIRD_FY + THIRD_CH/2, eclssCZ); // east
+
+for (const lz of [eclssCZ - 1.5, eclssCZ, eclssCZ + 1.5]) {
+  const pl = new THREE.PointLight(0x66ffcc, 0.5, 6);
+  pl.position.set(eclssCX, THIRD_CEIL - 0.2, lz);
+  scene.add(pl);
+}
+
+// ── SECOND LADDER (through a new hatch in the Lower Corridor's floor) ────
+const hatchTopY2 = LOWER_FY;
+const ladder2MidY = (hatchTopY2 + THIRD_FY) / 2;
+const ladder2Height = hatchTopY2 - THIRD_FY;
+for (const rx of [-0.18, 0.18]) {
+  cyl(0.014, ladder2Height, matLowerLadder, ladder2X + rx, ladder2MidY, ladder2Z);
+}
+const rung2Count = Math.floor(ladder2Height / 0.26);
+for (let i = 0; i <= rung2Count; i++) {
+  box(0.4, 0.02, 0.03, matLowerLadder, ladder2X, hatchTopY2 - i * 0.26, ladder2Z);
+}
+// Hatch rim laid on top of the EXISTING Lower Corridor floor — that floor itself is untouched.
+torus(0.3, 0.022, matHatchGlow, ladder2X, LOWER_FY + 0.03, ladder2Z, Math.PI/2);
+box(0.6, 0.018, 0.6, matHazard, ladder2X, LOWER_FY + 0.01, ladder2Z);
+const hatch2Light = new THREE.PointLight(0x0ee5ff, 0.7, 3);
+hatch2Light.position.set(ladder2X, LOWER_FY + 0.8, ladder2Z);
+scene.add(hatch2Light);
+torus(0.3, 0.018, matMetal, ladder2X, THIRD_FY + 0.03, ladder2Z, Math.PI/2);
+
+const ladder2HitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+const ladder2Hit = new THREE.Mesh(new THREE.BoxGeometry(0.5, ladder2Height, 0.5), ladder2HitMat);
+ladder2Hit.position.set(ladder2X, ladder2MidY, ladder2Z);
+scene.add(ladder2Hit);
+interactiveClickables.push({ mesh: ladder2Hit, onClick: () => useLadder2() });
+
+// ── OXYGEN GENERATORS — west wall, north end ──────────────────────────────
+for (let i = 0; i < 2; i++) {
+  const ox = eXW, oz = eZN + i * 0.85;
+  cyl(0.22, 1.4, matEclssUnit, ox, THIRD_FY + 0.72, oz);
+  cyl(0.24, 0.05, matEclssUnitDark, ox, THIRD_FY + 1.41, oz);
+  blinkingLights.push(torus(0.22, 0.015, matO2Accent, ox, THIRD_FY + 1.0, oz, Math.PI/2));
+}
+{
+  const tag = makeTextSprite('O2 GENERATOR', { color: '#8ffca0', bg: 'rgba(4,20,10,0.85)' });
+  tag.scale.set(0.26, 0.09, 1);
+  tag.position.set(eXW + 0.35, THIRD_FY + 1.15, eZN + 0.4);
+  scene.add(tag);
+}
+
+// ── CO2 SCRUBBERS — east wall, north end ──────────────────────────────────
+for (let i = 0; i < 2; i++) {
+  const cx2 = eXE, cz2 = eZN + i * 0.85;
+  box(0.34, 1.2, 0.34, matEclssUnitDark, cx2, THIRD_FY + 0.65, cz2);
+  box(0.36, 0.08, 0.36, matEclssUnit, cx2, THIRD_FY + 1.26, cz2);
+  box(0.3, 0.9, 0.02, matFilterMesh, cx2 - 0.16, THIRD_FY + 0.65, cz2);
+  blinkingLights.push(cyl(0.025, 0.04, matCO2Accent, cx2, THIRD_FY + 1.0, cz2 - 0.18, Math.PI/2, 0));
+}
+{
+  const tag = makeTextSprite('CO2 SCRUBBER', { color: '#ff9966', bg: 'rgba(30,10,4,0.85)' });
+  tag.scale.set(0.3, 0.09, 1);
+  tag.position.set(eXE - 0.45, THIRD_FY + 1.15, eZN + 0.4);
+  scene.add(tag);
+}
+
+// ── PRESSURE TANKS — west wall, south end ─────────────────────────────────
+for (let i = 0; i < 3; i++) {
+  const tx = eXW + (i - 1) * 0.32, tz = eZS;
+  cyl(0.11, 0.9, matEclssUnit, tx, THIRD_FY + 0.48, tz);
+  cyl(0.06, 0.1, matMetal, tx, THIRD_FY + 0.95, tz);
+  blinkingLights.push(cyl(0.03, 0.02, matPressureAccent, tx, THIRD_FY + 1.0, tz, Math.PI/2, 0));
+}
+{
+  const tag = makeTextSprite('PRESSURE TANKS', { color: '#8fd8ff', bg: 'rgba(4,16,26,0.85)' });
+  tag.scale.set(0.3, 0.09, 1);
+  tag.position.set(eXW, THIRD_FY + 1.35, eZS + 0.42);
+  scene.add(tag);
+}
+box(0.9, 0.005, 0.5, matHazard, eXW, THIRD_FY + 0.055, eZS);
+
+// ── WATER RECYCLING UNIT — east wall, south end ───────────────────────────
+const wrX = eXE, wrZ = eZS;
+const waterUnitBody = box(0.5, 0.9, 0.4, matEclssUnitDark, wrX, THIRD_FY + 0.45, wrZ);
+cyl(0.14, 0.5, matWaterTank, wrX - 0.1, THIRD_FY + 0.8, wrZ - 0.05);
+cyl(0.11, 0.34, matWater, wrX - 0.1, THIRD_FY + 0.75, wrZ - 0.05);
+blinkingLights.push(cyl(0.025, 0.04, matPressureAccent, wrX + 0.2, THIRD_FY + 0.9, wrZ, Math.PI/2, 0));
+{
+  const tag = makeTextSprite('WATER RECYCLER', { color: '#6fd8ff', bg: 'rgba(4,16,26,0.85)' });
+  tag.scale.set(0.32, 0.09, 1);
+  tag.position.set(wrX, THIRD_FY + 1.05, wrZ - 0.42);
+  scene.add(tag);
+}
+interactiveClickables.push({
+  mesh: waterUnitBody,
+  onClick: () => showMessage('WATER RECLAMATION\n\nEfficiency:\n98.7%\n\nPotable Output:\nNominal', 3800, 'inventory')
+});
+
+// ── OVERHEAD PIPE GANTRY, VALVES & FILTER CANISTERS ───────────────────────
+addConduit(eclssCX, THIRD_CEIL - 0.15, eclssCZ, eclssD - 0.4, 'z');
+for (let i = 0; i < 4; i++) {
+  addValve(eclssCX, THIRD_CEIL - 0.25, eclssCZ - eclssD/2 + 0.6 + i * (eclssD - 1.2) / 3);
+}
+addCableRun(eclssCZ - eclssD/2 + 0.2, eclssCZ + eclssD/2 - 0.2, eclssCX - 0.3, THIRD_CEIL - 0.1, 0.04);
+
+for (let i = 0; i < 3; i++) {
+  const fz = eclssCZ - 1.0 + i * 1.0;
+  cyl(0.08, 0.3, matEclssUnit, eclssCX, THIRD_CEIL - 0.45, fz);
+  for (let r = 0; r < 4; r++) {
+    box(0.17, 0.015, 0.02, matFilterMesh, eclssCX, THIRD_CEIL - 0.33 + r * 0.07, fz);
+  }
+  blinkingLights.push(cyl(0.015, 0.02, matO2Accent, eclssCX, THIRD_CEIL - 0.6, fz, Math.PI/2, 0));
+}
+{
+  const tag = makeTextSprite('FILTRATION', { color: '#cfd8dd', bg: 'rgba(10,14,16,0.85)' });
+  tag.scale.set(0.26, 0.09, 1);
+  tag.position.set(eclssCX + 0.45, THIRD_CEIL - 0.45, eclssCZ);
+  scene.add(tag);
+}
+
+// ── VENTILATION FANS (spin continuously via the existing hydroFans loop) ──
+addVentFan(eclssCX, THIRD_CEIL - 0.25, eclssCZ - eclssD/2 + 0.1, 0);
+addVentFan(eXE - 0.05, THIRD_FY + 1.3, eclssCZ, -Math.PI/2);
+
+// ── MAIN ECLSS CONSOLE — wall-mounted on the north wall, readouts + override ──
+const eclNorthZ = eclssCZ - eclssD/2 + 0.08;
+box(1.0, 0.75, 0.06, matEclssUnitDark, eclssCX, THIRD_FY + 1.15, eclNorthZ);
+
+const statusScreen = box(0.55, 0.3, 0.02, matScreen, eclssCX - 0.2, THIRD_FY + 1.25, eclNorthZ + 0.04);
+blinkingLights.push(box(0.5, 0.012, 0.01, matO2Accent, eclssCX - 0.2, THIRD_FY + 1.33, eclNorthZ + 0.045));
+blinkingLights.push(box(0.5, 0.012, 0.01, matPressureAccent, eclssCX - 0.2, THIRD_FY + 1.18, eclNorthZ + 0.045));
+interactiveClickables.push({
+  mesh: statusScreen,
+  onClick: () => showMessage('ECLSS STATUS\n\nO₂\n20.9%\n\nCabin Pressure\n101.3 kPa\n\nAll systems nominal.', 4500, 'log')
+});
+
+const overridePanel = box(0.22, 0.26, 0.04, matEclssUnitDark, eclssCX + 0.35, THIRD_FY + 1.15, eclNorthZ + 0.04);
+const overrideBtn = cyl(0.06, 0.03, matEmergencyRed, eclssCX + 0.35, THIRD_FY + 1.15, eclNorthZ + 0.08, Math.PI/2, 0);
+blinkingLights.push(overrideBtn);
+let eclssOverrideArmed = false;
+interactiveClickables.push({
+  mesh: overrideBtn,
+  onClick: () => {
+    eclssOverrideArmed = !eclssOverrideArmed;
+    showMessage(
+      eclssOverrideArmed
+        ? 'EMERGENCY OVERRIDE ENGAGED\n\nManual life-support control active.\nAutomated regulation suspended.'
+        : 'Emergency override disengaged.\n\nAutomated regulation restored.',
+      4000, 'warning'
+    );
+  }
+});
+{
+  const tag = makeTextSprite('EMERGENCY OVERRIDE', { color: '#ff6666', bg: 'rgba(30,0,0,0.85)' });
+  tag.scale.set(0.34, 0.09, 1);
+  tag.position.set(eclssCX + 0.35, THIRD_FY + 1.5, eclNorthZ + 0.1);
+  scene.add(tag);
+}
+
+// A couple of smaller ambient secondary monitors on the side walls
+for (const [mx, mz] of [[eXW + 0.12, eZS - 0.6], [eXE - 0.12, eZN - 0.3]]) {
+  box(0.3, 0.2, 0.02, matScreen, mx, THIRD_FY + 1.4, mz);
+  blinkingLights.push(box(0.26, 0.01, 0.01, matEclssScreenGlow, mx, THIRD_FY + 1.44, mz + 0.012));
+}
+
+// ════════════════════════════════════════════════════════════════════════
+// BATHROOM — directly south of the ECLSS Bay, through the doorway just cut
+// into its south wall above. A small, cramped ship's head — realistic
+// fixtures only. Nothing in the ECLSS Bay's interior or the rest of the
+// ship is touched; this only adds new geometry beyond that new doorway.
+// ════════════════════════════════════════════════════════════════════════
+
+const bathroomW = 1.7, bathroomD = 1.9;
+const bathroomCX = eclssCX, bathroomCZ = eclssSouthWallZ + bathroomD/2;
+const bathroomXMin = bathroomCX - bathroomW/2 + 0.25, bathroomXMax = bathroomCX + bathroomW/2 - 0.25;
+const bathroomZMin = bathroomCZ - bathroomD/2 + 0.25, bathroomZMax = bathroomCZ + bathroomD/2 - 0.25;
+
+const matPorcelain = new THREE.MeshStandardMaterial({ color: 0xf0f0ec, roughness: 0.25, metalness: 0.05 });
+const matMirrorGlass = new THREE.MeshStandardMaterial({ color: 0xcfe8ff, roughness: 0.04, metalness: 0.9 });
+const matShowerGlass = new THREE.MeshStandardMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.22, roughness: 0.05, metalness: 0.3, side: THREE.DoubleSide });
+const matCabinetBath = new THREE.MeshStandardMaterial({ color: 0x5a6368, roughness: 0.5, metalness: 0.4 });
+const matShowerPan = new THREE.MeshStandardMaterial({ color: 0x8fa8b0, roughness: 0.3, metalness: 0.2 });
+
+// ── ROOM SHELL — north wall is the doorway just cut into the ECLSS Bay above ──
+box(bathroomW, 0.1, bathroomD, matHydroFloor, bathroomCX, THIRD_FY, bathroomCZ);
+box(bathroomW, 0.08, bathroomD, matHydroPanel, bathroomCX, THIRD_CEIL, bathroomCZ);
+box(bathroomW, THIRD_CH, 0.08, matHydroPanel, bathroomCX, THIRD_FY + THIRD_CH/2, bathroomCZ + bathroomD/2); // south
+box(0.08, THIRD_CH, bathroomD, matHydroPanel, bathroomCX - bathroomW/2, THIRD_FY + THIRD_CH/2, bathroomCZ); // west
+box(0.08, THIRD_CH, bathroomD, matHydroPanel, bathroomCX + bathroomW/2, THIRD_FY + THIRD_CH/2, bathroomCZ); // east
+
+const bathLight = new THREE.PointLight(0xfff0e0, 0.55, 3.5);
+bathLight.position.set(bathroomCX, THIRD_CEIL - 0.2, bathroomCZ);
+scene.add(bathLight);
+
+// ── VACUUM TOILET — south-west corner, away from the doorway ─────────────
+const toiletX = bathroomCX - bathroomW/2 + 0.34;
+const toiletZ = bathroomCZ + bathroomD/2 - 0.5;
+
+// Wall-mounted vacuum unit (the suction/flush mechanism housing)
+box(0.26, 0.55, 0.16, matCabinetBath, bathroomCX - bathroomW/2 + 0.12, THIRD_FY + 0.78, toiletZ);
+blinkingLights.push(cyl(0.018, 0.02, matPressureAccent, bathroomCX - bathroomW/2 + 0.2, THIRD_FY + 0.95, toiletZ + 0.09, Math.PI/2, 0));
+
+// Pedestal + bowl
+cyl(0.13, 0.36, matPorcelain, toiletX, THIRD_FY + 0.18, toiletZ);
+cyl(0.165, 0.05, matPorcelain, toiletX, THIRD_FY + 0.37, toiletZ);
+const toiletSeatRing = torus(0.145, 0.028, matPorcelain, toiletX, THIRD_FY + 0.4, toiletZ, Math.PI/2);
+
+// Foot restraints either side, a realistic touch on a vacuum toilet
+box(0.12, 0.02, 0.22, matMetal, toiletX - 0.2, THIRD_FY + 0.015, toiletZ + 0.05);
+box(0.12, 0.02, 0.22, matMetal, toiletX + 0.2, THIRD_FY + 0.015, toiletZ + 0.05);
+
+// Hinged lid — pivots along the back edge, nearest the wall unit
+const toiletHingeX = toiletX - 0.13;
+const toiletLidGroup = new THREE.Group();
+toiletLidGroup.position.set(toiletHingeX, THIRD_FY + 0.41, toiletZ);
+scene.add(toiletLidGroup);
+const toiletLid = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.02, 20), matPorcelain);
+toiletLid.rotation.x = Math.PI / 2;
+toiletLid.position.set(0.13, 0.005, 0);
+toiletLidGroup.add(toiletLid);
+
+let toiletOpen = false, toiletBusy = false;
+function toggleToiletLid() {
+  if (toiletBusy) return;
+  toiletBusy = true;
+  toiletOpen = !toiletOpen;
+  const startRot = toiletLidGroup.rotation.z;
+  const targetRot = toiletOpen ? Math.PI / 1.9 : 0;
+  const t0 = clock.getElapsedTime();
+  function step() {
+    const t = Math.min(1, (clock.getElapsedTime() - t0) / 0.5);
+    toiletLidGroup.rotation.z = startRot + (targetRot - startRot) * t;
+    if (t < 1) requestAnimationFrame(step);
+    else toiletBusy = false;
+  }
+  step();
+}
+interactiveClickables.push({ mesh: toiletLid, onClick: toggleToiletLid });
+interactiveClickables.push({ mesh: toiletSeatRing, onClick: toggleToiletLid });
+
+// ── SINK + MIRROR — north wall, east of the doorway ───────────────────────
+const sinkX = bathroomCX + bathroomW/2 - 0.4;
+const sinkZ = bathroomCZ - bathroomD/2 + 0.18;
+box(0.1, 0.03, 0.1, matMetal, sinkX, THIRD_FY + 0.55, sinkZ); // wall bracket
+const basin = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.09, 0.08, 16), matPorcelain);
+basin.position.set(sinkX, THIRD_FY + 0.74, sinkZ);
+scene.add(basin);
+box(0.3, 0.015, 0.22, matPorcelain, sinkX, THIRD_FY + 0.785, sinkZ); // counter lip
+cyl(0.014, 0.12, matMetal, sinkX, THIRD_FY + 0.88, sinkZ - 0.08); // faucet stem
+box(0.02, 0.02, 0.08, matMetal, sinkX, THIRD_FY + 0.94, sinkZ - 0.04); // spout
+
+box(0.3, 0.4, 0.015, matMetal, sinkX, THIRD_FY + 1.3, bathroomCZ - bathroomD/2 + 0.035); // mirror frame
+box(0.26, 0.36, 0.01, matMirrorGlass, sinkX, THIRD_FY + 1.3, bathroomCZ - bathroomD/2 + 0.046); // mirror glass
+
+// Small open shelf under the sink with folded towels — visible storage
+box(0.3, 0.02, 0.22, matMetal, sinkX, THIRD_FY + 0.3, sinkZ);
+box(0.12, 0.05, 0.1, new THREE.MeshStandardMaterial({ color: 0xe8e8e8 }), sinkX - 0.08, THIRD_FY + 0.335, sinkZ);
+box(0.12, 0.05, 0.1, new THREE.MeshStandardMaterial({ color: 0xbfd8ff }), sinkX + 0.08, THIRD_FY + 0.335, sinkZ);
+
+// ── STORAGE CABINET — north-west corner ───────────────────────────────────
+const cabX = bathroomCX - bathroomW/2 + 0.3;
+const cabZ = bathroomCZ - bathroomD/2 + 0.25;
+box(0.5, 0.7, 0.26, matCabinetBath, cabX, THIRD_FY + 1.35, cabZ);
+box(0.46, 0.015, 0.24, matMetal, cabX, THIRD_FY + 1.02, cabZ); // shelf seam
+cyl(0.01, 0.15, matYellow, cabX + 0.2, THIRD_FY + 1.35, cabZ + 0.14, 0, Math.PI/2); // handle
+
+// ── SHOWER STALL — south-east corner, sliding/hinged glass door ──────────
+const showerSize = 0.78;
+const showerCX = bathroomCX + bathroomW/2 - showerSize/2 - 0.06;
+const showerCZ = bathroomCZ + bathroomD/2 - showerSize/2 - 0.06;
+
+// Fixed north partition panel (frosted glass)
+box(0.02, THIRD_CH * 0.82, showerSize, matShowerGlass, showerCX, THIRD_FY + (THIRD_CH * 0.82)/2, showerCZ - showerSize/2);
+// Door track header
+box(0.04, 0.04, showerSize, matMetal, showerCX - showerSize/2, THIRD_FY + THIRD_CH * 0.82, showerCZ);
+// Shower pan (raised lip + darker wet-floor material)
+box(showerSize - 0.04, 0.01, showerSize - 0.04, matShowerPan, showerCX, THIRD_FY + 0.056, showerCZ);
+cyl(0.05, 0.005, matMetal, showerCX, THIRD_FY + 0.062, showerCZ); // drain grate
+// Shower head, mounted on the fixed partition
+cyl(0.018, 0.12, matMetal, showerCX, THIRD_CEIL - 0.32, showerCZ - showerSize/2 + 0.05);
+cyl(0.055, 0.03, matMetal, showerCX, THIRD_CEIL - 0.42, showerCZ - showerSize/2 + 0.08, Math.PI/2.1, 0);
+// Small soap shelf
+box(0.1, 0.02, 0.06, matMetal, showerCX, THIRD_FY + 1.0, showerCZ - showerSize/2 + 0.03);
+
+// Hinged glass door on the west-facing opening, swinging out into the room —
+// pushed into the ship's existing interactiveDoors system, so it animates
+// with the same open/close logic already used for every other door.
+const showerHingeX = showerCX - showerSize/2;
+const showerHingeZ = showerCZ - showerSize/2;
+const showerDoorGroup = new THREE.Group();
+showerDoorGroup.position.set(showerHingeX, THIRD_FY + (THIRD_CH * 0.78)/2 + 0.02, showerHingeZ);
+scene.add(showerDoorGroup);
+const showerDoor = new THREE.Mesh(new THREE.BoxGeometry(0.02, THIRD_CH * 0.78, showerSize - 0.02), matShowerGlass);
+showerDoor.position.set(0, 0, (showerSize - 0.02)/2);
+showerDoorGroup.add(showerDoor);
+const showerDoorHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.18, 8), matMetal);
+showerDoorHandle.rotation.x = Math.PI / 2;
+showerDoorHandle.position.set(0.02, 0, showerSize - 0.14);
+showerDoorGroup.add(showerDoorHandle);
+interactiveDoors.push({ mesh: showerDoor, group: showerDoorGroup, closedRot: 0, openRot: -Math.PI / 1.7, open: false });
+
+// Extend the deck3 walkable bounds to include the new Bathroom, without
+// changing the ECLSS Bay's own bounds above.
+const deck3XMin = Math.min(eclssXMin, bathroomXMin);
+const deck3XMax = Math.max(eclssXMax, bathroomXMax);
+const deck3ZMin = eclssZMin;
+const deck3ZMax = bathroomZMax;
+
+// ════════════════════════════════════════════════════════════════════════
+// EVA EQUIPMENT ROOM — a separate pocket on the third deck, reached by its
+// OWN (third) ladder dropped through a new hatch laid on top of the
+// Hydroponics Bay's existing floor, well clear of its grow racks and the
+// first ladder. It does not touch the ECLSS Bay / Bathroom footprint either
+// (different x/z region entirely) — no existing room is modified.
+// ════════════════════════════════════════════════════════════════════════
+
+const ladder3X = 0, ladder3Z = 2.9; // lands inside the Hydroponics Bay, north of the grow racks
+
+const evaW = 3.0, evaD = 3.4;
+const evaCX = ladder3X, evaCZ = ladder3Z;
+const evaXMin = evaCX - evaW/2 + 0.3, evaXMax = evaCX + evaW/2 - 0.3;
+const evaZMin = evaCZ - evaD/2 + 0.3, evaZMax = evaCZ + evaD/2 - 0.3;
+
+const matSuitShell = new THREE.MeshStandardMaterial({ color: 0xe8e8e2, roughness: 0.55, metalness: 0.15 });
+const matSuitAccent = new THREE.MeshStandardMaterial({ color: 0xff5500, roughness: 0.5, metalness: 0.1 });
+const matVisorGold = new THREE.MeshStandardMaterial({ color: 0xffd23f, roughness: 0.15, metalness: 0.8, transparent: true, opacity: 0.85 });
+const matHelmetShell = new THREE.MeshStandardMaterial({ color: 0xf2f2f0, roughness: 0.3, metalness: 0.3 });
+const matPLSS = new THREE.MeshStandardMaterial({ color: 0xc8ccd0, roughness: 0.4, metalness: 0.5 });
+const matO2TankEva = new THREE.MeshStandardMaterial({ color: 0xe0e4e6, roughness: 0.3, metalness: 0.5 });
+const matToolboxBody = new THREE.MeshStandardMaterial({ color: 0xcc3322, roughness: 0.5, metalness: 0.3 });
+const matCableCoil = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.7 });
+const matJetpackGlow = new THREE.MeshStandardMaterial({ color: 0x3fd4ff, emissive: 0x3fd4ff, emissiveIntensity: 0.3 });
+const matWorkbenchEva = new THREE.MeshStandardMaterial({ color: 0x4a5056, roughness: 0.5, metalness: 0.4 });
+const matEvaLockerMetal = new THREE.MeshStandardMaterial({ color: 0x6b7278, roughness: 0.5, metalness: 0.45 });
+
+// ── ROOM SHELL ─────────────────────────────────────────────────────────
+box(evaW, 0.1, evaD, matHydroFloor, evaCX, THIRD_FY, evaCZ);
+
+const hatchSize3 = 0.62, hHalf3 = hatchSize3 / 2;
+(function buildEvaCeilingWithHatch(){
+  const zTop = evaCZ - evaD/2, zBot = evaCZ + evaD/2;
+  const xLeft = evaCX - evaW/2, xRight = evaCX + evaW/2;
+  const hz0 = ladder3Z - hHalf3, hz1 = ladder3Z + hHalf3;
+  const hx0 = ladder3X - hHalf3, hx1 = ladder3X + hHalf3;
+  box(evaW, 0.08, hz0 - zTop, matHydroPanel, evaCX, THIRD_CEIL, (zTop + hz0)/2);
+  box(evaW, 0.08, zBot - hz1, matHydroPanel, evaCX, THIRD_CEIL, (hz1 + zBot)/2);
+  box(hx0 - xLeft, 0.08, hatchSize3, matHydroPanel, (xLeft + hx0)/2, THIRD_CEIL, ladder3Z);
+  box(xRight - hx1, 0.08, hatchSize3, matHydroPanel, (hx1 + xRight)/2, THIRD_CEIL, ladder3Z);
+})();
+
+box(evaW, THIRD_CH, 0.08, matHydroPanel, evaCX, THIRD_FY + THIRD_CH/2, evaCZ - evaD/2); // north
+box(evaW, THIRD_CH, 0.08, matHydroPanel, evaCX, THIRD_FY + THIRD_CH/2, evaCZ + evaD/2); // south
+box(0.08, THIRD_CH, evaD, matHydroPanel, evaCX - evaW/2, THIRD_FY + THIRD_CH/2, evaCZ); // west
+box(0.08, THIRD_CH, evaD, matHydroPanel, evaCX + evaW/2, THIRD_FY + THIRD_CH/2, evaCZ); // east
+
+for (const lz of [evaCZ - 1.0, evaCZ + 1.0]) {
+  const pl = new THREE.PointLight(0xdfe8ff, 0.5, 5);
+  pl.position.set(evaCX, THIRD_CEIL - 0.2, lz);
+  scene.add(pl);
+}
+
+// ── THIRD LADDER (through a new hatch in the Hydroponics Bay's floor) ────
+const ladder3MidY = (LOWER_FY + THIRD_FY) / 2;
+const ladder3Height = LOWER_FY - THIRD_FY;
+for (const rx of [-0.18, 0.18]) {
+  cyl(0.014, ladder3Height, matLowerLadder, ladder3X + rx, ladder3MidY, ladder3Z);
+}
+const rung3Count = Math.floor(ladder3Height / 0.26);
+for (let i = 0; i <= rung3Count; i++) {
+  box(0.4, 0.02, 0.03, matLowerLadder, ladder3X, LOWER_FY - i * 0.26, ladder3Z);
+}
+// Hatch rim laid on top of the EXISTING Hydroponics Bay floor — untouched.
+torus(0.3, 0.022, matHatchGlow, ladder3X, LOWER_FY + 0.03, ladder3Z, Math.PI/2);
+box(0.6, 0.018, 0.6, matHazard, ladder3X, LOWER_FY + 0.01, ladder3Z);
+const hatch3Light = new THREE.PointLight(0x0ee5ff, 0.7, 3);
+hatch3Light.position.set(ladder3X, LOWER_FY + 0.8, ladder3Z);
+scene.add(hatch3Light);
+torus(0.3, 0.018, matMetal, ladder3X, THIRD_FY + 0.03, ladder3Z, Math.PI/2);
+
+const ladder3HitMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 });
+const ladder3Hit = new THREE.Mesh(new THREE.BoxGeometry(0.5, ladder3Height, 0.5), ladder3HitMat);
+ladder3Hit.position.set(ladder3X, ladder3MidY, ladder3Z);
+scene.add(ladder3Hit);
+interactiveClickables.push({ mesh: ladder3Hit, onClick: () => useLadder3() });
+
+// ── SPACESUITS — hanging rack, north wall ─────────────────────────────────
+const suitIntegrities = ['98.4%', '92.1%'];
+for (let i = 0; i < 2; i++) {
+  const sx = -0.6 + i * 1.2;
+  const sz = evaCZ - evaD/2 + 0.45;
+  box(0.32, 0.5, 0.22, matSuitShell, sx, THIRD_FY + 1.1, sz);
+  const chestPanel = box(0.2, 0.15, 0.02, matSuitAccent, sx, THIRD_FY + 1.15, sz + 0.11);
+  torus(0.13, 0.02, matMetal, sx, THIRD_FY + 1.38, sz, Math.PI/2);
+  cyl(0.06, 0.55, matSuitShell, sx - 0.22, THIRD_FY + 1.0, sz, 0, 0.15);
+  cyl(0.06, 0.55, matSuitShell, sx + 0.22, THIRD_FY + 1.0, sz, 0, -0.15);
+  cyl(0.08, 0.65, matSuitShell, sx - 0.1, THIRD_FY + 0.48, sz);
+  cyl(0.08, 0.65, matSuitShell, sx + 0.1, THIRD_FY + 0.48, sz);
+  box(0.11, 0.08, 0.14, matSuitAccent, sx - 0.1, THIRD_FY + 0.1, sz);
+  box(0.11, 0.08, 0.14, matSuitAccent, sx + 0.1, THIRD_FY + 0.1, sz);
+  cyl(0.01, 0.3, matMetal, sx, THIRD_FY + 1.75, sz);
+  const integrity = suitIntegrities[i];
+  interactiveClickables.push({
+    mesh: chestPanel,
+    onClick: () => showMessage(`SUIT DIAGNOSTIC\n\nIntegrity:\n${integrity}\n\nSeals:\nNominal\n\nLast Inspection:\nComplete`, 4200, 'inventory')
+  });
+}
+{
+  const tag = makeTextSprite('EVA SUITS', { color: '#dfe8ec', bg: 'rgba(10,14,16,0.85)' });
+  tag.scale.set(0.26, 0.09, 1);
+  tag.position.set(0, THIRD_FY + 1.9, evaCZ - evaD/2 + 0.45);
+  scene.add(tag);
+}
+
+// ── HELMETS — shelf on the south wall, visors hinge open ─────────────────
+const helmetShelfZ = evaCZ + evaD/2 - 0.4;
+for (let i = 0; i < 3; i++) {
+  const hx = -0.8 + i * 0.8;
+  box(0.26, 0.02, 0.22, matMetal, hx, THIRD_FY + 0.95, helmetShelfZ);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6), matHelmetShell);
+  dome.position.set(hx, THIRD_FY + 1.05, helmetShelfZ);
+  scene.add(dome);
+  cyl(0.135, 0.03, matMetal, hx, THIRD_FY + 0.98, helmetShelfZ);
+
+  const visorGroup = new THREE.Group();
+  visorGroup.position.set(hx, THIRD_FY + 1.14, helmetShelfZ + 0.02);
+  scene.add(visorGroup);
+  const visor = new THREE.Mesh(new THREE.SphereGeometry(0.1, 14, 14, 0, Math.PI * 2, Math.PI * 0.08, Math.PI * 0.4), matVisorGold);
+  visor.position.set(0, -0.06, 0.02);
+  visorGroup.add(visor);
+
+  let visorOpen = false, visorBusy = false;
+  interactiveClickables.push({
+    mesh: visor,
+    onClick: () => {
+      if (visorBusy) return;
+      visorBusy = true;
+      visorOpen = !visorOpen;
+      const startRot = visorGroup.rotation.x;
+      const targetRot = visorOpen ? -Math.PI / 2.1 : 0;
+      const t0 = clock.getElapsedTime();
+      function step() {
+        const t = Math.min(1, (clock.getElapsedTime() - t0) / 0.5);
+        visorGroup.rotation.x = startRot + (targetRot - startRot) * t;
+        if (t < 1) requestAnimationFrame(step); else visorBusy = false;
+      }
+      step();
+    }
+  });
+}
+{
+  const tag = makeTextSprite('HELMETS', { color: '#ffd23f', bg: 'rgba(24,18,0,0.85)' });
+  tag.scale.set(0.24, 0.09, 1);
+  tag.position.set(0, THIRD_FY + 1.5, helmetShelfZ);
+  scene.add(tag);
+}
+
+// ── OXYGEN TANKS — east wall rack, click to show remaining duration ──────
+const o2Durations = ['6h 42m', '7h 05m', '5h 58m', '6h 30m'];
+for (let i = 0; i < 4; i++) {
+  const tx = evaCX + evaW/2 - 0.35;
+  const tz = evaCZ - evaD/2 + 0.55 + i * 0.5;
+  const tank = cyl(0.1, 0.55, matO2TankEva, tx, THIRD_FY + 0.3, tz);
+  cyl(0.05, 0.08, matMetal, tx, THIRD_FY + 0.6, tz);
+  blinkingLights.push(cyl(0.02, 0.02, matO2Accent, tx, THIRD_FY + 0.64, tz, Math.PI/2, 0));
+  const duration = o2Durations[i];
+  const tankLabel = i + 1;
+  interactiveClickables.push({
+    mesh: tank,
+    onClick: () => showMessage(`O₂ TANK ${tankLabel}\n\nRemaining Duration:\n${duration}\n\nPressure:\nNominal`, 4000, 'inventory')
+  });
+}
+{
+  const tag = makeTextSprite('OXYGEN TANKS', { color: '#8ffca0', bg: 'rgba(4,20,10,0.85)' });
+  tag.scale.set(0.28, 0.09, 1);
+  tag.position.set(evaCX + evaW/2 - 0.45, THIRD_FY + 1.0, evaCZ - evaD/2 + 0.55);
+  scene.add(tag);
+}
+
+// ── PLSS BACKPACK / JETPACK — east wall, glows briefly on click ──────────
+const plssX = evaCX + evaW/2 - 0.35;
+const plssZ = evaCZ + 0.4;
+const jetpack = box(0.3, 0.42, 0.18, matPLSS, plssX, THIRD_FY + 1.0, plssZ);
+box(0.26, 0.1, 0.02, matSuitAccent, plssX, THIRD_FY + 1.15, plssZ - 0.095);
+cyl(0.03, 0.1, matMetal, plssX, THIRD_FY + 0.7, plssZ - 0.06);
+const jetGlowL = cyl(0.028, 0.03, matJetpackGlow, plssX - 0.08, THIRD_FY + 0.64, plssZ - 0.06, Math.PI/2, 0);
+const jetGlowR = cyl(0.028, 0.03, matJetpackGlow, plssX + 0.08, THIRD_FY + 0.64, plssZ - 0.06, Math.PI/2, 0);
+let jetpackBusy = false;
+interactiveClickables.push({
+  mesh: jetpack,
+  onClick: () => {
+    if (jetpackBusy) return;
+    jetpackBusy = true;
+    const t0 = clock.getElapsedTime();
+    function step() {
+      const t = (clock.getElapsedTime() - t0) / 1.4;
+      const pulse = t < 1 ? Math.sin(Math.min(1, t) * Math.PI) : 0;
+      const intensity = 0.3 + pulse * 3.2;
+      jetGlowL.material.emissiveIntensity = intensity;
+      jetGlowR.material.emissiveIntensity = intensity;
+      if (t < 1) requestAnimationFrame(step);
+      else { jetGlowL.material.emissiveIntensity = 0.3; jetGlowR.material.emissiveIntensity = 0.3; jetpackBusy = false; }
+    }
+    step();
+  }
+});
+{
+  const tag = makeTextSprite('PLSS BACKPACK', { color: '#3fd4ff', bg: 'rgba(0,16,24,0.85)' });
+  tag.scale.set(0.3, 0.09, 1);
+  tag.position.set(plssX - 0.45, THIRD_FY + 1.25, plssZ);
+  scene.add(tag);
+}
+
+// ── REPAIR KITS — workbench, east-south corner, lids open ────────────────
+function buildRepairKitEva(kx, kz) {
+  box(0.3, 0.14, 0.2, matToolboxBody, kx, THIRD_FY + 0.14, kz);
+  const hingeZ = kz - 0.1;
+  const lidGroup = new THREE.Group();
+  lidGroup.position.set(kx, THIRD_FY + 0.21, hingeZ);
+  scene.add(lidGroup);
+  const lid = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 0.2), matToolboxBody);
+  lid.position.set(0, 0, 0.1);
+  lidGroup.add(lid);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.006, 6, 12), matMetal);
+  handle.rotation.x = Math.PI / 2;
+  handle.position.set(0, 0.03, 0.1);
+  lidGroup.add(handle);
+  box(0.08, 0.02, 0.03, matMetal, kx - 0.08, THIRD_FY + 0.19, kz);
+  box(0.08, 0.02, 0.03, matSuitAccent, kx + 0.02, THIRD_FY + 0.19, kz + 0.03);
+  cyl(0.015, 0.1, matMetal, kx + 0.08, THIRD_FY + 0.22, kz - 0.02, Math.PI / 2.3, 0);
+
+  let open = false, busy = false;
+  interactiveClickables.push({
+    mesh: lid,
+    onClick: () => {
+      if (busy) return;
+      busy = true;
+      open = !open;
+      const startRot = lidGroup.rotation.x;
+      const targetRot = open ? -Math.PI / 1.6 : 0;
+      const t0 = clock.getElapsedTime();
+      function step() {
+        const t = Math.min(1, (clock.getElapsedTime() - t0) / 0.5);
+        lidGroup.rotation.x = startRot + (targetRot - startRot) * t;
+        if (t < 1) requestAnimationFrame(step); else busy = false;
+      }
+      step();
+    }
+  });
+}
+box(0.55, 0.42, 0.35, matWorkbenchEva, evaCX + evaW/2 - 0.45, THIRD_FY + 0.21, evaCZ + evaD/2 - 0.5);
+buildRepairKitEva(evaCX + evaW/2 - 0.55, evaCZ + evaD/2 - 0.58);
+buildRepairKitEva(evaCX + evaW/2 - 0.35, evaCZ + evaD/2 - 0.58);
+
+// ── LOCKERS + TETHER CABLES — west wall ───────────────────────────────────
+for (let i = 0; i < 3; i++) {
+  const lockerZ = evaCZ - evaD/2 + 0.55 + i * 0.5;
+  const lockerWallX = evaCX - evaW/2;
+  const lockerDepth = 0.4, lockerW = 0.42, lockerH = 1.3;
+  const lockerCx = lockerWallX + lockerDepth/2;
+  box(lockerDepth, lockerH, 0.03, matEvaLockerMetal, lockerCx, THIRD_FY + 0.75, lockerZ - lockerW/2);
+  box(lockerDepth, lockerH, 0.03, matEvaLockerMetal, lockerCx, THIRD_FY + 0.75, lockerZ + lockerW/2);
+  box(lockerDepth, 0.02, lockerW, matEvaLockerMetal, lockerCx, THIRD_FY + 0.75 + lockerH/2, lockerZ);
+  box(lockerDepth, 0.02, lockerW, matEvaLockerMetal, lockerCx, THIRD_FY + 0.75 - lockerH/2, lockerZ);
+  box(0.02, lockerH, lockerW, matEvaLockerMetal, lockerWallX + 0.01, THIRD_FY + 0.75, lockerZ);
+  box(lockerDepth - 0.04, 0.015, lockerW - 0.04, matEvaLockerMetal, lockerCx, THIRD_FY + 1.0, lockerZ);
+  torus(0.08, 0.015, matCableCoil, lockerCx, THIRD_FY + 1.05, lockerZ, Math.PI/2);
+
+  const hingeX = lockerWallX + lockerDepth, hingeY = THIRD_FY + 0.75, hingeZ = lockerZ - lockerW/2;
+  const doorGroup = new THREE.Group();
+  doorGroup.position.set(hingeX, hingeY, hingeZ);
+  scene.add(doorGroup);
+  const door = new THREE.Mesh(new THREE.BoxGeometry(0.02, lockerH - 0.05, lockerW - 0.02), matEvaLockerMetal);
+  door.position.set(0, 0, (lockerW - 0.02) / 2);
+  doorGroup.add(door);
+  const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.12, 8), matYellow);
+  handle.rotation.x = Math.PI / 2;
+  handle.position.set(0.02, 0, lockerW - 0.12);
+  doorGroup.add(handle);
+  interactiveDoors.push({ mesh: door, group: doorGroup, closedRot: 0, openRot: Math.PI / 1.7, open: false });
+}
+// Additional coiled tethers hung openly on the wall above the lockers
+for (const cz of [evaCZ - evaD/2 + 0.6, evaCZ - evaD/2 + 1.3]) {
+  torus(0.09, 0.02, matCableCoil, evaCX - evaW/2 + 0.12, THIRD_FY + 1.55, cz, Math.PI/2);
+  cyl(0.015, 0.15, matMetal, evaCX - evaW/2 + 0.12, THIRD_FY + 1.4, cz, Math.PI / 2.4, 0);
+}
+{
+  const tag = makeTextSprite('LOCKERS / TETHERS', { color: '#cfd8dd', bg: 'rgba(10,14,16,0.85)' });
+  tag.scale.set(0.34, 0.09, 1);
+  tag.position.set(evaCX - evaW/2 + 0.4, THIRD_FY + 1.75, evaCZ - evaD/2 + 0.9);
+  scene.add(tag);
+}
+
+// ── DECK-TRANSITION (LADDER) LOGIC ────────────────────────────────────────
+let currentDeck = 'upper'; // 'upper' | 'lower'
+let deckTransitioning = false;
+function useLadder() {
+  if (deckTransitioning) return;
+  deckTransitioning = true;
+  const goingDown = currentDeck === 'upper';
+  const startY = camera.position.y;
+  const targetY = goingDown ? (LOWER_FY + LOWER_EY) : (FY + EY);
+  const duration = 1.3;
+  const t0 = clock.getElapsedTime();
+  camera.position.x = ladderX;
+  camera.position.z = ladderZ;
+  showMessage(goingDown ? 'Descending to Lower Deck...' : 'Ascending to Upper Deck...', 1800, 'missioncontrol');
+  function step() {
+    const t = Math.min(1, (clock.getElapsedTime() - t0) / duration);
+    camera.position.y = startY + (targetY - startY) * t;
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      currentDeck = goingDown ? 'lower' : 'upper';
+      camera.position.z = goingDown ? (ladderZ + 0.55) : (ladderZ - 0.6);
+      deckTransitioning = false;
+    }
+  }
+  step();
+}
+
+// Second ladder — Lower Deck <-> ECLSS Bay (deck3). Independent of useLadder()
+// above so the Upper<->Lower transition is completely untouched.
+function useLadder2() {
+  if (deckTransitioning) return;
+  deckTransitioning = true;
+  const goingDown = currentDeck === 'lower';
+  const startY = camera.position.y;
+  const targetY = goingDown ? (THIRD_FY + THIRD_EY) : (LOWER_FY + LOWER_EY);
+  const duration = 1.3;
+  const t0 = clock.getElapsedTime();
+  camera.position.x = ladder2X;
+  camera.position.z = ladder2Z;
+  showMessage(goingDown ? 'Descending to ECLSS Bay...' : 'Ascending to Lower Deck...', 1800, 'missioncontrol');
+  function step() {
+    const t = Math.min(1, (clock.getElapsedTime() - t0) / duration);
+    camera.position.y = startY + (targetY - startY) * t;
+    if (t < 1) {
+      requestAnimationFrame(step);
+    } else {
+      currentDeck = goingDown ? 'deck3' : 'lower';
+      camera.position.z = goingDown ? (ladder2Z + 0.45) : (ladder2Z - 0.5);
+      deckTransitioning = false;
+    }
+  }
+  step();
+}
+
+
 
 const marsGeom = new THREE.SphereGeometry(20, 32, 32);
 const marsMat = new THREE.MeshStandardMaterial({ 
@@ -1892,9 +4080,17 @@ scene.add(sun);
 
 const starGeom = new THREE.BufferGeometry();
 const starPos = [];
-for(let i=0; i<5000; i++) {
+for(let i=0; i<8000; i++) {
   starPos.push((Math.random()-0.5)*400, (Math.random()-0.5)*400, (Math.random()-0.5)*400);
 }
+// A second, finer layer of very tiny distant stars for extra depth
+const starGeomFar = new THREE.BufferGeometry();
+const starPosFar = [];
+for(let i=0; i<4000; i++) {
+  starPosFar.push((Math.random()-0.5)*700, (Math.random()-0.5)*700, (Math.random()-0.5)*700);
+}
+starGeomFar.setAttribute('position', new THREE.Float32BufferAttribute(starPosFar, 3));
+scene.add(new THREE.Points(starGeomFar, new THREE.PointsMaterial({ color: 0xaaaaaa, size: 0.6, sizeAttenuation: true })));
 starGeom.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
 scene.add(new THREE.Points(starGeom, starMat));
 
@@ -1921,6 +4117,26 @@ const rotSpeed = 0.055;
 const startBtn = document.getElementById('start-btn');
 const overlay = document.getElementById('overlay');
 
+// Radio chatter text — periodically slip a faint comms line into the existing HUD ticker
+const tickerEl = document.getElementById('ticker');
+const chatterLines = [
+  'CTRL, this is ARGO-III, comms check, over.',
+  '...static... solar flux nominal ...static...',
+  'ARGO-III, be advised, telemetry received.',
+  '...say again, last transmission garbled...',
+  'Copy ARGO-III, standing by.'
+];
+setInterval(() => {
+  if (!tickerEl) return;
+  if (Math.random() < 0.35) {
+    const line = chatterLines[Math.floor(Math.random() * chatterLines.length)];
+    tickerEl.textContent = `[COMMS] ${line}  //  SYST_OK // NAVIGATION LOCKED // ALL SYSTEMS NOMINAL...`;
+    setTimeout(() => {
+      tickerEl.textContent = 'SYST_OK // NAVIGATION LOCKED // MISSION DAY 187 // TIGHT QUARTERS, MIND YOUR HEAD // ALL SYSTEMS NOMINAL...';
+    }, 8000);
+  }
+}, 25000);
+
 startBtn.addEventListener('click', () => {
   document.body.requestPointerLock();
 });
@@ -1933,12 +4149,26 @@ document.addEventListener('pointerlockchange', () => {
   }
 });
 
-// Easter-egg message overlay: fades in with the given text, fades out after `duration`
+// Styled popup overlay: fades in with the given text, styled per category, fades out after `duration`
 const easterMsgEl = document.getElementById('easter-msg');
 let easterMsgTimeout = null;
-function showMessage(text, duration = 4000) {
+let easterTypingInterval = null;
+function showMessage(text, duration = 4000, type = 'scan') {
   clearTimeout(easterMsgTimeout);
-  easterMsgEl.textContent = text;
+  clearInterval(easterTypingInterval);
+  easterMsgEl.className = 'popup-' + type;
+  if (type === 'log') {
+    // Terminal-style typing animation, character by character
+    easterMsgEl.textContent = '';
+    let i = 0;
+    easterTypingInterval = setInterval(() => {
+      easterMsgEl.textContent = text.slice(0, i);
+      i++;
+      if (i > text.length) clearInterval(easterTypingInterval);
+    }, 16);
+  } else {
+    easterMsgEl.textContent = text;
+  }
   void easterMsgEl.offsetWidth;
   easterMsgEl.classList.add('visible');
   easterMsgTimeout = setTimeout(() => {
@@ -1955,14 +4185,18 @@ document.addEventListener('click', () => {
   const drawerMeshes = interactiveDrawers.map(d => d.mesh);
   const doorMeshes = interactiveDoors.map(d => d.mesh);
   const clickMeshes = interactiveClickables.map(c => c.mesh);
-  const hits = drawerRaycaster.intersectObjects(drawerMeshes.concat(doorMeshes, clickMeshes));
+  const hits = drawerRaycaster.intersectObjects(drawerMeshes.concat(doorMeshes, clickMeshes), true);
   if (hits.length > 0 && hits[0].distance < REACH_DISTANCE) {
-    const hitObj = hits[0].object;
-    const drawer = interactiveDrawers.find(d => d.mesh === hitObj);
+    let obj = hits[0].object;
+    let drawer = null, door = null, clickable = null;
+    while (obj && !drawer && !door && !clickable) {
+      drawer = interactiveDrawers.find(d => d.mesh === obj);
+      door = interactiveDoors.find(d => d.mesh === obj);
+      clickable = interactiveClickables.find(c => c.mesh === obj);
+      obj = obj.parent;
+    }
     if (drawer) { drawer.open = !drawer.open; return; }
-    const door = interactiveDoors.find(d => d.mesh === hitObj);
     if (door) { door.open = !door.open; return; }
-    const clickable = interactiveClickables.find(c => c.mesh === hitObj);
     if (clickable && !clickable.used) {
       clickable.onClick();
       if (clickable.oneShot) clickable.used = true;
@@ -2009,13 +4243,18 @@ const playerDot = document.getElementById('player-dot');
 const halfMod = 1.3; // half-width of a side module
 
 const zones = [
-  { name: '[ COCKPIT ]', role: 'Flight deck and primary navigation suite, housing dual pilot stations and the main viewport used for manual course corrections during transit.', zMin: cockpitZ - cockpitD/2, zMax: corridorZStart, xMin: -cockpitW/2, xMax: cockpitW/2 },
-  { name: '[ SPINAL CORRIDOR ]', role: 'Central passage connecting every compartment on the ship, lined with power conduits, coolant lines, and emergency handholds along its length.', zMin: corridorZStart, zMax: corridorZEnd, xMin: -corridorWidth/2, xMax: corridorWidth/2 },
-  { name: '[ SCIENCE LAB ]', role: 'Compact research bay equipped for sample analysis and specimen storage, used to process material collected over the course of the transit.', zMin: junctionA - 1.6, zMax: junctionA + 1.6, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
-  { name: '[ MEDICAL BAY ]', role: 'Onboard clinic for treating injury and illness, fitted with an exam berth, vitals monitoring, an oxygen supply, and a locked medicine cabinet.', zMin: junctionA - 1.6, zMax: junctionA + 1.6, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
-  { name: '[ HABITAT ]', role: 'Crew sleeping quarters, providing a single restrained berth and personal storage locker for use during off-duty rest periods.', zMin: junctionB - 1.6, zMax: junctionB + 1.6, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod },
-  { name: '[ ENGINEERING ]', role: 'Reactor and propulsion control room, housing the coolant tanks, primary systems console, and the ship\u2019s main power core.', zMin: junctionB - 1.6, zMax: junctionB + 1.6, xMin: moduleX - halfMod, xMax: moduleX + halfMod },
-  { name: '[ AIRLOCK ]', role: 'EVA staging bay for suiting up and cycling between the pressurized cabin and open space during external operations or docking.', zMin: corridorZEnd, zMax: airlockZ + airlockD/2, xMin: -airlockW/2, xMax: airlockW/2 },
+  { name: '[ COCKPIT ]', role: 'Flight deck and primary navigation suite, housing dual pilot stations and the main viewport used for manual course corrections during transit.', zMin: cockpitZ - cockpitD/2, zMax: corridorZStart, xMin: -cockpitW/2, xMax: cockpitW/2, deck: 'upper' },
+  { name: '[ SPINAL CORRIDOR ]', role: 'Central passage connecting every compartment on the ship, lined with power conduits, coolant lines, and emergency handholds along its length.', zMin: corridorZStart, zMax: corridorZEnd, xMin: -corridorWidth/2, xMax: corridorWidth/2, deck: 'upper' },
+  { name: '[ SCIENCE LAB ]', role: 'Compact research bay equipped for sample analysis and specimen storage, used to process material collected over the course of the transit.', zMin: junctionA - 1.6, zMax: junctionA + 1.6, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod, deck: 'upper' },
+  { name: '[ MEDICAL BAY ]', role: 'Onboard clinic for treating injury and illness, fitted with an exam berth, vitals monitoring, an oxygen supply, and a locked medicine cabinet.', zMin: junctionA - 1.6, zMax: junctionA + 1.6, xMin: moduleX - halfMod, xMax: moduleX + halfMod, deck: 'upper' },
+  { name: '[ HABITAT ]', role: 'Crew sleeping quarters, providing a single restrained berth and personal storage locker for use during off-duty rest periods.', zMin: junctionB - 1.6, zMax: junctionB + 1.6, xMin: -moduleX - halfMod, xMax: -moduleX + halfMod, deck: 'upper' },
+  { name: '[ ENGINEERING ]', role: 'Reactor and propulsion control room, housing the coolant tanks, primary systems console, and the ship\u2019s main power core.', zMin: junctionB - 1.6, zMax: junctionB + 1.6, xMin: moduleX - halfMod, xMax: moduleX + halfMod, deck: 'upper' },
+  { name: '[ AIRLOCK ]', role: 'EVA staging bay for suiting up and cycling between the pressurized cabin and open space during external operations or docking.', zMin: corridorZEnd, zMax: airlockZ + airlockD/2, xMin: -airlockW/2, xMax: airlockW/2, deck: 'upper' },
+  { name: '[ HYDROPONICS BAY ]', role: 'Lower-deck growing lab producing fresh crops for the crew, fitted with grow towers, LED lighting, irrigation, and environmental sensors.', zMin: hydroZMin, zMax: hydroZMax, xMin: hydroXMin, xMax: hydroXMax, deck: 'lower' },
+  { name: '[ LOWER CORRIDOR ]', role: 'Short connecting passage on the lower deck, linking the Hydroponics Bay to the Galley.', zMin: lowerCorridorZStart, zMax: lowerCorridorZEnd, xMin: -lowerCorridorW/2, xMax: lowerCorridorW/2, deck: 'lower' },
+  { name: '[ GALLEY ]', role: 'Crew galley for meal prep and downtime, fitted with a microwave, coffee machine, water dispenser, fold-out table, and personal food lockers.', zMin: galleyZMin, zMax: galleyZMax, xMin: galleyXMin, xMax: galleyXMax, deck: 'lower' },
+  { name: '[ ECLSS BAY ]', role: 'Environmental Control & Life Support System — oxygen generation, CO₂ scrubbing, pressure regulation, water recycling and filtration for the entire ship.', zMin: eclssZMin, zMax: eclssZMax, xMin: eclssXMin, xMax: eclssXMax, deck: 'deck3' },
+  { name: '[ BATHROOM ]', role: 'Compact crew head — vacuum toilet, sink, mirror, storage, and a sliding-door shower stall.', zMin: bathroomZMin, zMax: bathroomZMax, xMin: bathroomXMin, xMax: bathroomXMax, deck: 'deck3' }
 ];
 
 function updateHUD(t) {
@@ -2023,6 +4262,7 @@ function updateHUD(t) {
   let currentZone = '[ DEEP SPACE ]';
   let currentRole = 'Unpressurized';
   for(const z of zones) {
+    if (z.deck !== currentDeck) continue;
     if(px >= z.xMin && px <= z.xMax && pz >= z.zMin && pz <= z.zMax) {
       currentZone = z.name;
       currentRole = z.role;
@@ -2060,12 +4300,28 @@ function animate() {
     if (moveLeft) camera.position.addScaledVector(side, walkSpeed);
     if (moveRight) camera.position.addScaledVector(side, -walkSpeed);
 
-    if (moveForward || moveBackward || moveLeft || moveRight) {
-      camera.position.y = (FY + EY) + Math.sin(time * 10) * 0.02;
-    }
+    if (!deckTransitioning) {
+      if (currentDeck === 'deck3') {
+        if (moveForward || moveBackward || moveLeft || moveRight) {
+          camera.position.y = (THIRD_FY + THIRD_EY) + Math.sin(time * 10) * 0.02;
+        }
+        camera.position.x = Math.max(deck3XMin, Math.min(deck3XMax, camera.position.x));
+        camera.position.z = Math.max(deck3ZMin, Math.min(deck3ZMax, camera.position.z));
+      } else if (currentDeck === 'lower') {
+        if (moveForward || moveBackward || moveLeft || moveRight) {
+          camera.position.y = (LOWER_FY + LOWER_EY) + Math.sin(time * 10) * 0.02;
+        }
+        camera.position.x = Math.max(hydroXMin, Math.min(hydroXMax, camera.position.x));
+        camera.position.z = Math.max(hydroZMin, Math.min(galleyZMax, camera.position.z));
+      } else {
+        if (moveForward || moveBackward || moveLeft || moveRight) {
+          camera.position.y = (FY + EY) + Math.sin(time * 10) * 0.02;
+        }
 
-    camera.position.x = Math.max(-3.6, Math.min(3.6, camera.position.x));
-    camera.position.z = Math.max(-7.55, Math.min(6.15, camera.position.z));
+        camera.position.x = Math.max(-3.6, Math.min(3.6, camera.position.x));
+        camera.position.z = Math.max(-7.55, Math.min(6.15, camera.position.z));
+      }
+    }
   }
 
   camera.rotation.order = 'YXZ';
@@ -2110,6 +4366,61 @@ saturn.rotation.y += 0.0005;
 moon.rotation.y += 0.0004;
 neptune.rotation.y += 0.0006;
 
+// New drifting planets — slow spin + gentle drift
+driftingPlanets.forEach(p => {
+  p.mesh.rotation.y += p.spin;
+  p.mesh.position.add(p.drift);
+});
+
+// Nebulae & galaxies drift almost imperceptibly, keeping the sky feeling alive
+nebulae.forEach((n, i) => { n.position.x += Math.sin(time * 0.02 + i) * 0.0006; });
+galaxies.forEach((g, i) => { g.rotation.z += 0.0003; });
+
+// Asteroid clusters tumble slowly in place
+asteroidClusters.forEach(rock => {
+  rock.rotation.x += rock.userData.spin.x;
+  rock.rotation.y += rock.userData.spin.y;
+  rock.rotation.z += rock.userData.spin.z;
+});
+
+// Comets drift slowly across the field of view and wrap around
+comets.forEach(c => {
+  c.group.position.add(c.vel);
+  if (c.group.position.x > 25) {
+    c.group.position.x = -25;
+    c.group.position.y = FY + THREE.MathUtils.randFloat(1, 6);
+    c.group.position.z = cockpitZ + THREE.MathUtils.randFloat(-40, -15);
+  }
+});
+
+// Occasional meteors — brief bright streaks on a random cooldown, never constant
+meteors.forEach(m => {
+  if (!m.userData.active) {
+    m.userData.cooldown -= delta;
+    if (m.userData.cooldown <= 0) {
+      m.userData.active = true;
+      m.visible = true;
+      m.position.set(
+        THREE.MathUtils.randFloat(-20, 20),
+        FY + THREE.MathUtils.randFloat(3, 9),
+        cockpitZ + THREE.MathUtils.randFloat(-30, 5)
+      );
+      m.userData.life = 0;
+    }
+  } else {
+    m.userData.life += delta;
+    m.position.x -= 0.35;
+    m.position.y -= 0.12;
+    m.material.opacity = Math.max(0, 0.85 - m.userData.life * 1.2);
+    if (m.userData.life > 0.7) {
+      m.userData.active = false;
+      m.visible = false;
+      m.userData.cooldown = 5 + Math.random() * 10;
+      m.material.opacity = 0.85;
+    }
+  }
+});
+
 // Animate shooting stars — they fly left-to-right outside cockpit left windows
 shootingStars.forEach(s => {
     s.position.x -= 0.04;
@@ -2139,8 +4450,62 @@ shootingStars.forEach(s => {
     if (scr.visible) {
       if (scr.userData.radarSweep) scr.userData.radarSweep.rotation.z += 0.04;
       if (scr.userData.planetWire) scr.userData.planetWire.rotation.y += 0.01;
+      // Subtle monitor refresh flicker — ambient life, doesn't affect existing behavior
+      if (scr.userData.panel) {
+        scr.userData.panel.material.opacity = 0.32 + Math.sin(time * 9 + scr.id) * 0.03 + (Math.random() < 0.02 ? 0.08 : 0);
+      }
     }
   });
+
+  // ── Hydroponics Bay ambient life ──
+  hydroFans.forEach(blades => { blades.rotation.y += delta * 6; });
+  blinkingLights.forEach((led, i) => {
+    const pulse = 1.2 + Math.sin(time * 2.2 + i * 1.3) * 1.1;
+    led.material.emissiveIntensity = Math.max(0.15, pulse);
+  });
+  waterTanks.forEach((tank, i) => {
+    tank.water.position.y = -0.12 + Math.sin(time * 0.8 + i) * 0.015;
+    tank.water.material.emissiveIntensity = 0.35 + Math.sin(time * 1.5 + i) * 0.15;
+  });
+
+  // ── Galley: floating spoon — gentle bob always, spins fast briefly on click ──
+  floatingSpoon.position.y += Math.sin(time * 1.4) * 0.0002;
+  floatingSpoon.rotation.y += floatingSpoon.userData.spinSpeed * delta;
+  floatingSpoon.rotation.z = Math.sin(time * 0.6) * 0.15;
+
+  // ── Galley: coffee steam + microwave steam, rising and fading in a loop ──
+  coffeeSteam.forEach(wisp => {
+    if (coffeeSteaming) {
+      const t = ((time + wisp.userData.phase) % 2.4) / 2.4;
+      wisp.position.y = -0.08 + t * 0.12;
+      wisp.material.opacity = Math.sin(t * Math.PI) * 0.35;
+      wisp.scale.set(1 + t * 0.6, 1 + t * 0.6, 1);
+    } else {
+      wisp.material.opacity = 0;
+    }
+  });
+  microwaveSteam.forEach(wisp => {
+    if (microwaveSteaming) {
+      const t = ((time + wisp.userData.phase) % 2.2) / 2.2;
+      wisp.position.y = wisp.userData.baseY + t * 0.13;
+      wisp.material.opacity = Math.sin(t * Math.PI) * 0.4;
+      wisp.scale.set(1 + t * 0.7, 1 + t * 0.7, 1);
+    } else {
+      wisp.material.opacity = 0;
+    }
+  });
+
+  // ── Cockpit dust motes — slow ambient drift through the light from the window ──
+  {
+    const positions = dustMotes.geometry.attributes.position.array;
+    for (let i = 0; i < dustCount; i++) {
+      positions[i*3]   += dustVel[i].x;
+      positions[i*3+1] += dustVel[i].y;
+      positions[i*3+2] += dustVel[i].z;
+      if (positions[i*3+1] > FY + 2.0) positions[i*3+1] = FY;
+    }
+    dustMotes.geometry.attributes.position.needsUpdate = true;
+  }
 
   updateHUD(time);
   renderer.render(scene, camera);
